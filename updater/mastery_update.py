@@ -194,6 +194,7 @@ def main():
     parser.add_argument('--variant', choices=['Client', 'Server'], default='Client')
     parser.add_argument('--target', type=Path, default=Path(__file__).resolve().parent)
     args = parser.parse_args()
+    target = installation_directory(args.target)
     if running():
         raise RuntimeError('Close Valheim and its server normally before updating')
     head = json.loads(download('https://api.github.com/repos/' + REPOSITORY + '/commits/' + BRANCH))['sha']
@@ -208,7 +209,25 @@ def main():
     if digest(archive) != manifest['archive_sha256'].lower():
         raise ValueError('Archive hash mismatch')
     manifest['commit'] = head
-    install(args.target, manifest, archive)
+    install(target, manifest, archive)
+
+def installation_directory(folder):
+    folder = Path(folder).absolute()
+    if not folder.is_dir():
+        raise ValueError('Updater folder does not exist')
+    bepinex = folder / 'BepInEx'
+    game_root = bepinex.exists() or any((folder / name).exists() for name in ['valheim.exe', 'valheim_server.exe', 'Valheim.app', 'valheim.app'])
+    if not game_root:
+        return folder  # Existing plugin-folder usage remains supported.
+    if not bepinex.is_dir():
+        raise RuntimeError('BepInEx 5 is missing. Install it in this Valheim folder first; this updater installs only Mastery.')
+    destination = bepinex / 'plugins' / 'ValheimMastery'
+    destination.resolve().relative_to(folder.resolve())
+    for part in [bepinex, bepinex / 'plugins', destination]:
+        if part.is_symlink() or (sys.platform == 'win32' and part.exists() and getattr(part.stat(), 'st_file_attributes', 0) & 0x400):
+            raise ValueError('Symlink/reparse plugin directory rejected')
+    destination.mkdir(parents=True, exist_ok=True)
+    return destination
 
 if __name__ == '__main__':
     try:

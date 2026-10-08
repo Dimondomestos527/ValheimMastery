@@ -100,5 +100,22 @@ class UpdaterTests(unittest.TestCase):
         self.update({'ValheimMastery.dll': b'old', 'assets/Old.png': b'art'})
         with self.assertRaises(ValueError): self.update({'ValheimMastery.dll': b'new', 'assets/old.png': b'new'})
         self.assertEqual(self.root.joinpath('ValheimMastery.dll').read_bytes(), b'old')
+    def test_steam_root_resolves_plugin_directory(self):
+        self.root.joinpath('valheim.exe').write_bytes(b'marker')
+        self.root.joinpath('BepInEx').mkdir()
+        target = u.installation_directory(self.root)
+        self.assertEqual(target, self.root / 'BepInEx/plugins/ValheimMastery')
+        u.install(target, *package({'ValheimMastery.dll': b'new'}))
+        self.assertFalse(self.root.joinpath('ValheimMastery.dll').exists())
+        self.assertEqual(target.joinpath('ValheimMastery.dll').read_bytes(), b'new')
+    def test_steam_root_without_bepinex_refused(self):
+        self.root.joinpath('valheim.exe').write_bytes(b'marker')
+        with self.assertRaises(RuntimeError): u.installation_directory(self.root)
+        self.assertFalse(self.root.joinpath('BepInEx').exists())
+    def test_server_root_and_plugin_folder(self):
+        self.assertEqual(u.installation_directory(self.root), self.root)
+        self.root.joinpath('valheim_server.exe').write_bytes(b'marker')
+        self.root.joinpath('BepInEx').mkdir()
+        self.assertEqual(u.installation_directory(self.root), self.root / 'BepInEx/plugins/ValheimMastery')
 
 if __name__ == '__main__': unittest.main()

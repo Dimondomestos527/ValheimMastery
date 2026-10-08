@@ -2,8 +2,8 @@
 **/obj/
 .nuget/
 .dotnet-home/
-validation/
-artifacts/
+/validation/
+/artifacts/
 .mastery-updates/
 **/__pycache__/
 *.pyc

@@ -1,6 +1,6 @@
 # Оновлення Valheim Mastery з Dev
 
-Скачайте `distribution/ValheimMastery-Updater.zip` через GitHub → файл → Download raw file. Розпакуйте **всі файли** в папку плагіна Mastery (`BepInEx/plugins/ValheimMastery`). Оновлюється папка, де лежать скрипти, незалежно від поточної папки термінала. Потрібні встановлені BepInEx 5 і Python 3.9+; скрипти не встановлюють їх автоматично.
+Скачайте `distribution/ValheimMastery-Updater.zip` через GitHub → файл → Download raw file. Розпакуйте **всі файли** в корінь гри Steam (поруч із `valheim.exe`) або в папку плагіна Mastery (`BepInEx/plugins/ValheimMastery`). У корені гри оновлювач сам обере `BepInEx/plugins/ValheimMastery`; у папці плагіна — оновить її. Поточна папка термінала не впливає. Без установленого BepInEx у папці гри буде відмова, а не DLL у корені. Потрібні встановлені BepInEx 5 і Python 3.9+; скрипти не встановлюють їх автоматично.
 
 Закрийте гру і сервер звичайним виходом. Windows: двічі натисніть `Update-Mastery.cmd`. macOS: дозвольте виконання `chmod +x Update-Mastery.command`, потім запустіть `.command` або `bash Update-Mastery.command`. Для сервера: Windows `Update-Mastery.cmd -Variant Server`; macOS `bash Update-Mastery.command --variant Server`. За умовчанням — Client. Не змішуйте варіанти в одній папці.
 
@@ -11,4 +11,5 @@
 Це оновлення **за запуском**, без фонового стеження. Скрипти себе не переписують: нову версію самого оновлювача завантажуйте як новий ZIP. SHA перевіряє цілісність, а не є незалежним підписом автора: джерело довіри — цей GitHub-репозиторій і його права запису.
 
 Windows installer перевірений на ізольованих папках. Mac wrapper і DLL у справжньому Valheim/macOS ще не перевірені: потрібна сумісна Mac-інсталяція BepInEx/Valheim та ручна перевірка. Не заявляємо runtime-сумісність лише з того, що файли завантажуються.
+
 
