@@ -126,6 +126,11 @@ def plan(root,old,args,head,files):
   before=config.read_bytes();current=st.launch_value(before.decode('utf-8'))[0]
   if previous and current!=previous['installed']:raise ValueError('Steam launch options changed; preserved for review')
   original=previous['original'] if previous else current
+  if sys.platform=='darwin' and not previous and mode=='steam' and original and (
+      '%command%' in original.casefold() or 'bepinex' in original.casefold()):
+   startup['mode']='manual'
+   print('Existing Steam launch options preserved. Mastery update will proceed; use Launch-Mastery.command for automatic updates, or keep the existing Steam launcher.')
+   return None,None,startup
   fallback=st.desired(root,original,platform.machine()=='arm64') if sys.platform=='darwin' else original
   wanted=desired_startup(root,original) if mode=='steam' else fallback
   launch={'path':str(config),'original':original,'installed':wanted,'fallback':fallback,'startup':mode=='steam'}
