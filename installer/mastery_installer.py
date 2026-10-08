@@ -658,7 +658,10 @@ def framework(root,blob):
 
  markers=['BepInEx/core','winhttp.dll','doorstop_config.ini','.doorstop_version','libdoorstop.dylib','run_bepinex.sh']
 
- any_existing=any(safe(root,n).exists() for n in markers)
+ core=safe(root,'BepInEx/core')
+ # Uninstall preserves directories/configs: an empty core folder is not a framework.
+ core_present=core.exists() and (not core.is_dir() or any(core.iterdir()))
+ any_existing=core_present or any(safe(root,n).exists() for n in markers if n!='BepInEx/core')
 
  if any_existing:
 
