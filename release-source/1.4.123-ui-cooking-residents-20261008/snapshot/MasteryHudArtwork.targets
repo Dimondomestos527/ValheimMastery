@@ -1,0 +1,4 @@
+<Project><ItemGroup>
+<EmbeddedResource Include="$(MSBuildThisFileDirectory)MasteryHudAssets\*.png" Exclude="$(MSBuildThisFileDirectory)MasteryHudAssets\vm_icon_skill_cooking_silver_v004.png"><LogicalName>ValheimMastery.Hud.%(Filename)%(Extension)</LogicalName></EmbeddedResource>
+<EmbeddedResource Include="$(MSBuildThisFileDirectory)MasteryHudAssets\vm_icon_skill_cooking_silver_v004.png"><LogicalName>ValheimMastery.Milestones.vm_icon_skill_cooking_silver_v004.png</LogicalName></EmbeddedResource>
+</ItemGroup></Project>

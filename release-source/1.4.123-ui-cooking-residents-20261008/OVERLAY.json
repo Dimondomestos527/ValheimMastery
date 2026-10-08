@@ -1,0 +1,92 @@
+[
+  {
+    "file": "src-modern/MasteryWindow.cs",
+    "before": "17A873D16C6024331BFFA2FE500852CA390C3B18D91A9016793434D29F3F9098",
+    "after": "945E5DDA1A95A6D7990404099C94D7E8BE1EC7FAAC4351CF09FEC0ACE2CA6F5F",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\ux-ui-live-frame-input-fix-20261008\\overlay\\src-modern\\MasteryWindow.cs"
+  },
+  {
+    "file": "src-modern/CookingCraftingProgression.cs",
+    "before": "4BC1D72C0B0418F9682CBFB664FA2E6AAA6EED27EA01DC088E33330CC976C1A0",
+    "after": "E54DED4C39C95D6E4C71C5EB7444DF6F9B08E9E1EFB5ACA3DD4B7FBC3784DDAD",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\utility-mead-timing-transfer-20261008\\candidate\\src-modern\\CookingCraftingProgression.cs"
+  },
+  {
+    "file": "src-modern/CookingMeadTiming.cs",
+    "before": null,
+    "after": "F4301864587E25CAD7A7A7410BDF29C722F479DF551302C5D954A987AB8F7F44",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\utility-mead-timing-transfer-20261008\\candidate\\src-modern\\CookingMeadTiming.cs"
+  },
+  {
+    "file": "src-modern/CraftingBatchXp.cs",
+    "before": "A3AC7CBDAFCA7A0D97888799CCD0EA31C5B998EF69AC1B846974A33744F4956B",
+    "after": "37D017954330B768AAEC7D72BFDD9F02AB4BF791D1321832CF4F173506D79C24",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\utility-mead-timing-transfer-20261008\\candidate\\src-modern\\CraftingBatchXp.cs"
+  },
+  {
+    "file": "src-modern/PeacefulXpPatches.cs",
+    "before": "A96BD77D384992F55E9B9A48F6C3879FF3B7559EB9AB5EABF271AF6CD61C46E8",
+    "after": "C1D8C65E50D07CD90DD69C7C8259E5DA07769E072EF038713A582EBD3C560628",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\utility-mead-timing-transfer-20261008\\candidate\\src-modern\\PeacefulXpPatches.cs"
+  },
+  {
+    "file": "src-modern/CookingFeastExperience.cs",
+    "before": null,
+    "after": "9E30DC903F563BEAF81C93D42E6ECD4511C9D34C9F99A81998CCE1104DADD199",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\utility-mead-timing-transfer-20261008\\candidate\\src-modern\\CookingFeastExperience.cs"
+  },
+  {
+    "file": "src-modern/MasterIdolResidentInteraction.cs",
+    "before": "0B0C053F54F39A1DB3AC9295ABDF5B0E78656DC981F9386197E5FA77812FA0E9",
+    "after": "E980A93044813191D1C206313F344A61D8C303FE34B4AD2442C8FE4B439D02D4",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolResidentPresentation.cs",
+    "before": "A919A2789F7EE98D178F23D2E0F7F6269E19910CAE63022D1ED018EA3A4A359A",
+    "after": "DE45CBC5405B401E1AF9545D0703B4848953540A563A7DF7EAD16AC7F3AA2307",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolResidentWork.cs",
+    "before": "FEC40E6018C17AE27206198463EEA45A06734B69BFACDF39E2BFBD9C6F55D83C",
+    "after": "1E7FE9F49404A6FBE942AAA0E74A219B480C74CA1C4B0C6E8919DA9C74D6C89F",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolSocial.cs",
+    "before": "832C25AB85ED644BB80ED3D099E55A42D1FE36BDE22F03939C27670D437FEFE3",
+    "after": "6DE015EBD3FEF3E43D9C9E8E821809957E9EBC5CDA6B5C0911927313EE2081C0",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolSocialSeats.cs",
+    "before": "40EE2A9C278185DD74B303421FE6E590FE50CE33F115BFE89F156839241D7EC3",
+    "after": "51C7B3A7542D29AEF5A496F0B5BE2863953209F5111E66E9FC94F8FCC2E0B124",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolResidentSceneAnimation.cs",
+    "before": null,
+    "after": "187173F59621203B6B853B2323A9C6CFC6CB60100BF9C7DEE0B1834586EF868C",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/MasterIdolResidentSceneRules.cs",
+    "before": null,
+    "after": "9E7275231344340534C4173AF4115B0A81EA0989EF3A0D502A20524B5DFE785F",
+    "origin": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMastery\\validation\\resident-animation-patch-20261008"
+  },
+  {
+    "file": "src-modern/PerkLocalization.cs",
+    "before": "B01602068DE905EDB9DAD27396C10E7645DC4E6CDE72A3F05C27B582CC98D0B1",
+    "after": "B90BACAE74F71F4FFA0699CBA4E0600CD1CEEF726A4C2CB5ADC94A4182F89EB4",
+    "origin": "root semantic localization correction"
+  },
+  {
+    "file": "src-modern/PerkLocalization.Ukrainian.cs",
+    "before": "560ADCE06F5380AD029B2E48CEA6CAD148C5D1EFDEBFF058126136B489A97B94",
+    "after": "EB67A283A056962DAE1C8C698C3CBF521EEF68D2820142A90869A6AFAEC37E75",
+    "origin": "root semantic Ukrainian localization correction"
+  }
+]

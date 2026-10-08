@@ -1,0 +1,1 @@
+Exact shipping source for 1.4.123-ui-cooking-residents-20261008. Client/server variants remain distinct. Source-authority is this snapshot plus sibling runtime-assets. Build with snapshot/tools/Build123.ps1. Live tests remain open; no Deep North or hook work-in-progress included.

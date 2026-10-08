@@ -1,0 +1,44 @@
+{
+  "Client": {
+    "schema": 1,
+    "product": "ValheimMastery",
+    "variant": "Client",
+    "version": "1.4.123-ui-cooking-residents-20261008",
+    "archive": "client-1.4.123-ui-cooking-residents-20261008.zip",
+    "archive_sha256": "99a51046f2545a450ce497aeeb2a3adb28734cd5469f948750539250e160815c",
+    "files": [
+      {
+        "path": "ValheimMastery.dll",
+        "size": 19489280,
+        "sha256": "ca73e0971215138c46605741497ce9449c8cc2d3f3dafe869a54ec5bd4db848f"
+      }
+    ],
+    "validation": "DUALBUILD/PROVENANCE36/4;592ACTUALSTEAMCONTRACTS0ERRORS;10QCGATES;1462UNRELATEDTYPESAND73RESOURCESPRESERVED;OWNERSREVIEWED_UI_MEAD_FEASTXP_RESIDENTS;LIVEUNTESTED",
+    "plugin_version": "1.4.123",
+    "channel": "Release",
+    "localization_mode": "existing-game-language-Ukrainian",
+    "requires_paired_client_server": true,
+    "network_projection": 3
+  },
+  "Server": {
+    "schema": 1,
+    "product": "ValheimMastery",
+    "variant": "Server",
+    "version": "1.4.123-ui-cooking-residents-20261008",
+    "archive": "server-1.4.123-ui-cooking-residents-20261008.zip",
+    "archive_sha256": "7917f7d646dff21bb557cf698c9e80f62fb9c072e9c5e353d39a70ec32f88ff6",
+    "files": [
+      {
+        "path": "ValheimMastery.dll",
+        "size": 19489280,
+        "sha256": "4bc15339b58a87e32b80dcc93b604489fd70876f949308b7da06b1b1b43c6b9e"
+      }
+    ],
+    "validation": "DUALBUILD/PROVENANCE36/4;592ACTUALSTEAMCONTRACTS0ERRORS;10QCGATES;1462UNRELATEDTYPESAND73RESOURCESPRESERVED;OWNERSREVIEWED_UI_MEAD_FEASTXP_RESIDENTS;LIVEUNTESTED",
+    "plugin_version": "1.4.123",
+    "channel": "Release",
+    "localization_mode": "existing-game-language-Ukrainian",
+    "requires_paired_client_server": true,
+    "network_projection": 3
+  }
+}
