@@ -1,0 +1,36 @@
+{
+  "schema": 2,
+  "channel": "Release",
+  "windows": {
+    "core_sha256": "27b861a8dc624b4a2a31bd8c1e957a68788795f7b0514537d64d126ac051981b"
+  },
+  "mac": {
+    "status": "PINNED_ARCHIVES_INSPECTED; CONFIG/STARTUP_FIXTURES_PASS; NATIVE_MAC_UNTESTED"
+  },
+  "localization": {
+    "status": "UKRAINIAN_TEST_EXISTING_BUILTIN",
+    "selection": "Valheim game language: Ukrainian",
+    "english": "DEFERRED"
+  },
+  "runtime_files": {
+    "mastery_installer.py": "27b861a8dc624b4a2a31bd8c1e957a68788795f7b0514537d64d126ac051981b",
+    "steam_launch.py": "ca77b3b592d03ef4b64adb6ab47128c073b7b0eae50f564725509fd658906507",
+    "language_setting.py": "33814955489a1ad42953d3f3e3689a7350ecf95f8bddeeb8f1f3a89c044732bc"
+  },
+  "startup_files": {
+    "startup_update.py": "115df37c7ba5313c6659f9b09d5cd7f91d7206d39497a63cde534a882fe1341c",
+    "Launch-Mastery.exe": "6d093de620fb335cd98f20293bbd512d1f5b31ba1707d88b47e4db03836d0116"
+  },
+  "startup": {
+    "schema": 1,
+    "channel": "Release",
+    "platforms": [
+      "Windows-x64",
+      "macOS-Intel",
+      "macOS-AppleSilicon-Rosetta"
+    ],
+    "default": "steam-for-matched-client-folder/manual-for-other-folder",
+    "timeout_seconds": 45,
+    "validation": "TRANSACTION/ARGV/STARTUP_FIXTURES_VERIFIED; NATIVE_MAC_AND_STEAM_PLAY_BUTTON_UNTESTED"
+  }
+}
