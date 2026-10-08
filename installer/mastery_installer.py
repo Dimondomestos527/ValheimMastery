@@ -602,6 +602,14 @@ def choose(choices):
 
  return Path(folder)
 
+def select_target(variant):
+ answer=input('Game folder: 1 Auto-search Steam (default), 2 Choose folder manually: ').strip()
+ if answer in {'','1'}:
+  return choose(discover(steam_roots(),variant))
+ if answer=='2':
+  return choose([])  # Native folder picker; do not search Steam in manual mode.
+ raise ValueError('Invalid folder selection mode')
+
 def identity(root,variant):
 
  if sys.platform=='win32':
@@ -676,7 +684,8 @@ def main():
    answer=input('Install target: 1 Valheim game (default), 2 Dedicated server: ').strip()
    if answer not in {'','1','2'}: raise ValueError('Invalid target selection')
    a.variant='Server' if answer=='2' else 'Client'
- root=(a.target or choose(discover(steam_roots(),a.variant))).absolute()
+ root=(a.target or select_target(a.variant)).absolute()
+ print('Selected game folder:',root)
 
  identity(root,a.variant)
 
