@@ -58,7 +58,7 @@ def busy():
 
   import csv
 
-  names=[r[0].lower() for r in csv.reader(subprocess.check_output(['tasklist','/FO','CSV','/NH']).decode(errors='replace').splitlines()) if r]
+  names=[r[0].lower() for r in csv.reader(subprocess.check_output([str(Path(os.environ.get('SystemRoot','C:/Windows'))/'System32/tasklist.exe'),'/FO','CSV','/NH']).decode(errors='replace').splitlines()) if r]
 
  else: names=[Path(r.strip()).name.lower() for r in subprocess.check_output(['ps','-axo','comm'],text=True).splitlines()]
 
@@ -596,7 +596,7 @@ def choose(choices):
 
   script='Add-Type -AssemblyName System.Windows.Forms; $d=New-Object System.Windows.Forms.FolderBrowserDialog; $d.Description="Choose Valheim game folder"; if($d.ShowDialog() -eq "OK"){$d.SelectedPath}'
 
-  folder=subprocess.check_output(['powershell.exe','-NoProfile','-STA','-Command',script],text=True).strip()
+  folder=subprocess.check_output([str(Path(os.environ.get('SystemRoot','C:/Windows'))/'System32/WindowsPowerShell/v1.0/powershell.exe'),'-NoProfile','-STA','-Command',script],text=True).strip()
 
  if not folder: raise ValueError('No game folder selected')
 

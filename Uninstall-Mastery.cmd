@@ -3,7 +3,7 @@ setlocal
 set "VM_ACTION=uninstall"
 set "VM_SCRIPT=%~f0"
 set "VM_TARGET=%~1"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$t=[IO.File]::ReadAllText($env:VM_SCRIPT); $marker='# POWERSHELL'; $script=$t.Substring($t.LastIndexOf($marker)+$marker.Length); & ([ScriptBlock]::Create($script))"
+"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -Command "$t=[IO.File]::ReadAllText($env:VM_SCRIPT); $marker='# POWERSHELL'; $script=$t.Substring($t.LastIndexOf($marker)+$marker.Length); & ([ScriptBlock]::Create($script))"
 set "VM_RESULT=%ERRORLEVEL%"
 pause
 exit /b %VM_RESULT%
