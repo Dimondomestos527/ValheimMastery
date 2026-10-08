@@ -1,0 +1,1224 @@
+{
+  "exports": [
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_swords_v002.png",
+      "sha256": "7a3e1b56515dad69f9afc78bc63bc8cad2eadfb5cf17623acf3025d93f3fb01a",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_swords\\v002\\vm_icon_skill_swords_v002_master.png",
+      "source_sha256": "0213b0e1dd7c7b0ce7efa208e81908e0da5f36ec206ede7a6c494095ef2cf8d7",
+      "crop_alpha_bbox": [
+        57,
+        49,
+        1228,
+        1212
+      ],
+      "width": 512,
+      "height": 509,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_swords_silver_v002.png",
+      "sha256": "dbb3d5b26b47b9eda12bd1da88404837cb1df688fd4da7fe318088d6c37b1730",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_swords_silver\\v002\\vm_icon_skill_swords_silver_v002_master.png",
+      "source_sha256": "e4cf2a417e352f98d646eaa71bdbf0d8e19465a0497c5866fd906fa1f63927b6",
+      "crop_alpha_bbox": [
+        57,
+        53,
+        1213,
+        1206
+      ],
+      "width": 512,
+      "height": 511,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_swords_silver_v001.png",
+      "sha256": "6a1d24054bfa148dcc071132f8f1099b578ff5c4a369ab624f792ddf0eed1245",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_swords_silver\\v001\\vm_icon_skill_swords_silver_v001_master.png",
+      "source_sha256": "11ba48ea0cfaa08aa32bb62bc38bc314119ce34504fc19c6d72da5e5996b1d8d",
+      "crop_alpha_bbox": [
+        0,
+        21,
+        1238,
+        1220
+      ],
+      "width": 512,
+      "height": 496,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_axes_v003.png",
+      "sha256": "985285913c051c86bd838779f5a77e09ab9de301dae1adb9a3416027a1102e2c",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_axes\\v003\\vm_icon_skill_axes_v003_master.png",
+      "source_sha256": "960832e7f7c282769448292cafacabf249cae6d5166a75554d7775d4243068ac",
+      "crop_alpha_bbox": [
+        91,
+        47,
+        1140,
+        1182
+      ],
+      "width": 473,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_axes_silver_v003.png",
+      "sha256": "eccb915d4981acbd45e1da00a3e6f2d5221deb14bb8efc9ef9e7ce04a28293da",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_axes_silver\\v003\\vm_icon_skill_axes_silver_v003_master.png",
+      "source_sha256": "6d2a16a465639ba797a4d1d81df7b7e6aaf55408da63803c352d0dd2d006a1e1",
+      "crop_alpha_bbox": [
+        49,
+        68,
+        1190,
+        1162
+      ],
+      "width": 512,
+      "height": 491,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_axes_gold_v002.png",
+      "sha256": "83fff590901f2bca27ad47aac6c3eb6ccd398fd08be718803b0983cae301ee5c",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_axes_gold\\v002\\vm_icon_skill_axes_gold_v002_master.png",
+      "source_sha256": "ebc7b1fd307b0b99a954bcd2128a2df381f42eee1ee13f33eac106c928f4c9d3",
+      "crop_alpha_bbox": [
+        59,
+        25,
+        1217,
+        1214
+      ],
+      "width": 499,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_clubs_v002.png",
+      "sha256": "a9577f0db959c2d37cbf6e2949664af0473ce3cfd02759f3eee1f07e59e43844",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_clubs\\v002\\vm_icon_skill_clubs_v002_master.png",
+      "source_sha256": "1d854542dab4400088998d5c6b02fb4f9ced3751db09004516ed428edbe3dc3a",
+      "crop_alpha_bbox": [
+        148,
+        53,
+        1172,
+        1157
+      ],
+      "width": 475,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_clubs_silver_v002.png",
+      "sha256": "c94d8c9c55ca75e331f0190fd9dbdcdfcb6bf0a963317fae33e82a98395ce301",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_clubs_silver\\v002\\vm_icon_skill_clubs_silver_v002_master.png",
+      "source_sha256": "3cff95353d8e7754145ba6fd314eb91e1e7a7cd4c40aeca0abdc9f139e33ea3b",
+      "crop_alpha_bbox": [
+        0,
+        0,
+        1234,
+        1236
+      ],
+      "width": 511,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_clubs_gold_v005.png",
+      "sha256": "8f10dcc4c96a7def5452a5dfabb6532fbec24131d3ae1252e0b373ebaeb065c6",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_clubs_gold\\v005\\vm_icon_skill_clubs_gold_v005_master.png",
+      "source_sha256": "99bffa7042482fb580008edcc2ffce5c952018ee6f6c582a3a9f80365781a8f5",
+      "crop_alpha_bbox": [
+        65,
+        31,
+        1210,
+        1205
+      ],
+      "width": 499,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_knives_v001.png",
+      "sha256": "9092b2cd3cbec168239819baacfc5dc7c691cb0a46d3722243fe3fbbd690d26d",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_knives\\v001\\vm_icon_skill_knives_v001_master.png",
+      "source_sha256": "b015bf9247aced29d2294304523032c0a84a0eaf8d0606d1664ca73bef2a5bbd",
+      "crop_alpha_bbox": [
+        81,
+        31,
+        1210,
+        1206
+      ],
+      "width": 492,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_knives_silver_v003.png",
+      "sha256": "e97dbc1d7738cf3e9cb06c1a5a31a883f564b3b8d3cc129868a87217806a7c03",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_knives_silver\\v003\\vm_icon_skill_knives_silver_v003_master.png",
+      "source_sha256": "ff3ddb83c56b22ccdfbbb86e7e2f18ee13ce025531580a397a560abc800f23a6",
+      "crop_alpha_bbox": [
+        130,
+        53,
+        993,
+        1150
+      ],
+      "width": 403,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_knives_gold_v001.png",
+      "sha256": "369d52c79b2a4e89588ddaf93dd8507408d82b9283b92946d40a5bf793450cf7",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_knives_gold\\v001\\vm_icon_skill_knives_gold_v001_master.png",
+      "source_sha256": "aa93ffbb94420a87607b9e99f1622107d0e58ec2303494003d3811868ccfe631",
+      "crop_alpha_bbox": [
+        17,
+        62,
+        1160,
+        1246
+      ],
+      "width": 494,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_spears_v001.png",
+      "sha256": "d8cdb911c600e63bb75ecc7488c5f88551fc2bf6ac470532a62307e97fe02949",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_spears\\v001\\vm_icon_skill_spears_v001_master.png",
+      "source_sha256": "d97176e82a621ec04208ad370f93fa878e29eefaef51c5f3a2f621fd9eaad380",
+      "crop_alpha_bbox": [
+        77,
+        53,
+        1180,
+        1200
+      ],
+      "width": 492,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_spears_silver_v003.png",
+      "sha256": "f69493cfce5d12bb2dcaf963df5ecfad52d2a63d10ce5b05031ef154140b2b40",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_spears_silver\\v003\\vm_icon_skill_spears_silver_v003_master.png",
+      "source_sha256": "77e1086a1f7ef7e075fc66e6da2024a145f7d48655f658c57066dcc84d8c9570",
+      "crop_alpha_bbox": [
+        106,
+        53,
+        1193,
+        1198
+      ],
+      "width": 486,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_spears_silver_v001.png",
+      "sha256": "d1dffd5230d9888da5a5c24df53f15dc740086654dedfad76768f0626d91dd5a",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_spears_silver\\v001\\vm_icon_skill_spears_silver_v001_master.png",
+      "source_sha256": "a5e0ea2cf445f6f10b4e28aa0de3ddfd0b7de68a313fb0d55b608d02e5d2d009",
+      "crop_alpha_bbox": [
+        97,
+        53,
+        1210,
+        1182
+      ],
+      "width": 505,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_polearms_v002.png",
+      "sha256": "6d6c8cce6718f385ec066a4cba186c04a9214c2c4a164bf4afdd310ebb9eb112",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_polearms\\v002\\vm_icon_skill_polearms_v002_master.png",
+      "source_sha256": "3e9f88ad521f9c39373155988415f2c7662e611b618702b57cdb8ad1a25de387",
+      "crop_alpha_bbox": [
+        65,
+        52,
+        1208,
+        1214
+      ],
+      "width": 504,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_polearms_v001.png",
+      "sha256": "2b3e6f0b7735027c158f4c2a979ec172937c8126620b57562f300e15d1b96a7f",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_polearms\\v001\\vm_icon_skill_polearms_v001_master.png",
+      "source_sha256": "ba0b6c9223b06edcab617330852ee54a4047c13247f0a3f8092c2c8d4939dbca",
+      "crop_alpha_bbox": [
+        40,
+        41,
+        1221,
+        1220
+      ],
+      "width": 512,
+      "height": 511,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_polearms_silver_v002.png",
+      "sha256": "ac0aec8ea39ca02efb723c1b90f63afbd062293bb0168c831ea26587776790b1",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_polearms_silver\\v002\\vm_icon_skill_polearms_silver_v002_master.png",
+      "source_sha256": "b7e52bb228dde3f052a922981977206d6d80fce8befd08c59e82dde3a913073c",
+      "crop_alpha_bbox": [
+        97,
+        17,
+        1230,
+        1225
+      ],
+      "width": 480,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bows_v002.png",
+      "sha256": "1814d6e532d8a33ff58f3c68054bf53436049d2ed606c57db31d8bce7e93a42f",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bows\\v002\\vm_icon_skill_bows_v002_master.png",
+      "source_sha256": "56ceb6507fb7a11588f208c38b69604a4d352e8ee317752e4a79ef64b97da70d",
+      "crop_alpha_bbox": [
+        61,
+        51,
+        1232,
+        1190
+      ],
+      "width": 512,
+      "height": 498,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bows_v006.png",
+      "sha256": "6a05370fd8e39e465cd2be8d24ea0378eef895550d44265503d9b0dd4fef6a5d",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bows\\v006\\vm_icon_skill_bows_v006_master.png",
+      "source_sha256": "671883c7c9351b3ce2d8b4675c88dd48eaf3a0044e13090dabf7af7d7ee553e7",
+      "crop_alpha_bbox": [
+        41,
+        32,
+        1224,
+        1235
+      ],
+      "width": 503,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bows_silver_v002.png",
+      "sha256": "20874c0c4dcacb7b2e57d83ba409b42814c8adb3c2d725e0700c38972a6a59b1",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bows_silver\\v002\\vm_icon_skill_bows_silver_v002_master.png",
+      "source_sha256": "9394fd83f9935f1ff516684e25b1b2a0dfaf5496569007ee099b05110b6092f6",
+      "crop_alpha_bbox": [
+        73,
+        23,
+        1203,
+        1253
+      ],
+      "width": 470,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_crossbows_v002.png",
+      "sha256": "c5f505b490b1d76f64952c4489206a687adec5f5a5d992b66515c9e33f3b7ace",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_crossbows\\v002\\vm_icon_skill_crossbows_v002_master.png",
+      "source_sha256": "f9f45a14fffbe392c1b5edbb833e4e34fd55ba10550fb546e2ba966a7fd9548f",
+      "crop_alpha_bbox": [
+        105,
+        55,
+        1237,
+        1211
+      ],
+      "width": 501,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_crossbows_gold_v003.png",
+      "sha256": "6189e2b86ea4d7c2338c22d0ca1e18ab2cae0788676cedf0bcb24d2edbb4a526",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_crossbows_gold\\v003\\vm_icon_skill_crossbows_gold_v003_master.png",
+      "source_sha256": "5015eb5bbd242dcc7a19d0c3b947abc61a21b028f0a85caf43e04edb7cd6e9df",
+      "crop_alpha_bbox": [
+        31,
+        21,
+        1222,
+        1218
+      ],
+      "width": 509,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_crossbows_deepnorth_v002.png",
+      "sha256": "141655940ff348feb83df6dc3e281e151202bfc67a8217b7e5dc47ef8a25b8d6",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_crossbows_deepnorth\\v002\\vm_icon_skill_crossbows_deepnorth_v002_master.png",
+      "source_sha256": "02faa4e8878b9dbca518bbbaf610c2b0f452650348a6cbb63d843147fa106ebf",
+      "crop_alpha_bbox": [
+        97,
+        38,
+        1210,
+        1222
+      ],
+      "width": 481,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_fists_v001.png",
+      "sha256": "7d61722c04f09194b44dbfed310ec31d2774006aa0aff29080b7c25c46a72b53",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_fists\\v001\\vm_icon_skill_fists_v001_master.png",
+      "source_sha256": "a55f6557ccd0959cb100536904149b0997d560951a461cfc96591a130fce2b8f",
+      "crop_alpha_bbox": [
+        0,
+        7,
+        1230,
+        1254
+      ],
+      "width": 505,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_fists_silver_v001.png",
+      "sha256": "ea44dcd51bdda61b0477ad7382c8649422026724168f38b15231fbcf79e8eedf",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_fists_silver\\v001\\vm_icon_skill_fists_silver_v001_master.png",
+      "source_sha256": "e2d1a3358eeaf61aa7f6907b49d9f1df57cf932cb58e8d029c06a052d9b49a6a",
+      "crop_alpha_bbox": [
+        97,
+        21,
+        1222,
+        1228
+      ],
+      "width": 477,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_fists_gold_v003.png",
+      "sha256": "7b503d08cdbae175cb89778adfedaaf1f8fabec452ce5d2c51f618d6c9e01c57",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_fists_gold\\v003\\vm_icon_skill_fists_gold_v003_master.png",
+      "source_sha256": "dead2e2eaa4210d2c2275c18cc7ae7f602e3e15795fa823205a17f30e46d176c",
+      "crop_alpha_bbox": [
+        67,
+        21,
+        1203,
+        1214
+      ],
+      "width": 488,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_blocking_v002.png",
+      "sha256": "8f56dc421d1a093209be30fff764170f0ec06c1bd97ccd3ce47da90ee9ab0024",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_blocking\\v002\\vm_icon_skill_blocking_v002_master.png",
+      "source_sha256": "038d29a82d6d4d4a5cb93d0c59a1fd1a76a1539d0264861d62c04ff4cd1eeab2",
+      "crop_alpha_bbox": [
+        57,
+        21,
+        1210,
+        1254
+      ],
+      "width": 479,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_blocking_silver_v002.png",
+      "sha256": "f79ba4030a23e465b887426f317fc0692c734d0ab833e5b8898a261d9eb8067c",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_blocking_silver\\v002\\vm_icon_skill_blocking_silver_v002_master.png",
+      "source_sha256": "03a87c5b3d966da03c7301ff4ae29996ab4ab40eb2363f6904328f4f2a785db6",
+      "crop_alpha_bbox": [
+        0,
+        21,
+        1093,
+        1254
+      ],
+      "width": 454,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_blocking_gold_v002.png",
+      "sha256": "e604e67971e11ab86211e0d46298f8038eca09e239d21e41fb347e5e5a76422a",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_blocking_gold\\v002\\vm_icon_skill_blocking_gold_v002_master.png",
+      "source_sha256": "b63db2b16eeb68158d9d50c35b48d2193f013c2da8afa7d490f9bad5bceeb124",
+      "crop_alpha_bbox": [
+        97,
+        21,
+        1194,
+        1212
+      ],
+      "width": 472,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_dodge_v001.png",
+      "sha256": "783eeb7f9c7cf619376f85d44d15d9d654503cd19cfcb903648486a11ce6a4d4",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_dodge\\v001\\vm_icon_skill_dodge_v001_master.png",
+      "source_sha256": "658706902dfd4c440d6a4632c5ac34e1660a538164e100bbc1deef891c6d2cf7",
+      "crop_alpha_bbox": [
+        0,
+        21,
+        1198,
+        1214
+      ],
+      "width": 512,
+      "height": 510,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_sneak_v001.png",
+      "sha256": "305c738b7c6df4407463a224ac93a908d47ae8aa285cf1a36bff8d269902e68c",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_sneak\\v001\\vm_icon_skill_sneak_v001_master.png",
+      "source_sha256": "d3b29883f2490b10a6e41d4b02d707a003d2d2e9d12c29cc826f8e7c77f95447",
+      "crop_alpha_bbox": [
+        81,
+        19,
+        1228,
+        1254
+      ],
+      "width": 476,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_run_v001.png",
+      "sha256": "df5609eab6c4394708f3ff6f3f664731b99a3cb71da761604d9c42ab5c6d02f5",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_run\\v001\\vm_icon_skill_run_v001_master.png",
+      "source_sha256": "84f775111792d9b5951b3c70c45c1cd43a949466e63754de01b59fd7776e005c",
+      "crop_alpha_bbox": [
+        21,
+        21,
+        1232,
+        1254
+      ],
+      "width": 503,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_jump_v001.png",
+      "sha256": "c108915322d023516197861cbbf83d2aedf8244df9e61c3d865553cc15ee75bc",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_jump\\v001\\vm_icon_skill_jump_v001_master.png",
+      "source_sha256": "a792b86e6e5a915a08f987a026db45129e6eb099e87b6eb666cb1446c51df900",
+      "crop_alpha_bbox": [
+        59,
+        48,
+        1199,
+        1230
+      ],
+      "width": 494,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_swim_v001.png",
+      "sha256": "a49b43d61108b026a282babe3c89370909cb08714f6ba9613bc99421ca5476d1",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_swim\\v001\\vm_icon_skill_swim_v001_master.png",
+      "source_sha256": "a0da9b1d329482e76a2c1771c2fce888d3b70d376c2919af10d99970895a06d1",
+      "crop_alpha_bbox": [
+        23,
+        21,
+        1251,
+        1227
+      ],
+      "width": 512,
+      "height": 503,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_ride_v001.png",
+      "sha256": "98bbda77bde382befa96af19ecef87f8800c6e96376c55a577cd3db7f66acf7f",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_ride\\v001\\vm_icon_skill_ride_v001_master.png",
+      "source_sha256": "17cab22136d0fe3e0916cad717a4c91075a6a352861614caf9094d121d624b9c",
+      "crop_alpha_bbox": [
+        25,
+        13,
+        1210,
+        1254
+      ],
+      "width": 489,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_elementalmagic_v002.png",
+      "sha256": "c46b9c7430f2a26149435894aaa3261ebdc76d093cc8b0e0bbd6340ab7631bea",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_elementalmagic\\v002\\vm_icon_skill_elementalmagic_v002_master.png",
+      "source_sha256": "d8ca9bf0f09c0b02320bbabecf6bb162d16181f1fb4fa3961f6f048e540c1199",
+      "crop_alpha_bbox": [
+        39,
+        17,
+        1216,
+        1241
+      ],
+      "width": 492,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_elementalmagic_silver_v002.png",
+      "sha256": "b9b2e3ad7ef53d58ee19a9894f5aa86f29989bf14f5508091f53df5607fdff32",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_elementalmagic_silver\\v002\\vm_icon_skill_elementalmagic_silver_v002_master.png",
+      "source_sha256": "ab0971c6bbbb7aa3adee569c637a0b2585da1dad3e3cb6baae008fc87bbbd69f",
+      "crop_alpha_bbox": [
+        235,
+        21,
+        1102,
+        1215
+      ],
+      "width": 372,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_elementalmagic_deepnorth_v002.png",
+      "sha256": "5f5ba08826d7f510bd80aa600c0474465571a88a13ee6af88cf1d459e51a9104",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_elementalmagic_deepnorth\\v002\\vm_icon_skill_elementalmagic_deepnorth_v002_master.png",
+      "source_sha256": "32294d17e35adcc563758c23273ca2b22cc2c9c54f8cafe1d5fd7f5952fc3b88",
+      "crop_alpha_bbox": [
+        25,
+        38,
+        1240,
+        1242
+      ],
+      "width": 512,
+      "height": 507,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bloodmagic_v006.png",
+      "sha256": "8b0400831e0e931b1bd7382489d4687f6804969c8e90b9b158aea2b3f50cebe9",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bloodmagic\\v006\\vm_icon_skill_bloodmagic_v006_master.png",
+      "source_sha256": "72b1af1d8d069e8f334a43e6a0077ba33303f698b816207435d25b8fdbc17b0d",
+      "crop_alpha_bbox": [
+        0,
+        43,
+        1210,
+        1220
+      ],
+      "width": 512,
+      "height": 498,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bloodmagic_gold_v003.png",
+      "sha256": "c78c4eac4b7105ff4a5ed06a869a875c66024bc0e13dc8997fe406bd0f768962",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bloodmagic_gold\\v003\\vm_icon_skill_bloodmagic_gold_v003_master.png",
+      "source_sha256": "4dfc582a527816a15a65d00553055a60822f2d7387db0a30455b1e8b1374299a",
+      "crop_alpha_bbox": [
+        97,
+        53,
+        1210,
+        1212
+      ],
+      "width": 492,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_bloodmagic_deepnorth_v003.png",
+      "sha256": "1e259a9ac92999d1ac234150ea06cf61d770b6394a76f3809348b67a1643e7e7",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_bloodmagic_deepnorth\\v003\\vm_icon_skill_bloodmagic_deepnorth_v003_master.png",
+      "source_sha256": "fcc6d356a3ebdf3615f69953722632fac434da5a08722be464a51b0acd9aa82c",
+      "crop_alpha_bbox": [
+        33,
+        21,
+        1190,
+        1254
+      ],
+      "width": 480,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_woodcutting_v002.png",
+      "sha256": "81b7994e949827414110f7f55ea3e8e8b5f1c5528d373c200dc5325f0ffa3bba",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_woodcutting\\v002\\vm_icon_skill_woodcutting_v002_master.png",
+      "source_sha256": "4165b9444cefd4d7574b5e599d2585e5bd99d73bbab4fe8b386f057649aba2c6",
+      "crop_alpha_bbox": [
+        17,
+        21,
+        1238,
+        1246
+      ],
+      "width": 510,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_woodcutting_v001.png",
+      "sha256": "62231beed48be069c1cc8b7db75ee4bd0f599a2fc53c0dc9b64c7317d6b56d68",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_woodcutting\\v001\\vm_icon_skill_woodcutting_v001_master.png",
+      "source_sha256": "b0e92dbeb034702b64bcbd497d5ab4692afd9f856964e8287fbee9973f7874ed",
+      "crop_alpha_bbox": [
+        19,
+        11,
+        1158,
+        1237
+      ],
+      "width": 476,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_woodcutting_silver_v001.png",
+      "sha256": "9a556c5a41fcd3133402e46987b9358d494cab5291f2e4ac1eb7c67a5727086e",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_woodcutting_silver\\v001\\vm_icon_skill_woodcutting_silver_v001_master.png",
+      "source_sha256": "4c913d4d5ad36e624b4dcc2754ed70d831d81011ede738314ef68d9afe7f77dd",
+      "crop_alpha_bbox": [
+        25,
+        20,
+        1238,
+        1228
+      ],
+      "width": 512,
+      "height": 510,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_pickaxes_v002.png",
+      "sha256": "1ecd3bc608d136bb1b36b17e0ff84ebe4b7bcb1eeeffa8abcec85dede7de96ae",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_pickaxes\\v002\\vm_icon_skill_pickaxes_v002_master.png",
+      "source_sha256": "72d600da29179541d4fe2ef151314afaaccf059d53d145bb9bca799b8b1da375",
+      "crop_alpha_bbox": [
+        25,
+        53,
+        1224,
+        1221
+      ],
+      "width": 512,
+      "height": 499,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_pickaxes_v001.png",
+      "sha256": "121cc684ad8258f1dc4cec4bb17795f3518d7874f8ee8112e9e2c83771c35be0",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_pickaxes\\v001\\vm_icon_skill_pickaxes_v001_master.png",
+      "source_sha256": "56079992ce6fbf4a40f6cfb81d36214c8f93d7dc49f04f0172abfbc0b3d616ae",
+      "crop_alpha_bbox": [
+        69,
+        21,
+        1210,
+        1254
+      ],
+      "width": 474,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_pickaxes_silver_v001.png",
+      "sha256": "c31c706c017f1432e79c3f46d874702c41c1420d4cc8edfb416de4a5af916078",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_pickaxes_silver\\v001\\vm_icon_skill_pickaxes_silver_v001_master.png",
+      "source_sha256": "56ef58ce53d66b9bc2668cf7b03c2a6e2eb354d352212019f60571bdc216112b",
+      "crop_alpha_bbox": [
+        33,
+        21,
+        1234,
+        1206
+      ],
+      "width": 512,
+      "height": 505,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_fishing_v001.png",
+      "sha256": "65cbb22759ce3a8bf5fbdb27665e9c6f69134861a884a729edfe0a9088675864",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_fishing\\v001\\vm_icon_skill_fishing_v001_master.png",
+      "source_sha256": "77e0b2802226a92eb303e941c54bbbf4bd1424ed002d09403a413b050f74803c",
+      "crop_alpha_bbox": [
+        19,
+        23,
+        1228,
+        1221
+      ],
+      "width": 512,
+      "height": 507,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_farming_v001.png",
+      "sha256": "043f639934f44741b7df8854d56e76620279603672a09c55f9823174400423f0",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_farming\\v001\\vm_icon_skill_farming_v001_master.png",
+      "source_sha256": "cbca7a0e9597c06fcb268a33abd16e0dc0909d9a801e802795ff8f3dc2651e48",
+      "crop_alpha_bbox": [
+        41,
+        45,
+        1239,
+        1214
+      ],
+      "width": 512,
+      "height": 500,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_farming_silver_v002.png",
+      "sha256": "4ad6c0d693819a45bf8549e41696dc833fe6045cb30aa77eb49a581219b0af40",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_farming_silver\\v002\\vm_icon_skill_farming_silver_v002_master.png",
+      "source_sha256": "3a915e6c76df8bd599d5be877530c6a297720f302d7c0d51ae907ff80522e17a",
+      "crop_alpha_bbox": [
+        0,
+        9,
+        1210,
+        1254
+      ],
+      "width": 498,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_farming_silver_v001.png",
+      "sha256": "025b440c82ef365895f849a07ea3b253089f943f2e4c2691d06abf519cbb0ddf",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_farming_silver\\v001\\vm_icon_skill_farming_silver_v001_master.png",
+      "source_sha256": "9c4803a9d2c53f1cb88c73b340518e38bc1eca748c72544926c7eaf913fc35ad",
+      "crop_alpha_bbox": [
+        61,
+        21,
+        1210,
+        1212
+      ],
+      "width": 494,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_cooking_v002.png",
+      "sha256": "0b46669cae0bbab16a86f8d203965c1748fe790d45215fa1f23809aff53ad7f1",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_cooking\\v002\\vm_icon_skill_cooking_v002_master.png",
+      "source_sha256": "8269be141e82f6612d710f62577f8ea6e4fbd53b8a3de24509111980c2ba6da8",
+      "crop_alpha_bbox": [
+        0,
+        21,
+        1210,
+        1222
+      ],
+      "width": 512,
+      "height": 508,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_cooking_silver_v003.png",
+      "sha256": "95285beebf32089fa33aa32c28083b301549d165fa2a590868491bf12da40ceb",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_cooking_silver\\v003\\vm_icon_skill_cooking_silver_v003_master.png",
+      "source_sha256": "ac6d6c0c5ffbc5630752064b1dd4340f9cd0a887bd782deb6502d1f0d4de4027",
+      "crop_alpha_bbox": [
+        49,
+        13,
+        1196,
+        1221
+      ],
+      "width": 486,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_cooking_gold_v002.png",
+      "sha256": "f76551be344eb4be5bc9f2bcefde0db28964e1e2d5a37d34a84dffef87557428",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_cooking_gold\\v002\\vm_icon_skill_cooking_gold_v002_master.png",
+      "source_sha256": "77c7711b9177cecc7e56549b0ba33641c1cf45c69ac90e5c4176d747531fb3ce",
+      "crop_alpha_bbox": [
+        57,
+        21,
+        1236,
+        1198
+      ],
+      "width": 512,
+      "height": 511,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "icon",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\vm_icon_skill_crafting_v001.png",
+      "sha256": "da17da8a4085ce8a3ae1f4fbe488a3daf3ba054d0e14965b38b726c276e4ae75",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\drafts\\vm_icon_skill_crafting\\v001\\vm_icon_skill_crafting_v001_master.png",
+      "source_sha256": "b33cb6dcce84302bd95195033aba55c83caab2a14a90b682ef2d5109b2f8a1c9",
+      "crop_alpha_bbox": [
+        23,
+        15,
+        1216,
+        1238
+      ],
+      "width": 499,
+      "height": 512,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "frame",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\frame_bronze.png",
+      "sha256": "50a9d3ee2909224b141c252ec45712e55a5d31fa343b3327b8b8647fe1e8f553",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\approved\\vm_frame_milestone_bronze\\v003\\vm_frame_milestone_bronze_v003_master.png",
+      "source_sha256": "43a82318485f8bc5b79941d23e26d5e4431fcf4fe3a1c80f382f91ae4219e81e",
+      "width": 1024,
+      "height": 576,
+      "opaque": true,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "frame",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\frame_silver.png",
+      "sha256": "4c433738a734b614293578931b4a4d9e5f73682a4552d8f0a9b8df4d52e74cd1",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\approved\\vm_frame_milestone_silver\\v003\\vm_frame_milestone_silver_v003_master.png",
+      "source_sha256": "aeec55de644669273cd8e7d85799728f6b60b01b03200a2deedd172ed428a455",
+      "width": 1024,
+      "height": 576,
+      "opaque": true,
+      "status": "DERIVED_FROM_APPROVED"
+    },
+    {
+      "role": "frame",
+      "file": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\exports\\vm_milestone_runtime\\v001\\frame_gold.png",
+      "sha256": "cac663e1ac3ac23cc4edd486c8e7910d2b9026b7f8b495340cd80de3e8d720cd",
+      "source": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Valheim dedicated server\\MasteryDev\\ValheimMasteryVisualAssets\\01a11669-39c8-7f70-aec7-170ba12660ed\\approved\\vm_frame_milestone_gold\\v003\\vm_frame_milestone_gold_v003_master.png",
+      "source_sha256": "f4b00d64825b0940337cc94073db2590435aa0df9ce9c8e2e8369b432a266b95",
+      "width": 1024,
+      "height": 576,
+      "opaque": true,
+      "status": "DERIVED_FROM_APPROVED"
+    }
+  ],
+  "bindings": [
+    {
+      "perk_id": "swords_35",
+      "filename": "vm_icon_skill_swords_v002.png"
+    },
+    {
+      "perk_id": "swords_70",
+      "filename": "vm_icon_skill_swords_silver_v002.png"
+    },
+    {
+      "perk_id": "swords_100",
+      "filename": "vm_icon_skill_swords_silver_v001.png"
+    },
+    {
+      "perk_id": "axes_35",
+      "filename": "vm_icon_skill_axes_v003.png"
+    },
+    {
+      "perk_id": "axes_70",
+      "filename": "vm_icon_skill_axes_silver_v003.png"
+    },
+    {
+      "perk_id": "axes_100",
+      "filename": "vm_icon_skill_axes_gold_v002.png"
+    },
+    {
+      "perk_id": "clubs_35",
+      "filename": "vm_icon_skill_clubs_v002.png"
+    },
+    {
+      "perk_id": "clubs_70",
+      "filename": "vm_icon_skill_clubs_silver_v002.png"
+    },
+    {
+      "perk_id": "clubs_100",
+      "filename": "vm_icon_skill_clubs_gold_v005.png"
+    },
+    {
+      "perk_id": "knives_35",
+      "filename": "vm_icon_skill_knives_v001.png"
+    },
+    {
+      "perk_id": "knives_70",
+      "filename": "vm_icon_skill_knives_silver_v003.png"
+    },
+    {
+      "perk_id": "knives_100",
+      "filename": "vm_icon_skill_knives_gold_v001.png"
+    },
+    {
+      "perk_id": "spears_35",
+      "filename": "vm_icon_skill_spears_v001.png"
+    },
+    {
+      "perk_id": "spears_70",
+      "filename": "vm_icon_skill_spears_silver_v003.png"
+    },
+    {
+      "perk_id": "spears_100",
+      "filename": "vm_icon_skill_spears_silver_v001.png"
+    },
+    {
+      "perk_id": "polearms_35",
+      "filename": "vm_icon_skill_polearms_v002.png"
+    },
+    {
+      "perk_id": "polearms_70",
+      "filename": "vm_icon_skill_polearms_v001.png"
+    },
+    {
+      "perk_id": "polearms_100",
+      "filename": "vm_icon_skill_polearms_silver_v002.png"
+    },
+    {
+      "perk_id": "bows_35",
+      "filename": "vm_icon_skill_bows_v002.png"
+    },
+    {
+      "perk_id": "bows_70",
+      "filename": "vm_icon_skill_bows_v006.png"
+    },
+    {
+      "perk_id": "bows_100",
+      "filename": "vm_icon_skill_bows_silver_v002.png"
+    },
+    {
+      "perk_id": "crossbows_35",
+      "filename": "vm_icon_skill_crossbows_v002.png"
+    },
+    {
+      "perk_id": "crossbows_70",
+      "filename": "vm_icon_skill_crossbows_gold_v003.png"
+    },
+    {
+      "perk_id": "crossbows_100",
+      "filename": "vm_icon_skill_crossbows_deepnorth_v002.png"
+    },
+    {
+      "perk_id": "fists_35",
+      "filename": "vm_icon_skill_fists_v001.png"
+    },
+    {
+      "perk_id": "fists_70",
+      "filename": "vm_icon_skill_fists_silver_v001.png"
+    },
+    {
+      "perk_id": "fists_100",
+      "filename": "vm_icon_skill_fists_gold_v003.png"
+    },
+    {
+      "perk_id": "blocking_35",
+      "filename": "vm_icon_skill_blocking_v002.png"
+    },
+    {
+      "perk_id": "blocking_70",
+      "filename": "vm_icon_skill_blocking_silver_v002.png"
+    },
+    {
+      "perk_id": "blocking_100",
+      "filename": "vm_icon_skill_blocking_gold_v002.png"
+    },
+    {
+      "perk_id": "dodge_35",
+      "filename": "vm_icon_skill_dodge_v001.png"
+    },
+    {
+      "perk_id": "dodge_70",
+      "filename": "vm_icon_skill_dodge_v001.png"
+    },
+    {
+      "perk_id": "dodge_100",
+      "filename": "vm_icon_skill_dodge_v001.png"
+    },
+    {
+      "perk_id": "sneak_35",
+      "filename": "vm_icon_skill_sneak_v001.png"
+    },
+    {
+      "perk_id": "sneak_70",
+      "filename": "vm_icon_skill_sneak_v001.png"
+    },
+    {
+      "perk_id": "sneak_100",
+      "filename": "vm_icon_skill_sneak_v001.png"
+    },
+    {
+      "perk_id": "run_35",
+      "filename": "vm_icon_skill_run_v001.png"
+    },
+    {
+      "perk_id": "run_70",
+      "filename": "vm_icon_skill_run_v001.png"
+    },
+    {
+      "perk_id": "run_100",
+      "filename": "vm_icon_skill_run_v001.png"
+    },
+    {
+      "perk_id": "jump_35",
+      "filename": "vm_icon_skill_jump_v001.png"
+    },
+    {
+      "perk_id": "jump_70",
+      "filename": "vm_icon_skill_jump_v001.png"
+    },
+    {
+      "perk_id": "jump_100",
+      "filename": "vm_icon_skill_jump_v001.png"
+    },
+    {
+      "perk_id": "swim_35",
+      "filename": "vm_icon_skill_swim_v001.png"
+    },
+    {
+      "perk_id": "swim_70",
+      "filename": "vm_icon_skill_swim_v001.png"
+    },
+    {
+      "perk_id": "swim_100",
+      "filename": "vm_icon_skill_swim_v001.png"
+    },
+    {
+      "perk_id": "ride_35",
+      "filename": "vm_icon_skill_ride_v001.png"
+    },
+    {
+      "perk_id": "ride_70",
+      "filename": "vm_icon_skill_ride_v001.png"
+    },
+    {
+      "perk_id": "ride_100",
+      "filename": "vm_icon_skill_ride_v001.png"
+    },
+    {
+      "perk_id": "elementalmagic_35",
+      "filename": "vm_icon_skill_elementalmagic_v002.png"
+    },
+    {
+      "perk_id": "elementalmagic_70",
+      "filename": "vm_icon_skill_elementalmagic_silver_v002.png"
+    },
+    {
+      "perk_id": "elementalmagic_100",
+      "filename": "vm_icon_skill_elementalmagic_deepnorth_v002.png"
+    },
+    {
+      "perk_id": "bloodmagic_35",
+      "filename": "vm_icon_skill_bloodmagic_v006.png"
+    },
+    {
+      "perk_id": "bloodmagic_70",
+      "filename": "vm_icon_skill_bloodmagic_gold_v003.png"
+    },
+    {
+      "perk_id": "bloodmagic_100",
+      "filename": "vm_icon_skill_bloodmagic_deepnorth_v003.png"
+    },
+    {
+      "perk_id": "woodcutting_35",
+      "filename": "vm_icon_skill_woodcutting_v002.png"
+    },
+    {
+      "perk_id": "woodcutting_70",
+      "filename": "vm_icon_skill_woodcutting_v001.png"
+    },
+    {
+      "perk_id": "woodcutting_100",
+      "filename": "vm_icon_skill_woodcutting_silver_v001.png"
+    },
+    {
+      "perk_id": "pickaxes_35",
+      "filename": "vm_icon_skill_pickaxes_v002.png"
+    },
+    {
+      "perk_id": "pickaxes_70",
+      "filename": "vm_icon_skill_pickaxes_v001.png"
+    },
+    {
+      "perk_id": "pickaxes_100",
+      "filename": "vm_icon_skill_pickaxes_silver_v001.png"
+    },
+    {
+      "perk_id": "fishing_35",
+      "filename": "vm_icon_skill_fishing_v001.png"
+    },
+    {
+      "perk_id": "fishing_70",
+      "filename": "vm_icon_skill_fishing_v001.png"
+    },
+    {
+      "perk_id": "fishing_100",
+      "filename": "vm_icon_skill_fishing_v001.png"
+    },
+    {
+      "perk_id": "farming_35",
+      "filename": "vm_icon_skill_farming_v001.png"
+    },
+    {
+      "perk_id": "farming_70",
+      "filename": "vm_icon_skill_farming_silver_v002.png"
+    },
+    {
+      "perk_id": "farming_100",
+      "filename": "vm_icon_skill_farming_silver_v001.png"
+    },
+    {
+      "perk_id": "cooking_35",
+      "filename": "vm_icon_skill_cooking_v002.png"
+    },
+    {
+      "perk_id": "cooking_70",
+      "filename": "vm_icon_skill_cooking_silver_v003.png"
+    },
+    {
+      "perk_id": "cooking_100",
+      "filename": "vm_icon_skill_cooking_gold_v002.png"
+    },
+    {
+      "perk_id": "crafting_35",
+      "filename": "vm_icon_skill_crafting_v001.png"
+    },
+    {
+      "perk_id": "crafting_70",
+      "filename": "vm_icon_skill_crafting_v001.png"
+    },
+    {
+      "perk_id": "crafting_100",
+      "filename": "vm_icon_skill_crafting_v001.png"
+    }
+  ],
+  "method": "Deterministic alpha-border crop and Lanczos size export only; original approved masters unchanged"
+}
