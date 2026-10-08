@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-idols-ui-pet-20261008",
-  "archive": "server-1.4.123-idols-ui-pet-20261008.zip",
-  "archive_sha256": "73fcc3417a36828a90a33a4d987e3dc3f5f024ed8b5a5e2f829fb71b298ad58d",
+  "version": "1.4.123-ui-cooking-residents-20261008",
+  "archive": "server-1.4.123-ui-cooking-residents-20261008.zip",
+  "archive_sha256": "7917f7d646dff21bb557cf698c9e80f62fb9c072e9c5e353d39a70ec32f88ff6",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 19468288,
-      "sha256": "6679cba86ee1be334816d60a6a28c12fa30fa30f4c459509cdf384afeae871ec"
+      "size": 19489280,
+      "sha256": "4bc15339b58a87e32b80dcc93b604489fd70876f949308b7da06b1b1b43c6b9e"
     }
   ],
-  "validation": "DUAL BUILD/PROVENANCE;591 HARMONY CONTRACTS INCLUDING ACTUAL STEAM1.0.17;73RESOURCES;50INTERACTION+25TAMING GUARDS;1489UNRELATEDTYPES PASS. LIVE PET/RENAME/UI/RECONNECT/RESTART UNTESTED",
+  "validation": "DUALBUILD/PROVENANCE36/4;592ACTUALSTEAMCONTRACTS0ERRORS;10QCGATES;1462UNRELATEDTYPESAND73RESOURCESPRESERVED;OWNERSREVIEWED_UI_MEAD_FEASTXP_RESIDENTS;LIVEUNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
