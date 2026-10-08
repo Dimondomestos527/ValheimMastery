@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-20261008",
-  "archive": "server-1.4.123-20261008.zip",
-  "archive_sha256": "b008763da4e2ba7cb2495386e1e23520c215bb9b9f318e14a28f8486d334c0c8",
+  "version": "1.4.123-hud-nav-20261008",
+  "archive": "server-1.4.123-hud-nav-20261008.zip",
+  "archive_sha256": "6980474e80c655a0b1aefd8024c2687865d5a5a2c1917e04cb9eea09d4f8680f",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 13204480,
-      "sha256": "ba25efa8736bc329f50ca369537f4e03a7d28cb46eac70cb06cfec829d048c1f"
+      "size": 14684160,
+      "sha256": "1be438f94ad93c272fa7de4958ff6ad241ba248bd681a481c3e8e717c09d369c"
     }
   ],
-  "validation": "REVIEWED EXISTING 1.4.123 PAYLOAD; UKRAINIAN PLAYER TEST; LIVE INSTALLER/MAC UNTESTED",
+  "validation": "DUAL NATIVE BUILD, HARMONY CONTRACTS, PRESENTATION AND NAV STATIC QC PASS; GAME UI AND NATIVE MAC UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian"
