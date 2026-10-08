@@ -704,6 +704,10 @@ def identity(root,variant,interactive=True):
 
    if subprocess.run(['/usr/bin/arch','-x86_64','/usr/bin/true']).returncode: raise RuntimeError('Rosetta validation failed')
 
+# Official BepInEx macOS x64 5.4.23.2 files; preserve a verified legacy
+# runtime as foreign/preexisting, never adopt or overwrite it during mod update.
+LEGACY_MAC_RUNTIME = {'.doorstop_version': '2744735fee2ee237e29f592f88ab669dc8d478fca31e6da4caf9a4a1b3abb7f1', 'libdoorstop.dylib': 'c1973e0b124b7ca58aed82c6672559f411da214760718eb42b028bd3f8f57e16', 'run_bepinex.sh': '985e6df9ab6b693485fb6f7fcbe85de3bc3355d0c073ed3686171d18a7d500a0', 'BepInEx/core/0Harmony.dll': '1a21cc03424fc82c3dd1346905d16494536b9595ae4162228d99fb7c285c1031', 'BepInEx/core/0Harmony.xml': 'd1f02fc3ada3a13da307de421225bfe56ebe24064370980979391c4be021672f', 'BepInEx/core/0Harmony20.dll': 'd256c5373692a184018f171144712460ced1a6f01562fde26e742b077b36cbd6', 'BepInEx/core/BepInEx.dll': 'c65b42034bc8ffb9f0b336e416dc3884e3f99fc5a5a89eb1f2ff7868412322cd', 'BepInEx/core/BepInEx.Harmony.dll': 'd0739c4a13f369094cb164c205ee4cca5392bdd7241b9f242ee13f0d4c0b1856', 'BepInEx/core/BepInEx.Harmony.xml': 'a04fedf08f7c81f5d01aba6f2840a7ffce50b79bbd24587d8dbe69ab73971d29', 'BepInEx/core/BepInEx.Preloader.dll': '116f8b879b1b87566f5ce30106fc5d5718da69d3870315d184a4460379a765c7', 'BepInEx/core/BepInEx.Preloader.xml': '5ccaffcef1c41292d94931b24f140ca82b47a879e3439e89293285054490eb0a', 'BepInEx/core/BepInEx.xml': 'c0c7799bbaf1e37398f85f0ba8e02d8136c55a3165db87063942e3fedda0a68c', 'BepInEx/core/HarmonyXInterop.dll': '4d6175fa6dfee743423380f62fb5cc7f1811b469748538bd1b974ded34f3f907', 'BepInEx/core/Mono.Cecil.dll': '7ae470288fff4a402899c254d0a76cefef55877f5c54f96e83c797cc5bb6e2f6', 'BepInEx/core/Mono.Cecil.Mdb.dll': '5896d1898f616701fff18f3b2c71e6b844d2390ef9f41e1c5fccce8cb27c698e', 'BepInEx/core/Mono.Cecil.Pdb.dll': '174db44a067f58561510af746f3caeb032037762c57a31c8d9ee32db25174984', 'BepInEx/core/Mono.Cecil.Rocks.dll': '54ac539fb5ddc8b44c0e9acd0fcb7324f89d1a072edf8ebc1b06dd691e3d3927', 'BepInEx/core/MonoMod.RuntimeDetour.dll': '40e49bb314391cd7bddc2644f8553eeba92c194b940836b103df16955c464e0c', 'BepInEx/core/MonoMod.RuntimeDetour.xml': '54887808960d156550b37d602d08847607aa9e908d039f2765fb0b5e79394aa4', 'BepInEx/core/MonoMod.Utils.dll': '9d1495f147ac93c4f81f84538c1a326e8f8a6aefc78d6289d798f3ce1162c5e9', 'BepInEx/core/MonoMod.Utils.xml': '0577b362023a3432d6e8d7934c5eddc3e08fdbb19e191af083e341562c5ede38'}
+
 def framework(root,blob):
 
  expected={n:b for n,b in unpack(blob).items() if owned(n)}
@@ -716,6 +720,12 @@ def framework(root,blob):
  any_existing=core_present or any(safe(root,n).exists() for n in markers if n!='BepInEx/core')
 
  if any_existing:
+
+  if 'libdoorstop.dylib' in expected and all(
+      safe(root,n).is_file() and sha(safe(root,n).read_bytes())==digest
+      for n,digest in LEGACY_MAC_RUNTIME.items()):
+   print('Preserving verified existing BepInEx macOS x64 5.4.23.2; updating Mastery only.')
+   return {}
 
   for n,b in expected.items():
 
