@@ -2,7 +2,7 @@
 set -euo pipefail
 unset PYTHONHOME PYTHONPATH
 export PYTHONNOUSERSITE=1
-trap 'status=$?; if (( status != 0 )); then echo "Installer stopped. See the error above; existing files were preserved." >&2; fi; if [[ -t 0 ]]; then echo "Press Return to close."; read -r || true; fi' EXIT
+trap 'mastery_exit_code=$?; if (( mastery_exit_code != 0 )); then echo "Installer stopped. See the error above; existing files were preserved." >&2; fi; if [[ -t 0 ]]; then echo "Press Return to close."; read -r || true; fi' EXIT
 action='uninstall'
 repository='Dimondomestos527/ValheimMastery'
 work=$(mktemp -d "${TMPDIR:-/tmp}/ValheimMasteryInstaller.XXXXXX")
