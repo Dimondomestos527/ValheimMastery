@@ -721,6 +721,10 @@ def framework(root,blob):
 
    p=safe(root,n)
 
+   # The version marker is advisory on a preexisting Mac loader. Accept its
+   # absence only when EVERY other official runtime file is byte-identical.
+   # Do not create/adopt it or relax checks on any executable/core/config file.
+   if n=='.doorstop_version' and 'libdoorstop.dylib' in expected and not p.exists(): continue
    if not p.is_file() or sha(p.read_bytes())!=sha(b): raise ValueError('Existing BepInEx differs or is incomplete; preserved without overwriting: '+n)
 
   return {} # Exactly compatible preexisting framework is never adopted.
