@@ -2,7 +2,7 @@
   "schema": 2,
   "channel": "Release",
   "windows": {
-    "core_sha256": "9276252c568ef11b52f21a9d561058242fd5ab5fa943922d0d883ed4e2cccc9f"
+    "core_sha256": "c1844430c50ed51dd829bd73ec4e4b99e4915760abef175ff4489916a3a64ad3"
   },
   "mac": {
     "status": "PINNED_ARCHIVES_INSPECTED; CONFIG/STARTUP_FIXTURES_PASS; NATIVE_MAC_UNTESTED"
@@ -13,12 +13,12 @@
     "english": "DEFERRED"
   },
   "runtime_files": {
-    "mastery_installer.py": "9276252c568ef11b52f21a9d561058242fd5ab5fa943922d0d883ed4e2cccc9f",
+    "mastery_installer.py": "c1844430c50ed51dd829bd73ec4e4b99e4915760abef175ff4489916a3a64ad3",
     "steam_launch.py": "ca77b3b592d03ef4b64adb6ab47128c073b7b0eae50f564725509fd658906507",
     "language_setting.py": "33814955489a1ad42953d3f3e3689a7350ecf95f8bddeeb8f1f3a89c044732bc"
   },
   "startup_files": {
-    "startup_update.py": "115df37c7ba5313c6659f9b09d5cd7f91d7206d39497a63cde534a882fe1341c",
+    "startup_update.py": "f71c8780c48be1c9ff50c0b58f137252bd2cb2d365ae2f8b26e72983c15e250b",
     "Launch-Mastery.exe": "6d093de620fb335cd98f20293bbd512d1f5b31ba1707d88b47e4db03836d0116"
   },
   "startup": {
