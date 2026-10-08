@@ -23,13 +23,27 @@ if (Test-Path -LiteralPath $cacheRoot) {
 }
 $session = Join-Path $cacheRoot ([Guid]::NewGuid().ToString('N'))
 New-Item -ItemType Directory -Path $session -Force | Out-Null
+function File-Sha256($path) {
+ $stream = [IO.File]::OpenRead($path)
+ $hasher = [Security.Cryptography.SHA256]::Create()
+ try { return [BitConverter]::ToString($hasher.ComputeHash($stream)).Replace('-', '').ToLowerInvariant() }
+ finally { $stream.Dispose(); $hasher.Dispose() }
+}
 function Download-Checked($url, $dest, $hash) {
  if ($hash -notmatch '^[0-9a-f]{64}$') { throw 'Invalid checksum' }
  Invoke-WebRequest -UseBasicParsing -Uri $url -OutFile $dest -Headers $headers
- if ((Get-FileHash -LiteralPath $dest -Algorithm SHA256).Hash.ToLowerInvariant() -ne $hash) { throw 'Download checksum mismatch' }
+ if ((File-Sha256 $dest) -ne $hash) { throw 'Download checksum mismatch' }
 }
-$archive = Join-Path $session 'python.tar.gz'
-Download-Checked 'https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-x86_64-pc-windows-msvc-install_only.tar.gz' $archive '5e100ee3d592ff500f4408a624f054d202e32d9dba8a12b2226bef81083fd778'
+$archive = Join-Path $cacheRoot 'python-3.13.16-20261003-x64.tar.gz'
+$pythonHash = '5e100ee3d592ff500f4408a624f054d202e32d9dba8a12b2226bef81083fd778'
+if (Test-Path -LiteralPath $archive) {
+ if ((Get-Item -LiteralPath $archive).Attributes -band [IO.FileAttributes]::ReparsePoint) { throw 'Unsafe Python cache' }
+ if ((File-Sha256 $archive) -ne $pythonHash) { throw 'Cached Python checksum mismatch; preserve and stop' }
+} else {
+ $pendingArchive = Join-Path $session 'python-download.tar.gz'
+ Download-Checked 'https://github.com/astral-sh/python-build-standalone/releases/download/20261003/cpython-3.13.16%2B20261003-x86_64-pc-windows-msvc-install_only.tar.gz' $pendingArchive $pythonHash
+ [IO.File]::Move($pendingArchive, $archive)
+}
 $tar = Join-Path $env:SystemRoot 'System32\tar.exe'
 if (-not (Test-Path -LiteralPath $tar)) { throw 'Windows 10/11 tar.exe is required' }
 & $tar -xzf $archive -C $session
