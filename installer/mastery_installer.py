@@ -2,13 +2,14 @@
 
 """Valheim Mastery release installer. Standard library; no game launch."""
 
-import argparse, hashlib, io, json, os, platform, re, shutil, struct, subprocess, sys, tempfile, urllib.request, uuid, zipfile
+import argparse, hashlib, importlib.util, io, json, os, platform, re, shutil, struct, subprocess, sys, tempfile, urllib.request, uuid, zipfile
 
 from pathlib import Path, PurePosixPath
 
 REPO = 'Dimondomestos527/ValheimMastery'
 
 MAX = 64*1024*1024
+FETCH_TIMEOUT=60
 
 BEP = {
 
@@ -20,7 +21,7 @@ def sha(b): return hashlib.sha256(b).hexdigest()
 
 def fetch(url):
 
- with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent':'ValheimMastery-Installer/2'}),timeout=60) as r: b=r.read(MAX+1)
+ with urllib.request.urlopen(urllib.request.Request(url, headers={'User-Agent':'ValheimMastery-Installer/2'}),timeout=FETCH_TIMEOUT) as r: b=r.read(MAX+1)
 
  if len(b)>MAX: raise ValueError('Download too large')
 
@@ -36,6 +37,10 @@ def checked(url, digest):
 
 def steam_busy():
 
+ if sys.platform=='win32':
+  import csv
+  output=subprocess.check_output([str(Path(os.environ.get('SystemRoot','C:/Windows'))/'System32/tasklist.exe'),'/FO','CSV','/NH']).decode(errors='replace')
+  return any(row and row[0].casefold()=='steam.exe' for row in csv.reader(output.splitlines()))
  if sys.platform!='darwin': return False
 
  return any(Path(line.strip()).name.casefold() in {'steam','steam_osx'} for line in subprocess.check_output(['ps','-axo','comm'],text=True).splitlines())
@@ -52,7 +57,7 @@ def allowed_config(path):
 
  raise ValueError('Outside recognized Steam user configuration')
 
-def busy():
+def busy(variant=None):
 
  if sys.platform=='win32':
 
@@ -62,7 +67,8 @@ def busy():
 
  else: names=[Path(r.strip()).name.lower() for r in subprocess.check_output(['ps','-axo','comm'],text=True).splitlines()]
 
- return any(n in {'valheim','valheim.exe','valheim_server','valheim_server.exe'} for n in names)
+ blocked={'valheim','valheim.exe'} if variant=='Client' else {'valheim_server','valheim_server.exe'} if variant=='Server' else {'valheim','valheim.exe','valheim_server','valheim_server.exe'}
+ return any(n in blocked for n in names)
 
 def safe(root, name):
 
@@ -82,9 +88,31 @@ def safe(root, name):
 
  return target
 
+LEGACY_NAMES={'BepInEx/plugins/ValheimMastery.dll','BepInEx/plugins/ValheimMasteryPoC.dll'}
+LEGACY_HASHES={
+ 'f10ad55cc838217d1782c23ee18a8f80f254d3b3ecc1dd8a3194aab3707d5751':'Client',
+ 'ba25efa8736bc329f50ca369537f4e03a7d28cb46eac70cb06cfec829d048c1f':'Server',
+ 'dbb0d271f7bf0e7b91c1af88d3e7599fd4842358b6b8eeb978cf041a159f4568':'Client',
+ '1be438f94ad93c272fa7de4958ff6ad241ba248bd681a481c3e8e717c09d369c':'Server'}
+
+def legacy_candidates(root,variant):
+ result={};base=safe(root,'BepInEx/plugins')
+ if not base.exists():return result
+ for path in base.rglob('*'):
+  name=path.relative_to(root).as_posix();safe(root,name)
+  if not path.is_file() or path.suffix.casefold()!='.dll' or name=='BepInEx/plugins/ValheimMastery/ValheimMastery.dll':continue
+  if path.stat().st_size>MAX:raise ValueError('Plugin DLL too large to inspect safely: '+name)
+  data=path.read_bytes();digest=sha(data)
+  suspected=path.stem.casefold() in {'valheimmastery','valheimmasterypoc'} or b'domestos.valheim.mastery' in data or b'ValheimMastery' in data
+  if not suspected:continue
+  if name not in LEGACY_NAMES or LEGACY_HASHES.get(digest)!=variant:
+   raise ValueError('Unknown/ambiguous legacy Mastery DLL preserved; review this path before installing: '+name)
+  result[name]=data
+ return result
+
 def owned(name):
 
- return name=='BepInEx/config/domestos.valheim.mastery.cfg' or name in {'.doorstop_version','winhttp.dll','doorstop_config.ini','libdoorstop.dylib','run_bepinex.sh','Launch-Mastery.command'} or name.startswith('BepInEx/core/') or name.startswith('BepInEx/plugins/ValheimMastery/')
+ return name in LEGACY_NAMES or name=='BepInEx/config/domestos.valheim.mastery.cfg' or name in {'.doorstop_version','winhttp.dll','doorstop_config.ini','libdoorstop.dylib','run_bepinex.sh','Launch-Mastery.command','Launch-Mastery.exe'} or name.startswith('.mastery-installer/updater/') or name.startswith('BepInEx/core/') or name.startswith('BepInEx/plugins/ValheimMastery/')
 
 def unpack(blob):
 
@@ -132,7 +160,8 @@ def load(root):
 
  for n,r in s['files'].items():
 
-  if not owned(n) or not re.fullmatch('[0-9a-f]{64}',r.get('installed','')): raise ValueError('Invalid owned entry')
+  retired=r.get('kind')=='retired' and n in LEGACY_NAMES and r.get('installed') is None
+  if not owned(n) or (not retired and not re.fullmatch('[0-9a-f]{64}',r.get('installed',''))): raise ValueError('Invalid owned entry')
 
   safe(root,n)
 
@@ -174,6 +203,8 @@ def recover(root):
 
  if data.get('external'):
 
+  if steam_busy(): raise RuntimeError('Close Steam normally before pending launch-configuration recovery')
+
   item=data['external']; config=allowed_config(item['path'])
 
   if any(not re.fullmatch('[0-9a-f]{64}',item[k]) for k in ['before','after']): raise ValueError('Invalid Steam backup digest')
@@ -195,8 +226,6 @@ def recover(root):
   else: atomic(dst,b)
 
  p.unlink()
-
-
 
 class InstallerLock:
 
@@ -238,11 +267,9 @@ class InstallerLock:
 
    self.handle.close(); self.handle=None
 
-
-
 def recover_locked(root):
 
- if steam_busy(): raise RuntimeError('Close Steam normally before configuration recovery')
+ # Pure mod recovery must work with Steam open; recover() guards external VDF journals.
 
  control=safe(root,'.mastery-installer')
 
@@ -254,9 +281,10 @@ def recover_locked(root):
 
  finally: lock.close()
 
-def transaction(root, changes, state, inject=None, expected=None, external=None):
+def transaction(root, changes, state, inject=None, expected=None, external=None, expected_files=None):
 
- if busy() or (sys.platform=='darwin' and steam_busy()): raise RuntimeError('Close Valheim/server and, on Mac, Steam normally before continuing')
+ if busy(state.get('variant')): raise RuntimeError('Close the selected Valheim client/server normally before continuing')
+ if external and steam_busy(): raise RuntimeError('Close Steam normally before changing launch options')
 
  control=safe(root,'.mastery-installer'); control.mkdir(exist_ok=True)
 
@@ -267,6 +295,10 @@ def transaction(root, changes, state, inject=None, expected=None, external=None)
   recover(root)
 
   if load(root)!=expected: raise RuntimeError('Ownership changed during preparation; retry')
+
+  for name,digest in (expected_files or {}).items():
+   path=safe(root,name);current=sha(path.read_bytes()) if path.is_file() else None
+   if current!=digest:raise ValueError('File changed during preparation; preserved: '+name)
 
   before={}
 
@@ -300,7 +332,7 @@ def transaction(root, changes, state, inject=None, expected=None, external=None)
 
   atomic(safe(root,'.mastery-installer/pending.json'),state_bytes(journal))
 
-  if busy(): raise RuntimeError('Game started during staging')
+  if busy(state.get('variant')): raise RuntimeError('Selected game/server started during staging')
 
   try:
 
@@ -334,7 +366,7 @@ def transaction(root, changes, state, inject=None, expected=None, external=None)
 
  finally: lock.close()
 
-def apply(root, files, variant, version, inject=None, launch=None, external=None):
+def apply(root, files, variant, version, inject=None, launch=None, external=None, startup=None, expected_files=None, retire=None, release_commit=None):
 
  root=Path(root).absolute()
 
@@ -372,13 +404,24 @@ def apply(root, files, variant, version, inject=None, launch=None, external=None
 
     atomic(safe(root,'.mastery-installer/objects/'+original),data)
 
-   records[n]={'installed':sha(b),'original':original,'kind':'preference' if n=='BepInEx/config/domestos.valheim.mastery.cfg' else ('mod' if n.startswith('BepInEx/plugins/ValheimMastery/') else 'framework')}
+   records[n]={'installed':sha(b),'original':original,'kind':'preference' if n=='BepInEx/config/domestos.valheim.mastery.cfg' else ('startup' if n.startswith('.mastery-installer/updater/') or n in {'Launch-Mastery.exe','Launch-Mastery.command'} else ('mod' if n.startswith('BepInEx/plugins/ValheimMastery/') else 'framework'))}
 
- changes=dict(files)
+ # Do not rewrite identical files (in particular the currently running launcher).
+ changes={n:b for n,b in files.items() if not safe(root,n).is_file() or sha(safe(root,n).read_bytes())!=sha(b)}
+
+ expected_files=dict(expected_files or {})
+ for name,data in (retire or {}).items():
+  digest=sha(data)
+  if name not in LEGACY_NAMES or LEGACY_HASHES.get(digest)!=variant:raise ValueError('Unverified legacy retirement')
+  path=safe(root,name)
+  if not path.is_file() or sha(path.read_bytes())!=digest:raise ValueError('Legacy DLL changed; preserved')
+  atomic(safe(root,'.mastery-installer/objects/'+digest),data)
+  records[name]={'installed':None,'original':digest,'kind':'retired'}
+  changes[name]=None;expected_files[name]=digest
 
  for n in list(records):
 
-  if records[n]['kind']=='mod' and n not in files:
+  if records[n]['kind'] in {'mod','startup'} and n not in files:
 
    p=safe(root,n)
 
@@ -394,11 +437,15 @@ def apply(root, files, variant, version, inject=None, launch=None, external=None
 
  state={'schema':2,'product':'ValheimMastery','variant':variant,'version':version,'files':records}
 
- if launch is not None: state['mac_launch']=launch
+ if launch is not None: state['steam_launch']=launch
+ elif old and (old.get('steam_launch') or old.get('mac_launch')): state['steam_launch']=old.get('steam_launch') or old['mac_launch']
+ if startup is not None and startup is not False: state['startup']=startup
+ elif startup is None and old and old.get('startup'): state['startup']=old['startup']
+ if release_commit is not None:state['release_commit']=release_commit
+ elif old and old.get('release_commit') and version==old.get('version') and all(n not in changes for n in files if n.startswith('BepInEx/plugins/ValheimMastery/')):
+  state['release_commit']=old['release_commit']
 
- elif old and old.get('mac_launch'): state['mac_launch']=old['mac_launch']
-
- transaction(root,changes,state,inject,expected=old,external=external)
+ transaction(root,changes,state,inject,expected=old,external=external,expected_files=expected_files)
 
  return state
 
@@ -426,7 +473,7 @@ def uninstall(root, inject=None):
 
  for n,r in old['files'].items():
 
-  if r['kind']=='mod' and n.lower().endswith('.dll'):
+  if r['kind'] in {'mod','retired'} and n.lower().endswith('.dll'):
 
    p=safe(root,n)
 
@@ -454,9 +501,9 @@ def uninstall(root, inject=None):
 
   changes[n]=b
 
- external=None; launch=old.get('mac_launch')
+ external=None; launch=old.get('steam_launch') or old.get('mac_launch')
 
- if launch and not foreign:
+ if launch and (not foreign or launch.get('startup')):
 
   import steam_launch
 
@@ -464,11 +511,13 @@ def uninstall(root, inject=None):
 
   if steam_launch.launch_value(text)[0]==launch['installed']:
 
-   external=(config,steam_launch.set_launch(text,launch['original']).encode('utf-8'),sha(b))
+   restored=launch.get('fallback') if foreign and sys.platform=='darwin' and launch.get('startup') else launch['original']
+   external=(config,steam_launch.set_launch(text,restored).encode('utf-8'),sha(b))
 
   else: print('Preserved user-changed Steam launch options')
 
- transaction(root,changes,dict(old,files=keep,version='uninstalled'),inject,expected=old,external=external)
+ final=dict(old,files=keep,version='uninstalled'); final.pop('startup',None)
+ transaction(root,changes,final,inject,expected=old,external=external)
 
  print('Mastery removed. User configs, saves and unrelated mods preserved.')
 
@@ -610,7 +659,20 @@ def select_target(variant):
   return choose([])  # Native folder picker; do not search Steam in manual mode.
  raise ValueError('Invalid folder selection mode')
 
-def identity(root,variant):
+def mac_executable(root):
+ import plistlib
+ apps=list(root.glob('*.app'))
+ if len(apps)!=1 or apps[0].stem.casefold()!='valheim':raise ValueError('Requires exactly one native Valheim.app')
+ app=safe(root,apps[0].relative_to(root).as_posix())
+ info_path=safe(root,(app/'Contents/Info.plist').relative_to(root).as_posix())
+ info=plistlib.loads(info_path.read_bytes());name=info.get('CFBundleExecutable')
+ if not isinstance(name,str) or not name or name in {'.','..'} or any(c in name for c in '/\\:\r\n\0'):
+  raise ValueError('Invalid Mac executable basename')
+ exe=safe(root,(app/'Contents/MacOS'/name).relative_to(root).as_posix())
+ if not exe.is_file():raise ValueError('Mac executable missing')
+ return exe,app
+
+def identity(root,variant,interactive=True):
 
  if sys.platform=='win32':
 
@@ -626,19 +688,8 @@ def identity(root,variant):
 
  else:
 
-  import plistlib
-
-  apps=list(root.glob('*.app'))
-
-  if variant!='Client' or len(apps)!=1: raise ValueError('Mac requires one native Valheim.app client')
-
-  app=apps[0]
-
-  if app.stem.casefold()!='valheim': raise ValueError('Not Valheim.app')
-
-  with (app/'Contents/Info.plist').open('rb') as f: info=plistlib.load(f)
-
-  exe=app/'Contents/MacOS'/info['CFBundleExecutable']
+  if variant!='Client':raise ValueError('Mac installer targets the native game client')
+  exe,app=mac_executable(root)
 
   description=subprocess.check_output(['/usr/bin/file','-b',str(exe)],text=True)
 
@@ -646,6 +697,7 @@ def identity(root,variant):
 
   if platform.machine()=='arm64' and subprocess.run(['/usr/bin/arch','-x86_64','/usr/bin/true']).returncode:
 
+   if not interactive: raise RuntimeError('Rosetta is required; rerun the interactive Mac installer')
    answer=input('Rosetta is required. Start the Apple installer now? You must accept its license yourself. [y/N] ').strip().lower()
 
    if answer!='y' or subprocess.run(['/usr/sbin/softwareupdate','--install-rosetta']).returncode: raise RuntimeError('Rosetta was not installed')
@@ -675,11 +727,30 @@ def framework(root,blob):
 
  return expected
 
+def startup_module(head=None):
+ path=Path(__file__).parent/'startup_update.py'
+ if not path.is_file():
+  if not head: raise RuntimeError('Startup helper missing; run installer once')
+  base='https://raw.githubusercontent.com/'+REPO+'/'+head+'/installer/'
+  manifest=json.loads(fetch(base+'bootstrap.json'))
+  digest=manifest.get('startup_files',{}).get('startup_update.py','')
+  if not re.fullmatch('[a-f0-9]{64}',digest): raise ValueError('Missing verified startup helper')
+  atomic(path,checked(base+'startup_update.py',digest))
+ spec=importlib.util.spec_from_file_location('mastery_startup',path)
+ module=importlib.util.module_from_spec(spec);spec.loader.exec_module(module)
+ module.bind(sys.modules[__name__]);return module
+
 def main():
+ global FETCH_TIMEOUT
 
- p=argparse.ArgumentParser(); p.add_argument('action',choices=['install','uninstall']); p.add_argument('--target',type=Path); p.add_argument('--variant',choices=['Client','Server']); p.add_argument('--commit'); p.add_argument('--language',choices=['Ukrainian','English'])
+ p=argparse.ArgumentParser(); p.add_argument('action',choices=['install','uninstall','startup','update']); p.add_argument('--startup',choices=['steam','manual','off']); p.add_argument('--target',type=Path); p.add_argument('--variant',choices=['Client','Server']); p.add_argument('--commit'); p.add_argument('--language',choices=['Ukrainian','English'])
 
- a=p.parse_args()
+ argv=sys.argv[1:]; tail=[]
+ if '--' in argv:
+  boundary=argv.index('--');tail=argv[boundary+1:];argv=argv[:boundary]
+ a=p.parse_args(argv)
+ if a.action=='update':FETCH_TIMEOUT=8
+ if a.action in {'startup','update'} and not a.target:raise ValueError('Startup requires an explicit installed target')
  if a.variant is None:
   if a.target: a.variant='Server' if (a.target/'valheim_server.exe').exists() and not (a.target/'valheim.exe').exists() else 'Client'
   elif sys.platform=='darwin': a.variant='Client'
@@ -690,15 +761,25 @@ def main():
  root=(a.target or select_target(a.variant)).absolute()
  print('Selected game folder:',root)
 
- identity(root,a.variant)
+ identity(root,a.variant,interactive=a.action not in {'startup','update'})
+ if a.action=='startup':return startup_module().run(root,tail)
 
- if busy(): raise RuntimeError('Close Valheim and its server normally')
+ if busy(a.variant): raise RuntimeError('Close the selected Valheim client/server normally')
 
  if a.action=='uninstall': uninstall(root); return
+
+ retire=legacy_candidates(root,a.variant)
+ preferences_expected={}
 
  head=a.commit or json.loads(fetch('https://api.github.com/repos/'+REPO+'/commits/Release'))['sha']
 
  if not re.fullmatch('[0-9a-f]{40}',head): raise ValueError('Invalid release commit')
+ if a.action=='update':
+  recover_locked(root);current=load(root)
+  if current and current.get('variant')!=a.variant:raise ValueError('Installed variant mismatch')
+  if current and current.get('startup') and a.language is None and current.get('release_commit')==head:
+   startup_module().ready_files(root)
+   print('Already current; no mod/runtime downloads required:',head);return
 
  base='https://raw.githubusercontent.com/'+REPO+'/'+head+'/distribution/'
 
@@ -759,8 +840,10 @@ def main():
   import language_setting
   config='BepInEx/config/domestos.valheim.mastery.cfg'; path=safe(root,config)
   previous=path.read_bytes() if path.exists() else b''
+  preferences_expected[config]=sha(previous) if path.exists() else None
   default=language_setting.current(previous) or 'Ukrainian'
   language=a.language
+  if language is None and a.action=='update':language=default
   if language is None:
    answer=input('Mod language: 1 Ukrainian, 2 English; Enter keeps '+default+': ').strip()
    if answer not in {'','1','2'}: raise ValueError('Invalid language choice')
@@ -789,45 +872,14 @@ def main():
 
  else: files.update(framework(root,dependency))
 
- launch=None; external=None
-
+ launch=None;external=None;startup=None
+ helper=startup_module(head)
+ launch,external,startup=helper.plan(root,old,a,head,files)
+ apply(root,files,a.variant,manifest['version'],launch=launch,external=external,startup=startup,expected_files=preferences_expected,retire=retire,release_commit=head)
  if sys.platform=='darwin':
-
-  import steam_launch
-
-  if steam_busy(): raise RuntimeError('Close Steam normally, then run installer again')
-
-  configs=[p for steam in steam_roots() for p in (Path(steam)/'userdata').glob('*/config/localconfig.vdf') if p.is_file()]
-
-  valid=[]
-
-  for config in configs:
-
-   try: steam_launch.launch_value(config.read_text(encoding='utf-8')); valid.append(config)
-
-   except ValueError: pass
-
-  if not valid: raise RuntimeError('No Steam profile with Valheim found. Run vanilla once, exit game and Steam, then retry.')
-
-  config=allowed_config(choose(valid)); b=config.read_bytes(); text=b.decode('utf-8'); current=steam_launch.launch_value(text)[0]
-
-  if old and old.get('mac_launch'):
-
-   launch=old['mac_launch']
-
-   if str(config)!=launch['path'] or current!=launch['installed']: raise RuntimeError('Steam launch setting changed; preserved for review')
-
-  else:
-
-   wanted=steam_launch.desired(root,current,platform.machine()=='arm64')
-
-   launch={'path':str(config),'original':current,'installed':wanted}; external=(config,steam_launch.set_launch(text,wanted).encode('utf-8'),sha(b))
-
- apply(root,files,a.variant,manifest['version'],launch=launch,external=external)
-
- if sys.platform=='darwin':
-
-  safe(root,'run_bepinex.sh').chmod(safe(root,'run_bepinex.sh').stat().st_mode|0o100)
+  for name in ('run_bepinex.sh','Launch-Mastery.command'):
+   path=safe(root,name)
+   if path.exists():path.chmod(path.stat().st_mode|0o100)
 
  print('Installed',manifest['version'],'from Release',head)
 
@@ -835,7 +887,7 @@ def main():
 
 if __name__=='__main__':
 
- try: main()
+ try: sys.exit(main() or 0)
 
  except Exception as e: print('Installer stopped:',e,file=sys.stderr); sys.exit(1)
 
