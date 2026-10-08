@@ -2,18 +2,20 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-hud-nav-20261008",
-  "archive": "server-1.4.123-hud-nav-20261008.zip",
-  "archive_sha256": "6980474e80c655a0b1aefd8024c2687865d5a5a2c1917e04cb9eea09d4f8680f",
+  "version": "1.4.123-idols-ui-pet-20261008",
+  "archive": "server-1.4.123-idols-ui-pet-20261008.zip",
+  "archive_sha256": "73fcc3417a36828a90a33a4d987e3dc3f5f024ed8b5a5e2f829fb71b298ad58d",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 14684160,
-      "sha256": "1be438f94ad93c272fa7de4958ff6ad241ba248bd681a481c3e8e717c09d369c"
+      "size": 19468288,
+      "sha256": "6679cba86ee1be334816d60a6a28c12fa30fa30f4c459509cdf384afeae871ec"
     }
   ],
-  "validation": "DUAL NATIVE BUILD, HARMONY CONTRACTS, PRESENTATION AND NAV STATIC QC PASS; GAME UI AND NATIVE MAC UNTESTED",
+  "validation": "DUAL BUILD/PROVENANCE;591 HARMONY CONTRACTS INCLUDING ACTUAL STEAM1.0.17;73RESOURCES;50INTERACTION+25TAMING GUARDS;1489UNRELATEDTYPES PASS. LIVE PET/RENAME/UI/RECONNECT/RESTART UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
-  "localization_mode": "existing-game-language-Ukrainian"
+  "localization_mode": "existing-game-language-Ukrainian",
+  "requires_paired_client_server": true,
+  "network_projection": 3
 }
