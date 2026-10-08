@@ -1,0 +1,20 @@
+{
+  "schema": 2,
+  "channel": "Release",
+  "windows": {
+    "core_sha256": "49f5945d0ff73b0144e14ddc126fff2eebcfc0cb8e106163c859d60883a64a4e"
+  },
+  "mac": {
+    "status": "CONFIG_FIXTURES_PASS; NATIVE_MAC_UNTESTED"
+  },
+  "localization": {
+    "status": "UKRAINIAN_TEST_EXISTING_BUILTIN",
+    "selection": "Valheim game language: Ukrainian",
+    "english": "DEFERRED"
+  },
+  "runtime_files": {
+    "mastery_installer.py": "49f5945d0ff73b0144e14ddc126fff2eebcfc0cb8e106163c859d60883a64a4e",
+    "steam_launch.py": "ca77b3b592d03ef4b64adb6ab47128c073b7b0eae50f564725509fd658906507",
+    "language_setting.py": "33814955489a1ad42953d3f3e3689a7350ecf95f8bddeeb8f1f3a89c044732bc"
+  }
+}
