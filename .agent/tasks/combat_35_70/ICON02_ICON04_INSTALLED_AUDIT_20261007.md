@@ -1,0 +1,7 @@
+# ICON02_ICON04_INSTALLED_AUDIT_20261007
+OwnerCOMBAT35/70root; scopedREAD-ONLY requestfromcoordinator IDOL_BEHAVIOR_SETTINGS_ICON_TRIAGE_20261007. ReviewONLYICON02ShadowStepreadyTTL/consume andICON04Axes70buff10/cooldown15/marker15 againstACTUALinstalledperformance-pilot-a-deploy-20261007/snapshot. No assumptionsfromcanonicalpending100.
+Exactreservations own task/progress/handoff and validation/icon02-icon04-combat-audit-20261007/** ONLY. No source/assets/config/statewrites/build/install/launch. SHARED SYSTEM CHANGE:NONE. Root-onlysimpleaudit.
+Weights100:installedidentity20,source+compiledfacts50,classification/fixbound/manualtests20,handoff10. No LIVEproofexpected; source-backedstatusmustseparateHUDappearance.
+Client02A103FD67B6349C42638F2CA070B4405B9A76060E7FE12ECC03434161F273E0;Server3913091057C5CF26F79156A532985CF4A5B29E3AD0839F03B5488691400006B0 freshlyverified. Version1.4.123.
+ICON04 duration/damage changesNOTauthorized. Futurefixonlymarkersemanticsafterhumanchoice; ICON02fixownedready-statuslifetimeonly afterauthorization, donottouchteleportcooldown or otherSE.
+FINALCOMPLETE100/100boundedreadonlyaudit20identity+50installedsource/dualIL+20classification/futurebounds/manualtestplan+10handoff. Reportvalidation/icon02-icon04-combat-audit-20261007/HANDOFF_UA.md. ICON02STATICFAILpresentationlifecyclenoHUDLIVEproof;ICON04STATICPASS10/15mechanics/P3UXambiguity; bothLIVE/migrationcauseUNTESTED. No source/assets/config/state/build/deploy/launch changes. ExactreservationsRELEASED.

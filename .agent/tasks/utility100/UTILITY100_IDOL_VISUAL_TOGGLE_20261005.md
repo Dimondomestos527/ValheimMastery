@@ -1,0 +1,11 @@
+# UTILITY100_IDOL_VISUAL_TOGGLE_20261005
+
+COMPLETE / SOURCE INTEGRATED / STATIC VERIFIED; exact reservations RELEASED. COMPLEX. Root Utility100 implements; max2 bounded read-only reviewers. Human authorizes biome-colored emissive lines, pleasant activation animation and on/off interaction. No install/runtime/deploy; native-only assets. Palette and fade/pulse explicitly approved; optional interaction answer absent, proposed any ward-permitted nearby player used and disclosed.
+
+Exact reservations: src-modern/MasterIdolPieces.cs, MasterIdolWorldRegistry.cs, MasterIdolRuntime.cs; NEW MasterIdolInteraction.cs, MasterIdolVisual.cs, MasterIdolToggleRules.cs; validation/utility100-idol-visual-toggle-20261005/**; own task/progress/handoff; docs/gold/UTILITY_100.md appendix. Existing placement/admission/Gold source read-only.
+
+SHARED SYSTEM CHANGE: own authenticated NetworkSync ZRpc adapter and persisted per-idol ZDO on/off state; reason server validates current actor/world/distance/ward and confirmed idol before setting desired state; domains Utility100/native network/Workshop. No Favor/schema/cost changes. Native interactions inspect Interactable API; no global input change. Native m_model emission material copied per real instance before changing keyword/color, preserving emission texture/base material. No new loader/assets or protection controller. Bounded native/persistence review required before root integration.
+
+Weights: source/native trace20% (1); implementation50% (toggle20,visual20,integration10); verification20% (pure rules10,dual build/review10); docs10%. Off does not free world unique slot. No biome powers. Initial stored default off planned; existing placements also off until deliberate interaction. Source/static only, visual/network LIVE tests separate.
+
+Reservation amendment before write: NEW src-modern/MasterIdolSwitchStore.cs. Native review confirms ZDO owner updates can overwrite server-set keys; use separate bounded six-type server switch journal as authority, ZDO mirror cosmetic only. Preserve admission store format. Atomic temp/replace/checksum/world binding, fail closed on unknown writes; no automatic toggles after load. Same persistence reviewer required.

@@ -1,0 +1,19 @@
+# UTILITY100_RESIDENT_LIFETIME_20261008
+ACTIVE latesthuman via root FINISH_RESIDENT_COOKING_ASSETS_DEPLOY_20261008: finishfriendship beforedeploy. Rootapproved exactGold MINIMAL_PROTOCOL_UA contract implementation afterformat declaration, exactsourcefinalreview later. InstalledED95/A9D9 baseline +frozen9seat/heal changes retained; previous9FROZEN untouched,newisolatedsnapshot only. No Assets/full28/creative4/Goldledger9/Favor/receipt/itemmetadata/productionstate/config/save/launch/deploy edits.
+
+Reserve BEFOREWRITE validation/utility100-resident-lifetime-20261008/** +own task/progress/handoff. Exactexistingplannedoverlay MasterIdolResidentPolicy.cs,MasterIdolLeash.cs,MasterIdolResidents.cs,MasterIdolWorldIndex.cs,MasterIdolEffectZones.cs,MasterIdolRecruitment.cs,MasterIdolIndexHooks.cs,MasterIdolResidentDiagnostics.cs,MasterIdolResidentsDebug.cs; retained9seat/healoverlay stayssameexceptdeclaredcoupling. NEW MasterIdolResidentFriendModel.cs,MasterIdolResidentFriendStore.cs,MasterIdolResidentFriendAuthority.cs,MasterIdolResidentFriendNetwork.cs. Additionalexacthelperreservation beforewrite ifneeded.
+
+SHARED SYSTEM CHANGE: nonfinancialfriendstore1+sixNPC ZDO keys ordinaryautosave; authenticatedserver-peer commit/session/ACK/friendquery/cache; nativeZDOindex/load/destroy hooks; GUIDquota and activeworkvspermanentfaction separation. AI/friendlyhit/ward/PvP/ownertransfer/reconnect/restart, Goldformatreview/Combat/UXaffectedrootreview. No blindSetTamed/forcedsaves/newworldscan/nativeUIDdurableidentity. Reference FORMAT_UA.md; native-scoutrisk knownUIDremap/nonownerSet race/sourcePeer trust. Weighteddesign20+implementation40+verification30+handoff10. Bounded2readonlyreviewers reused. Root alone finalintegration/deploy.
+
+2026-10-08 PIVOT authorized via root: native taming replaces unfinished FriendStore/certificate. Preserve three custom research sources outside Compile in validation/.../unshipped-friend-research; no new persistence subsystem. Reserve additional exact MasterIdolNativeTaming.cs, MasterIdolResidentRoster.cs, MasterIdolMeadows.cs. SHARED SYSTEM CHANGE: native Character.SetTamed at current owner after authoritative committed roster; existing home.v1 stable creationToken matching across UID remap; tamed-family classification, active-work checks, faction/target guards and recruitment quotas. No forced save/RPC/store addition. Frozen9 preserved.
+
+FINAL READY_FOR_ROOT_REVIEW100/100 preparation native-tame-final6. Earlier custom-store requirements superseded; three unfinished custom sources archived outside compile. Final16overlay/frozenmanifest/handoff, boundednative+riskPASS; ownership reservationsreleased Root. No deploy/live/forcedsave/production writes.
+
+## 2026-10-08 — встановлена спільна основа
+Root повідомив про встановлення схваленої combined native-tame-final6 + batch/debit + Cooking curve + exact milestone-art v001 збірки на client/server.
+Поточна selective source base: validation/finish-resident-cooking-assets-deploy-20261008/snapshot.
+Client SHA256: F10AD55CC838217D1782C23EE18A8F80F254D3B3ECC1DD8A3194AAB3707D5751
+Server SHA256: BA25EFA8736BC329F50CA369537F4E03A7D28CB46EAC70CB06CFEC829D048C1F
+Обидві DLL цього snapshot звірено в Utility100: SHA256 збігаються. Фактичне installed readback/backups/single plugin/no staging/10 protected samples unchanged і PASS 21 overlays dual/QC/preservation/owner reviews — evidence від Root, у цьому owner turn повторно не виконувалися.
+Усі наступні Utility100 candidates мають виходити з цієї combined source base; стару ізольовану native-tame DLL не встановлювати поверх неї. Frozen owner snapshot/manifest залишені без змін.
+LIVE UNTESTED: приручення, reconnect/restart, owner transfer. Нових implementation/build/install/runtime дій не замовлено й не виконано; це лише оновлення owner compatibility handoff.

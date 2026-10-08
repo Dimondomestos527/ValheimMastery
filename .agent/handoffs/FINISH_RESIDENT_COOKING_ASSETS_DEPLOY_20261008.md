@@ -1,0 +1,11 @@
+# FINISH_RESIDENT_COOKING_ASSETS_DEPLOY_20261008 — поточний стан
+
+ACTIVE, не встановлено. Останнє рішення користувача: постійна дружність через належно інтегроване нативне приручення. Utility100 зупинив розширення FriendStore; дослідницькі файли архівовані поза компіляцією. Потрібні точні докази нативного збереження й адаптація roster/quota/home/leash/work, а не лише прапорець tamed. Combat100, UX і Gold отримали обмежений запит на перевірку завершеного кандидата. Не підміняти це новим протоколом без доведеної необхідності.
+
+Готові частини у validation/finish-resident-cooking-assets-deploy-20261008/snapshot: resident seat/heal9, Cooking XP coefficient, batch/debit2, approved milestone-art v001 +59PNG/72bindings. Частковий preflight: dual build0errors,533contracts/variant,10QC PASS,1320foreign types preserved/41 accepted types exact,56compiled boundaries,art exact bytes PASS. Client3850E5409500EA860AA1F5DEC5A47C227C0C663CD8C91F8E1562063024B62619 / Server77D5C4AF01343EB193B67707C089BF7859E6D0EF05C97781EBB17A13B5E9FA80. Це не фінальні DLL і не доказ виконаного приручення.
+
+Встановлені версії залишаються resident-patch-no-assets: clientED95E19946D258FF4C709455DE3907FABA538F76FFB7AF15A6CB3D5576E28796 / serverA9D9B6948F260A58550FB40CA58B670851E4C015E2F6D83FFD7BFCAC8BB6DC9C,1.4.123.0. Не збирати весь src-modern, не запускати/не вбивати гру, не змінювати production saves/config/Gold.
+
+Наступна дія: отримати frozen Utility100 native-taming delta + exact hashes + owner evidence; перевірити змінені взаємодії Combat/UX/Gold, інтегрувати лише погоджені файли, перегенерувати pinned manifests/owner type map, виконати нову збірку й перевірки. FINAL_ACCEPTANCE.json створювати лише з фактичних результатів; потім звичайно закрита гра, свіжі protected hashes, резервні DLL і атомарне встановлення client/server з перевіркою SHA/єдиного плагіна/відсутності staging. TEST_UA.md містить native-taming та batch5 матрицю. LIVE і міграційний baseline залишаються UNTESTED/INCOMPLETE.
+
+LATEST: COMPLETE installed via READY_PATCHES_DEPLOY_20261008 including frozen native taming; current authoritative selective installed snapshot is the reserved output snapshot, clientF10AD55C/serverBA25EFA8. Prior pending handoff above historical; see new READY handoff/report for exact SHA and manual tests.

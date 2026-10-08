@@ -1,0 +1,2 @@
+ACTIVE preliminaryreport validation/base-performance-audit-20261007/PRELIMINARY_AUDIT_UA.md. NextownerWorkshop/Utilityprofiling andmanualF2/FPS/GPU/resolutionA/B; no productionmoddisable/worldreset. ConstantFPSnotoneindex93.7mshitch.
+OwnerWorkshop/Utilityperformanceauditsdelivered;readonlyinstantGPU18%at65C/39.46W(samplecontextunknown) recorded. NeedexactbaseFPS/Instances plusoutside/settingsA/B, notcauseclaimfromsample. Runtimebenchmark20%stillpending.

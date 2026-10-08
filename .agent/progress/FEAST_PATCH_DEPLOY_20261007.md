@@ -1,0 +1,1 @@
+COMPLETE100%=20preparation+20build+35combinedQC+25installintegrity. Client0ED34EB6/server42ACD846 verified. Bothbuild0errors/14QC/1268foreign+47owner types PASS;rollback/config/sampledjournal/singleDLL/nopendingPASS. Gameplay UNTESTED baselineINCOMPLETE. See validation/feast-patch-deploy-20261007/DEPLOYMENT_REPORT_UA.md.

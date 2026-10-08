@@ -1,0 +1,10 @@
+# FINAL FROZEN: готовий до root serial integration
+UTILITY35_70_COOKING_DEBIT_GUARD_20261008; SOURCE/STATIC VERIFIED, LIVE UNTESTED.
+Єдиний overlay: validation/utility-cooking-debit-guard-20261008/candidate/src-modern/PeacefulXpPatches.cs.
+ОСТАТОЧНИЙ SOURCE SHA256 EB4F766C9A5E90C5E04BF5DB57BF8B09DC782780AAB4171B9B2AB04F4B26BB0C.
+Client966FEA03CBAE390809FB42F5E17898B43E4A52A69A52757EA3EA800665538E69; server987230596660C8C57CE338F3AE8D689C51F19B50679ABE29792025B43FBCE183. Попередні D94E/2E01/14D8 хеші SUPERSEDED після review correction, не використовувати.
+База installed snapshot ED95E199/A9D9B694, installed-readback-final.csv підтверджує незмінність встановлених DLL. source-comparison-final.csv: один змінений файл; економічні PeacefulXp методи й Crafting класи в тому ж файлі text-identical.
+Fresh dualbuild cooking-debit-final exit0/0errors/provenance32; final contracts532/0errors each; linked-tests-final PASS7600checks; 3759foreignmethods pervariant preserved including branch/switch target indexes; native contracts і cooking-forge PASS. REPORT_UA.md точні сценарії/межі.
+Root bounded source review прийнятний; utility_prep_review FINAL revised guard PASS, no blockers. Nested same-item aggregate debit now excluded from parent delta, inner+outer each award once; fixture covers this. Guard blocks handled incompatibletrue/full/disallowed/noitem/RemoveOneItemfalse/noactualexactdebit/duplicates. Нативний bool і інвентар guard не змінює.
+New observation patch Inventory.RemoveOneItem тільки точний threadscope. No XPScale/resource/cauldron/batch/bonus/firstUnique/Fermenter/metadata changes; coefficient окремий owner overlay. Owner ACK/concurrentcollector/Harmony exception weaving/native auto/manual gameplay LIVE UNTESTED, не expand scope.
+Exact doc/evidence/source reservations RELEASED/FROZEN. No canonical/source install/game/config/save/state writes. Root має інтегрувати цей єдиний source overlay з Resident/XP/Assets і провести own combined checks перед встановленням. Не встановлювати окремі кандидатні DLL замість комбінованої збірки.

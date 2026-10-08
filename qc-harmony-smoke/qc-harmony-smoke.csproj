@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework><ImplicitUsings>enable</ImplicitUsings><Nullable>disable</Nullable></PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="FrameworkHarmonyHost.cs;EmbeddedMonoLauncher.cs" />
+    <Compile Include="..\src-modern\ClubsReserveRules.cs" Link="ClubsReserveRules.cs" />
+    <Compile Include="..\src-modern\MilestoneCrossingRule.cs" Link="MilestoneCrossingRule.cs" />
+    <Compile Include="..\src-modern\ProcessingBatchLedger.cs" Link="ProcessingBatchLedger.cs" />
+    <Compile Include="..\src-modern\WorkshopAtomicDebit.cs" Link="WorkshopAtomicDebit.cs" />
+    <Compile Include="..\src-modern\WorkshopReceipt.cs" Link="WorkshopReceipt.cs" />
+    <Compile Include="..\src-modern\WorkshopRequestLedger.cs" Link="WorkshopRequestLedger.cs" />
+    <Compile Include="..\src-modern\WorkshopLeaseRules.cs" Link="WorkshopLeaseRules.cs" />
+    <Compile Include="..\src-modern\WorkshopDurableRequests.cs" Link="WorkshopDurableRequests.cs" />
+    <Compile Include="..\src-modern\WorkshopSettlementHistory.cs" Link="WorkshopSettlementHistory.cs" />
+    <Reference Include="0Harmony"><HintPath>C:\Program Files (x86)\Steam\steamapps\common\Valheim dedicated server\BepInEx\core\0Harmony.dll</HintPath></Reference>
+    <PackageReference Include="Mono.Cecil" Version="0.11.5" />
+  </ItemGroup>
+</Project>

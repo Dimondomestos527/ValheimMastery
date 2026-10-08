@@ -1,0 +1,9 @@
+# UTILITY35_70_RUN_WORKSHOP_INVESTIGATION_20261005 handoff
+- Current state: canonical 1.4.123; read-only investigation COMPLETE; owner phase remains BASELINE / READ-ONLY.
+- Completed: exact Run phase-2/phase-3 recipe comparison; current-log assessment; WorkshopTiming stage map; preview-versus-authoritative chest trace; future implementation contract.
+- Findings: phase 3 has stronger configured tuning and 63 versus 49 principal particles in three current natural samples, but samples were not controlled and do not prove perceptual separation. Phase 3 is already at the 64-particle cap. No WorkshopTiming transaction exists in current logs, so no latency bottleneck has been measured. Current beam is a pre-craft prediction and violates the new actual-successful-debit feedback contract.
+- Exact next action: only after human authorization, run a controlled VFX comparison and enable/capture WorkshopTiming on both client and server for host/remote scenarios. Do not optimize until stage deltas identify a bottleneck. Implementation then removes preview beams and emits from exact final debit contributors only after confirmed commit.
+- Shared boundary: future settlement contributor payload/RPC requires a SHARED SYSTEM CHANGE declaration, affected-owner review and root integration before editing. Common VFX infrastructure is consumed, not casually modified.
+- Regression: exactly-once debit/result; host/remote; owned/unowned; personal/chest split; multiple contributors; full inventory; cancel/retry/refund/preserve/ambiguous output; reconnect; malformed/stale cosmetic data; no beam from a non-debited chest.
+- Runtime/deployment: no launch, config edit, build, deploy or production-state change. Existing client log/config were read only.
+- Reservations: lifecycle documentation reservations released. No source/shared files held.

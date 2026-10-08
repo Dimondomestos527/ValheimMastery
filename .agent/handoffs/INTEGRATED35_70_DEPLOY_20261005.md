@@ -1,0 +1,11 @@
+# INTEGRATED35_70_DEPLOY_20261005 — final handoff
+Status COMPLETE; explicit user-authorized integrated deployment fulfilled2026-10-05. REGRESSION_INTEGRATION/root, infrastructure policy applied.
+Installed current shared source for MAGIC35_70_TORBA_20261005, UTILITY35_70_EARLY_PREPARATION_IMPL_20261005, COMBAT35_70_CLUBS_PRESENTATION_20261005. No source/gameplay implementation in this coordinator task.
+Client: C:/ValheimModDev/BepInEx/plugins/ValheimMastery/ValheimMastery.dll; SHA256 F9F41E639A2ED33D9B6E369EDDFE88B1634A3DBF25CD468E35E1D28D90FCB4BE.
+Server: C:/Program Files (x86)/Steam/steamapps/common/Valheim dedicated server/BepInEx/plugins/ValheimMastery/ValheimMastery.dll; SHA256 7893F14F8AC2F9D7DE3EC08B18B2DF80682F7D056F543E98334CF1DB903D9E06.
+Version1.4.123.0. Fresh dual Build123/provenance PASS;19 groups all exit0;403 Harmony contracts per variant0errors.204 source inputs unchanged; complete exact manifests in validation/integrated35-70-deploy-20261005.
+Rollback: task-local rollback/Client-ValheimMastery.dll (old839D03955995ECBC5E3B80698D0E8BB9CE86A6C5072183F38868D74B15EFD409) and Server-ValheimMastery.dll (old95DEB8ADD0629FC7E37D1C42F9CFBFDED53688113274CB265164A4259B47C241); after verification intact. First replacement invocation failed on null backup path, both originals restored/hash-verified; corrected invocation succeeded. No gameplay failure inferred.
+Production worlds/characters/config/Gold/Workshop saves untouched. Processes absent; no game/server start. One Mastery DLL per plugin tree and no pending files. Canonical build/runtime and migration baseline dated supplements updated; migration baseline remains INCOMPLETE.
+Required future gameplay remains owner-scoped: actual Unity registration; Torba visual/survivability/cargo; Workshop latency/concurrency/reconnect/restart; combat VFX/SFX/appliedHP and shield collisions. Run/chest-flow new presentation and hill rush fix were not implemented by owners and are excluded from claimed delivered changes.
+Minimal next reads: AGENTS/profile, this task/progress/handoff, validation/integrated35-70-deploy-20261005/DEPLOYMENT_REPORT_UA.md and installed manifests; then relevant owner live steps. Do not infer old gameplay evidence applies to these new hashes.
+Exact next action NONE under completed installation scope. New DLLs load on next normal launch. All reservations RELEASED.

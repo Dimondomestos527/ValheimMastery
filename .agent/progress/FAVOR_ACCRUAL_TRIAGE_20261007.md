@@ -1,0 +1,1 @@
+COMPLETE boundedtriage100(30+50+20). Exactcommandsverified;tracefalse/resetconfirmed;XPeventsnotawardproof. RuntimeaccrualregressionUNTESTED pending manualvmfavortraceon/show beforeafternewpiece/craft/upgrade.

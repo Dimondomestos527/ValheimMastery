@@ -1,0 +1,5 @@
+﻿# UTILITY100_IDOL_PIPELINE_INSTALL_20261006
+COMPLETE / INSTALLED / NOT LIVE VERIFIED. Weighted25baseline+35preservation+30install/readback+10docs=100. Human explicitly authorizedinstall.
+Client285C9CEA46F1AA8DB8DB37E2E99D137CDAD2DB801F156859100113CC2B035F1C;Server15FB30D6AF4BC43E87029C7CC4B7ED42062992167BF30BF4E79F2AB8040F167A;version1.4.123.
+Base installedpolish161130B0.../06417C3B... matched frozen baseline; preservation1080foreigntypes each confirmed. Cumulative reviewedmemory-index+pipeline shipped, GoldboundedACKapproved. Configsunchanged, backupsverified; no world/profile/Gold/Workshop state edits, no processlaunch. Exactsource/target/backup hashes validation/utility100-idol-pipeline-install-20261006/installed.csv;report/rollback/Install.ps1 retained.
+NextuserLIVE: BlackForestplacement, toggles/hitch, camera versusrotation/menu/selection cancel, nativepayment/freeconstruction/ward/workbench andtiming logs. Firstvalidateactiveinstalledhash beforediagnosis ifanotherchatreplacesDLLs. No claim all lag eliminated. Reservationsreleased.

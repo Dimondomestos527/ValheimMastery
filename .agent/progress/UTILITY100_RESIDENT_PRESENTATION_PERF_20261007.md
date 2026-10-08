@@ -1,0 +1,1 @@
+QUEUED0/100. Requirements/evidence pointers durable. No implementation/review/live yet, no source reservations. Swamp/Mountain candidate separate; shared HUD review authorization pending coordinator.

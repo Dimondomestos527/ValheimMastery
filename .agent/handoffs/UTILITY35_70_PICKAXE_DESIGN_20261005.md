@@ -1,0 +1,9 @@
+# UTILITY35_70_PICKAXE_DESIGN_20261005 handoff
+- Source authority1.4.123, src-modern; no gameplay changes/build/install.
+- Completed: source20% ordinary/20% conditional forced=4% nominal eligible-hit frequency (ForceProc bypasses both); lethal1-2 neighbours3m sorted bounds; native cascade and2s witness timing investigated by bounded read-only scout. Native AllDestroyed matches AllBroken; do not revive unsupported surviving-positive-health explanation.
+- Native key: original nonlethal DamageArea leaves RPC_Damage support scan disabled even if proc extra DamageArea removes support. Later qualifying lethal original hit can trigger cascade beyond witness expiry. CheckForUpdate periodic refresh is not support scan.
+- Proposed A:10% ordinary,1 guaranteed extra break,5% conditional collapse=.5% nominal per hit; still fragile to support cascades. Proposed B recommended:20% ordinary,50% incoming-hit damage to1-2 neighbours instead guaranteedkill,5% conditional collapse=1% nominal per hit. All numerical values proposed, not approved/measured.
+- Presentation: current collapse recipe rock destruction/Eikthyr stomp/native thunder flash/lightning accent/thunder; confirmation/attribution must cover actual relevant support resolution once. No indefinite old-proc attribution; owner/native outcome must drive cue. No asset substitution selected.
+- Exact next action: obtain user preference for mechanic, then scoped implementation with exact reservations; shared feedback mutation declaration/review if required. Include tests original lethal/nonlethal, proc supportloss immediate/delayed, nearly exhausted vein, forced collapse, ForceProc state, owner/concurrency/cueonce.
+- Minimal files: matching task/progress; Pickaxes70SuperHit.cs; relevant recipe and feedback helpers.
+- Protected runtime state untouched; documentation reservations RELEASED. COMPLETE read-only investigation, DESIGN ONLY proposals; not LIVE VERIFIED.

@@ -1,0 +1,9 @@
+# UX_SIX_TOTEM_MODELS_20261008_01A11669
+ACTIVE. Human requests six unique real 3D models based on native guard_stone plus thematic activation VFX, preserving Valheim/biome style.
+Scope isolated model/VFX authoring and previews, not canonical source integration, runtime install, gameplay/stat/timer changes.
+Six profiles verified current MasterIdolProfiles: Meadows, BlackForest, Swamp, Mountain, Plains, Mistlands; all clone guard_stone per MasterIdolPieces. Activation0.85s brightness +0.35–1.15s pulse per ToggleRules; biome palette verified MasterIdolVisual.
+Reserved BEFORE WRITE: own task/progress/handoff; asset-root references/vm_totem_native/v001/**; drafts/vm_totem_{meadows,blackforest,swamp,mountain,plains,mistlands}/v001/**; comparisons/vm_six_totems/v001/**; handoffs/vm_six_totems_v001/**; manifest.csv/README.
+Root only COMPLEX. No new software installed or external service chosen. Current no Blender/bpy/trimesh/pyrender; NumPy/Pillow/UnityPy already available. Inspect native mesh/UV first; create real mesh files and renders from geometry, not claim generated illustration is model. Effects previews isolated, not LIVE Unity-verified. Sound not in scope.
+World/radius/colliders/ZDO state unchanged. Final art/integration requires human approval of exact models/effects.
+Reserve comparisons/vm_six_totems/v002/**; drafts/vm_totem_activation_{meadows,blackforest,swamp,mountain,plains,mistlands}/v001/**; handoffs/vm_six_totems_v001/finalize_models.py and MODEL_VERIFICATION.json before write. v002 preview refines unique activation motion only; six GLB models v001 immutable.
+Human revision: Swamp and BlackForest too similar; add biome detail to all six while keeping direction. Reserve drafts/vm_totem_{meadows,blackforest,swamp,mountain,plains,mistlands}/v002/**; comparisons/vm_six_totems/v003/**; handoffs/vm_six_totems_v002/**. No integration. Preserve all v001 models and old previews.

@@ -1,0 +1,13 @@
+# UTILITY35_70_RUN_PHASE2_SOFTEN_20261006 handoff
+- COMPLETE SOURCE/STATIC CANDIDATE; LIVE_TEST_REQUIRED appearance. No installation/runtime authorization; all reservations RELEASED.
+- Exact scope: NativeMovementPulse.Schedule phase2 ring alpha .55->.45 only; all others unchanged.
+- Candidate must start frozen installed Gold9 snapshot; pending Utility100/Gold10/paidCombat excluded.
+- Implemented exact scalar edit in canonical and small overlay. No other source/QC/project changes. Phase2 ring alpha now.45 rather than.55 (~18% configured opacity reduction); hue/shape/size/count64/lifetime unchanged,phase1off/phase3.9/airjump.72/streak32/64/64 preserved.
+- Evidence base validation/utility-run-phase2-soften-20261006/; REPORT_UA.md contains exact source/build/QC/read-only runtime evidence and player retest. Frozen input snapshotGold9 Client54E5313C469236CE9F65A5E7B8FA90B58A5A2EEB67A7F69A4ABB26C931B870F3/ServerFC5719707775101170C34A9C91A5C9FF4CCDAEDF3E73F9599CE694F2817AA538.
+- Overlay: overlay/NativeMovementPulse.cs; oldsourceDA7D5B4125930D113668B57A84475006007D82F1AC4833CF3BE29F393B3A3009 ->new175CF49948BD9A9405904314CADDA107BAE33952FC77C116993059A1AE2212C8, OVERLAY_MANIFEST.csv.275/276 source files byte-identical frozen; only this file changed. Canonical other-owner pending files NOT in snapshot.
+- Client candidate snapshot/bin/Perks123Client/ValheimMastery.dll SHA256 CF659960E2B611928CAE98796C2F8B4D56FFC9FA8D6CB4C81BAA8C4523E1999F.
+- Server candidate snapshot/bin/Perks123Server/ValheimMastery.dll SHA256 68A89449E994EC6DD4C399CF4445A88A41A7214D551860C8073546C22F62CD79.
+- Dual Build1230errors/11existing warnings each; provenance32fingerprints PASS. Full IL preservation each1271types,1270unchangedtypes/4080unchangedmethods,1method/1float changed. Existing native movement checks17 andHarmony targets499/0errors each; finalqc6/6exit0. Root serial literal/source/preservation review; SIMPLE no agents.
+- Instance safety: particle startColor only, native material bindings untouched; pool Capture/Restore, deferred mute/EmitOnce, cleanup, VFX guards/headless relay unchanged. Pixels/day-dark/camera and postinstall runtime NOT tested; retest instructions in report.
+- Installed DLLs remain initial hashes (installed-read-only.csv); no install/launch/config/world/character/state writes. Utility100/Gold10/paidCombat excluded by exact baseline source + foreign IL preservation.
+- Next coordinator action: use exact overlay only after baseline/sourcehash match, or revalidate combined accepted changes before rebuild; install only when separately authorized. Player compare phase2/3 daytime/dark background and camera angles, reset/pool-reuse/airjump/VFXoff/dedicated relay. No follow-up chat sent; report available through task files.

@@ -1,0 +1,5 @@
+# IDOL_RELOAD_FAILURE_20261006
+REGRESSION_INTEGRATION. Userreports idol alreadyOFFatload/switchdenial screenshot afterfeedbackpatch; laterrequests5xAtgeircelebrationfeathers. Existingexplicitownerchatdelegation authorization persists.
+Reserve own3records,validation/idol-reload-failure-20261006/**,datedbaseline/knownissueappendices only. Readonly productionlog/journals copiedforevidence, no resets/migration/source/build/deploy/launch/kill. OWNERUtility100, affectedGoldCoreboundedfinancialreview; Combat100ownfeathertuning.
+Phases evidence40,classification20,ownerhandoff30,records10. FAILURE notfixed bytriage; baselineINCOMPLETE, migrationcauseUNTESTED.
+BoundedtriageCOMPLETE40evidence+20classification+30ownerhandoff+10records=100%;actualbug remainsFAIL/UNRESOLVED. Utility100prioritymessageDELIVERED;Combat100fivefoldfeathersDELIVERED. GoldCoreoutboundauditREJECTED byautomaticapprovalreview: priorhumanpermission scopedfourlistedchats, GoldCoreexplicitauthorizationmissing; asyncquestionpending. No retry/indirectworkaround/source/protectedstate changes. Report validation/idol-reload-failure-20261006/TRIAGE_UA.md; baselineINCOMPLETE. OwnrecordreservationsRELEASED.

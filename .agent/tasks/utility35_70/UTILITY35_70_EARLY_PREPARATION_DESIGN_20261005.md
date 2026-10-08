@@ -1,0 +1,11 @@
+# UTILITY35_70_EARLY_PREPARATION_DESIGN_20261005
+- Owner/profile: UTILITY_35_70; root integration.
+- Goal: оцінити підготовку ресурсів під час таймера крафту, grace після cancel, menu-based building-resource prefetch/reservation; запропонувати варіанти за latency/correctness/concurrency cost.
+- Phase/status: BASELINE / READ-ONLY; COMPLETE design/source assessment only.
+- Acceptance: current timer/cancel path verified; cache versus ownership lease versus quantity reservation distinguished; bounded recommended craft/build lifecycle; alternatives and final-RTT limitation recorded; three lifecycle records read back.
+- Exact write reservations: this file; .agent/progress/UTILITY35_70_EARLY_PREPARATION_DESIGN_20261005.md; .agent/handoffs/UTILITY35_70_EARLY_PREPARATION_DESIGN_20261005.md. No source/shared/config/runtime writes.
+- Relevant source: WorkshopRemoteCraft.BeginSelectedCraft/AllowCraft/Tick/CraftCancellation/CancelPendingCraft; WorkshopStationPrewarm/StationProof; WorkshopBuildBridge/BuildRay; WorkshopResourceReservation; previous COLD_ACTION_ANALYSIS task.
+- Non-goals: implementation/build/launch/deploy; production state; pickup/drop resource creation; blanket chest/network locks; native hook claims without inspection.
+- Shared systems touched: NONE. Future protocol/event/persistence changes require SHARED SYSTEM CHANGE before mutation and affected-owner review/root integration.
+- Required future regression: complete/cancel/resume/change recipe during async prepare; stale/out-of-order tokens; personal-inventory changes; rights/stock/ownership changes; multiple players; menu idle/spam; crafting35 preservation; full inventory; build-position drift; prepared token expiry/reconnect; exactly-once output/debit.
+- Reservations: released after final readback.

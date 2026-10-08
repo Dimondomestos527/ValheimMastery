@@ -1,0 +1,2 @@
+# Progress
+COMPLETE trace20/20; implementation40/40; verification30/30; handoff10/10=100% source/static scope, not runtime fix acceptance. Four owned files integrated/readback PASS.16model(including300weight cases),7compiled+43framework checks each variant PASS; dual native builds32/4 provenance PASS. Native/persistence reviews PASS. Native free-world path retained, workbench required, recipe2–8 ceilings with <=100 actual-base-weight budget. Gold dependencies synced before finalbuild; unrelated Combat drift preserved. No production changes. Reservations RELEASED.

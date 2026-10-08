@@ -1,0 +1,1 @@
+COMPLETE100%=evidence20/acceptanceQC45/install25/report10. InstalledClientE9D80254/Server904EE306 verified exact hashes androllback/protectedjournals/configs/singleDLL/nopending. Goldexact7boundaryreviewPASS.10QCgroups/522contracts/identity76+15compiled/1288foreign compiledtypes/283foreignsourcePASS. No launch. GameplayUNTESTED baselineINCOMPLETE.

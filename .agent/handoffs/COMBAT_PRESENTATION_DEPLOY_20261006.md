@@ -1,0 +1,1 @@
+COMPLETE INSTALL/STATIC VERIFIED;15%(1/1)+50%(4/4)+25%(3/3)+10%(1/1)=100% scoped installation;reservations RELEASED. FourfocusedQC PASS/1175unrelatedtypes unchanged;Utility preserved. No gameplay/liveclaim; baseline INCOMPLETE. Report validation/combat-presentation-deploy-20261006/DEPLOYMENT_REPORT_UA.md.

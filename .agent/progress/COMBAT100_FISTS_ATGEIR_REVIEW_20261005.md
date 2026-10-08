@@ -1,0 +1,12 @@
+# COMBAT100_FISTS_ATGEIR_REVIEW_20261005 — progress
+- Статус COMPLETE для retrieval/source/design review. Implementation не розпочато.
+- Exact reservations: тільки5 документів, перелічених у task; після final readback RELEASED. Source/shared mutations NONE.
+- Фази20/40/25/15; accepted1/1,2/2,1/1,1/1 =100% саме review scope.
+-20%: відновлений12275-character brief; обидва прямі user attachments ідентичні після newline normalization; чинні cooldown rules та human capacity=threshold=C збережені.
+-40%: два bounded read-only scouts завершили Fists/native equipment/lethal/persistence та Atgeir/native window/projectile/SE/asset review. Native server DLL identity/MVID/SHA у звіті; client parity/live unknown. Root перевірив Gold protocol, food/movement/stamina/shared dependencies.
+-25%: root report містить усі8 requested outcomes; classification catalog slots CATALOG ONLY, new mechanics DESIGN ONLY; proposed architecture явно відділена від human approvals/source facts.
+-15%: full report readback exact, preserved brief збігається з definitive user attachment; task/progress/handoff завершені й final five-file readback recorded. Report SHA256 AF14F4AE9FAFBF3EAA272714027252C2197E3BD357DA73AEC4C0A31882D568C6.
+- Додатковий bounded Fists reviewer stress-tested reactive escrow proposal: actual durable owner write, terminal revoke, crash-safe settlement, cross-patron cooldown epoch, unknown recovery і trusted activation-time gates лишаються до майбутньої implementation.
+- Gold owner Mastery — Gold Core / Pantheon, thread01a1087b-f425-7c53-b561-8c1bb30f18b8, отримав дозволену користувачем пантеонну частину: shared combat admission/design dependencies та report path. Повідомлення явно не authorizes implementation.
+- Не виконано source edits, build/tests/runtime launch/deploy/config/save/schema/package changes. Gameplay regression DEFERRED by baseline scope.
+- Наступний крок поза завершеним review: за explicit implementation authorization новий task із drift check, exact shared reservations, Gold/network/equipment owner review; presentation selection перед відповідною implementation.

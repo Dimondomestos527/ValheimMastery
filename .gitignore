@@ -1,0 +1,18 @@
+**/bin/
+**/obj/
+.nuget/
+.dotnet-home/
+validation/
+artifacts/
+.mastery-updates/
+**/__pycache__/
+*.pyc
+*.log
+*.cfg
+*.vmi
+*.bin
+*.db
+*.fwl
+*.old
+.env*
+# Only explicitly reviewed distribution ZIPs belong in Git.

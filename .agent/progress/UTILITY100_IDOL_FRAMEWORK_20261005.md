@@ -1,0 +1,5 @@
+# UTILITY100_IDOL_FRAMEWORK_20261005 progress
+- COMPLETE / SOURCE INTEGRATED / STATIC VERIFIED. Scope2/2=20%; implementation5/5=50%; verification2/2=20%; docs/handoff1/1=10%. Total100% цього обмеженого етапу каркаса, не LIVE і не всі здібності ідолів.
+- User selected guard_stone без ward; 9 owned files integrated/readback verified. Recipes provisional; powers/travel/Ashlands absent. Second native build click required after permit.
+- 43 model assertions,43 compiled assertions per variant,34 Gold100 assertions per variant PASS. Client/server builds PASS (7 existing warnings/0 errors),32/4 reference provenance. Native/persistence reviewers cleared prior blockers; Gold accepted current-world guard ECB71042920D4B274F5B17E395867CCE1BE61D75FA28E06916F39481514BE71D.
+- Evidence validation/utility100-idol-framework-20261005/acceptance.txt,REPORT_UA.md,integrated-files.csv. Concurrent foreign Combat100FavorService change preserved, excluded from frozen build claim. Exact reservations RELEASED. No deployment/runtime/production state changes.

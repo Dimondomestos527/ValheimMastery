@@ -1,0 +1,3 @@
+# ACTIVE — human review pending
+Source inventory20/20; six foundation masters30/30; surface/icon/scale review22/30 (native idol icons pending); provenance/handoff20/20.92/100 for scoped foundation; not full UI integration. All images shown inline; no runtime/source mutation. Pending native idol assets and Unity validation.
+Review revision v002 visually inspected: all five sheets shown inline; alpha-bound cropping corrected transparent padding; symbol-font fallback shows six MAUL diamonds; tooltip/card labels fit frame safe area. Raw generated masters preserved. Full source bindings recorded; native idol icons and live Unity validation remain pending.

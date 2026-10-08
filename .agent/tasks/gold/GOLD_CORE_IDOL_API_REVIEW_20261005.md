@@ -1,0 +1,10 @@
+# GOLD_CORE_IDOL_API_REVIEW_20261005
+
+Bounded guard rereview 2026-10-05 COMPLETE / SOURCE REVIEW COMPLETE. Own task/progress/handoff reservations RELEASED. Candidate remained read-only; no shared source change. GoldWorldReady guard closes stale-session/world cached-ledger blocker at source level for native synchronous fresh/held permit calls; no compile/runtime acceptance inferred. Updated verdict in matching handoff.
+
+Owner/profile GOLD_CORE/root, .agent/profiles/GOLD_CORE.md. NORMAL/root-only bounded read-only shared-consumer review under ongoing human-authorized Gold implementation. Utility100 supplied concrete idol candidate and requested Gold boundary review; no additional gameplay/implementation/runtime authorization inferred.
+Goal: hash-bound verdict on fresh Crafting100 unlock authority, GoldCharacterSave helper/rollback contract and no Favor spending; distinguish own world admission store from Gold transactions.
+Exact write reservations: own task/progress/handoff only. Read-only candidate MasterIdolPlacement/Journal/AdmissionStore/WorldRegistry under validation/utility100-idol-framework-20261005/snapshot/src-modern; current GoldCraftingService/Ledger/GoldCharacterSave. No candidate/canonical writes/builds/launch/save/config/deploy. No external Utility chat messaging authorization; return owner-readable handoff as requested.
+Shared systems reviewed: Gold read-only unlock readiness and native character save helper. No shared-system mutation. Full native placement/Workshop/payment/store crash proof remains Utility/its reviewers.
+Acceptance: actual API/source review, current-world readiness caveat, Persist(false) outcome caveat, fingerprints and exact followup. Phases20%source identity(1unit),40%Gold boundary(1unit),20%persistence contract(1unit),20%handoff/readback(1unit). Review100% does not mean candidate integration accepted.
+Presentation N/A. Status COMPLETE / SOURCE REVIEW COMPLETE; own document reservations RELEASED after readback. Narrow API shape compatible; final authority integration requires current world/session binding proof or guard.

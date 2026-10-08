@@ -1,0 +1,17 @@
+{
+  "schema": 1,
+  "product": "ValheimMastery",
+  "variant": "Client",
+  "version": "1.4.123-20261008",
+  "archive": "client-1.4.123-20261008.zip",
+  "archive_sha256": "8d928b4febb9e80c29bfb0fa2b9eb6c825bcfa48cf3e6e671e99a14f328725b6",
+  "files": [
+    {
+      "path": "ValheimMastery.dll",
+      "size": 13204480,
+      "sha256": "f10ad55cc838217d1782c23ee18a8f80f254d3b3ecc1dd8a3194aab3707d5751"
+    }
+  ],
+  "source": "baselines/installed-20261008",
+  "validation": "STATIC PASS; LIVE UNTESTED; Mac runtime UNTESTED"
+}

@@ -1,0 +1,2 @@
+CurrentClientE9D80254. Seevalidation/favor-accrual-triage-20261007/TRIAGE_UA.md. Nextmanualtraceon/show/newaction/show;readmatchingGoldFavorTrace andsource XP/gates. No scriptbonus executed,Trace defaultchange notrequestedasimplementation. OwnerGoldsharedawardandUtility35_70buildXP/reuse;no silentotherdomainfix.
+Automaticdefaultaward alreadyimplemented/sourcePASS,Traceonlylogs afterGain. ConfigCrafting100/GoldCore enabled. No codefixjusttogglingTrace; verifybefore-afteractualledger andvalidationgate ifruntimegainmissing.

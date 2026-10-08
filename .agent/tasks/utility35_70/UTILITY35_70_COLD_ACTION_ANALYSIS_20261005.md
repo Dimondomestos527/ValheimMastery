@@ -1,0 +1,12 @@
+# UTILITY35_70_COLD_ACTION_ANALYSIS_20261005
+- Owner: UTILITY_35_70; root integration.
+- Goal: розібрати нові парні client/server WorkshopTiming тести, визначити можливість прискорити перші craft/build та тимчасово зберігати підготовку попередніх building pieces; перевірити здійсненність вибраного Run VFX 32/max/max+vertical ring.
+- Phase: BASELINE / READ-ONLY. Current request authorizes log/source investigation and a design proposal; no explicit implementation-phase switch.
+- Acceptance: correlated transaction stage table; observed bottleneck versus inference distinguished; bounded cache/invalidation proposal; concrete native-asset/count/orientation Run contract; task/progress/handoff readback.
+- Exact write reservations: only this task and matching .agent/progress/UTILITY35_70_COLD_ACTION_ANALYSIS_20261005.md and .agent/handoffs/UTILITY35_70_COLD_ACTION_ANALYSIS_20261005.md. No source/config/runtime write reservations.
+- Scope: current client/server logs; WorkshopTiming, StationProof/Prewarm, ChestLease, WorldRecords/RecordStore, RemoteCraft; native Run/double-jump presentation and canonical asset workflow.
+- Non-goals: chest-flow implementation (user deprioritized); build/deploy/launch; source changes; cached authorization/stock/debit bypass; full multi-player acceptance.
+- Shared systems touched: NONE. Future shared infrastructure mutation requires SHARED SYSTEM CHANGE before write and affected-owner review.
+- Complexity: NORMAL bounded read-only investigation, root-only.
+- Required future regressions: cold/warm/switch A-B-A/build/craft; concurrent player/access/stock/ownership changes; full inventory/cancel/retry/exactly-once; cache expiry/reconnect; Run phase transitions/pool reset/native ring visibility/headless.
+- Status: COMPLETE for evidence/design investigation; implementation remains outside current phase.

@@ -1,0 +1,13 @@
+# GOLD_CORE_STATUS_MULTIBAR_20261005 progress
+- Status COMPLETE for authorized source/static/report scope. Reservations RELEASED.
+1. Source/evidence/status report —35%;1/1 accepted. Current mechanics/source paths, historical vs fresh test evidence, critical live matrix and mock commands in GOLD_STATUS_AND_TEST_PLAN_UA.txt.
+2. Local multi-bar test UI —30%;1/1 accepted. Separate Tyr value/image/text, default off; exact finite0..1000 parser; current debug/Gold/unlock/local-player/session guards; independent Update invalidation; default layout restores. Original Gold/action semantics unchanged.
+3. Verification/review —25%;8/8 accepted: isolated Client/Server builds2; pure ledger+supplemental cap/transactions2; Gold100 Client/Server2; read-only UX/debug review+scoped source/compiled isolation2. Evidence verification-results.csv,ui-fixture-compiled-contracts.csv,UX_DEBUG_REVIEW_UA.txt,gold-gameplay-preservation.csv. Required scoped checks PASS; no universal full-suite/live PASS.
+4. Final report/handoff —10%;1/1 accepted. Ukrainian report/readback/matching records/runtime limits/next action complete.
+- Progress35+30+25+10=100% of authorized candidate/status task; not100% Gold gameplay/recovery or live UI acceptance.
+- Source capture:207 C#,209 manifest entries, stable at copy; unrelated3 magic files drifted during build (concurrent-source-drift.csv). Own2 source files match tested snapshot; seven Gold gameplay/Favor/receipt/save files unchanged from prior integrated snapshot. Do not claim whole canonical repository unchanged/current combined build.
+- Test results: both Build123/provenance PASS; ledger11 managed groups PASS; receipt/managed recovery PASS; supplemental999→1000/player-isolation PASS;21 Gold100 structural checks per variant PASS; compiled fixture nonmutation contracts PASS. No assertion rewritten to obtain PASS.
+- Read-only reviewer initially requested independent invalidation and culture formatting; root applied both before snapshot/build/final approval. No blocking findings remain.
+- Changes: GoldPantheonUi.cs; PerkDebugService.cs one Vm alias; this task/progress/handoff + task-local validation sources/scripts/report/logs. Shared mutation declaration in task; root integrates.
+- Runtime: no client/server launch, install, packaging, production config/world/character/Workshop/Gold state write. New mock not installed. Live matrix LIVE_TEST_REQUIRED.
+- Exact next action: coordinated fresh integration/build from accepted latest owner source if deployment requested; install matching client/server only with explicit scope; run mock UA/English/resolution/scale/lifecycle tests, then separate Gold authority/crash matrix on disposable state.

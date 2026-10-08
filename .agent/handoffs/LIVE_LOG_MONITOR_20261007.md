@@ -1,0 +1,1 @@
+Closed readonly capture. See SESSION_REVIEW_UA.md. Next integrate Utility35/70 EOF/Master Feast coverage and Utility100 shutdown cleanup/reentry evidence; no restart/deploy authorized by this task. Baseline not complete.

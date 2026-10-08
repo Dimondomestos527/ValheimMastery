@@ -1,0 +1,1 @@
+COMPLETE boundedtriage100%=log30/source30/ownerhandoff30/report10. 4switchadmission-outputdenials+9placementfavordenials. Protectedrecordsreadcopy stable/matchpreinstall. Utility100 andGoldCore messagesDELIVERED. RuntimeFAILunresolved; nativeidentityremapcauseUNTESTED; no source/productionmutations. See TRIAGE_UA.md.

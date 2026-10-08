@@ -1,0 +1,2 @@
+ACTIVE25/100 native cause confirmed. Reservations held; implementation staged. Livevalidationpending, nojournal/financialwrites.
+COMPLETE scopedownerprep100/100 (25nativecause+35implementation+30static/boundedreviews+10handoff). SOURCE/STATIConly; actualspecificGUID/fullnativepayout/reload UNTESTED. Sevenreservations RELEASED; candidate/report validation/utility100-idol-native-reload-identity-20261007.76controlled+15compiled/522nativeeach0errors;1288foreigntypes/283foreignsources unchanged;installedunchanged. Rootfinalacceptance/explicitinstall/livetestnext.

@@ -1,0 +1,5 @@
+# Next patch inclusion — Cooking XP
+
+Human authorized acceleration after slow Cooking report. Task COOKING_XP_NEXT_PATCH_20261007 defines exact fractional-level curve2×through35,linear3×at70,4×at100. Pending patch must integrate XP-owner frozen candidate once, plus bounded Utility action coverage evidence. Do not deploy now or forget this item when resident follow-up is ready. Assets remain excluded under current next-patch scope.
+
+Start candidate from installed resident snapshot. XP owner writes isolated shared formula candidate; Utility35/70 audits native cauldron/fire/oven/fermenter author/success/failure/batch/bonus attribution read-only, preserving no-overlap. Additional resource weighting is audit-first and no arbitrary new resource coefficients; existing cost valuation retained. Requires source gates+dual build/native contracts/preservation/readback before root integration. Live XP rate manual tests remain UNTESTED until next installed patch tested. Owner messages are recorded in current chat, task durable.

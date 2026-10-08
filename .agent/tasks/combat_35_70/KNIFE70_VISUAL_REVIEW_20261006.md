@@ -1,0 +1,7 @@
+# KNIFE70_VISUAL_REVIEW_20261006
+Owner COMBAT_35_70/root. Human asks review activeKnife70visual and options moreinteresting/Valheim-native/readable. READ-ONLY gameplay/source/build/deploy; no launch/stateedit.
+Exact reservations: own task/progress/handoff and validation/knife70-visual-review-20261006/** ONLY. No shared/canonical runtimewrites. SHARED SYSTEM CHANGE:NONE. Root-only NORMALreview.
+Source Knife70ShadowStrikeService/VisualService/activeEchoVisual; historical#iffalse customplayerreplica excluded; inspectactualinstalledIL. Baseline1.4.123; currentinstalledSHA mustverify ratherthanuseoldturretbaseline.
+Acceptance: activeeventtiming/assets/sourcevscompiled/historicalseparation, usabilityriskreview,2native-onlydesignchoices withrecommendeddirection andproposedbudgets; no LIVEclaim withoutcurrentplayerfootage. Weights100: activeevidence40,issues30,options20,handoff10.
+Presentationreviewplan: retainexistingnativeWraithresourceforcanonicaldirection; confirmmanifestidentities. PreserveSFXchoiceunlesshumanchoosesreplacement. Any proposedtargetfollowing/confirmedhitnetworkpayload needsfutureSHARED SYSTEM CHANGE review beforeimplementation. No importedassets or customshader proposal. Needactualgameobservation forsize/palette/visibility/audio/remotequality acceptance.
+FINAL COMPLETE100/100reviewonly. AllreservationsRELEASED. Source/staticactualinstalledWraith/manifestreviewdone;2nativeonlydirections withrecommendedAandproposedbudget. Evidence ownreview/ILlogs; no source/build/deploy/statechanges. Newvisualchoicependinghuman, LIVEunobserved.

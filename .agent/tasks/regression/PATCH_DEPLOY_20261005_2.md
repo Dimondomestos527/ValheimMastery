@@ -1,0 +1,12 @@
+# PATCH_DEPLOY_20261005_2
+Owner REGRESSION_INTEGRATION/root; profile and infrastructure policy read. Human: install latest patch; follow-up explicitly includes Pantheon. Existing100 scope retained.
+Accepted inputs: Magic fire orbit2 files; Combat native hammer/mace5files and clubs descriptions; Crossbows35 five source files and crossbow content; Pantheon diagnostic UI2files. Crossbows70 turret DESIGN ONLY/not installed; Combat100 latest tasks READ ONLY/no source patch.
+No gameplay implementation by coordinator. Snapshot starts exact prior installed selective snapshot; overlay accepted17 files, never deploy owner full DLL with unrelated changes.
+Exact reservations: own .agent/tasks/regression/PATCH_DEPLOY_20261005_2.md, .agent/progress/PATCH_DEPLOY_20261005_2.md, .agent/handoffs/PATCH_DEPLOY_20261005_2.md; validation/patch-deploy-20261005-2/**; client/server ValheimMastery.dll and ValheimMastery.PATCH_DEPLOY_20261005_2.pending; docs/architecture/BUILD_RUNTIME_BASELINE.md and docs/validation/1.4.123_POST_MIGRATION_BASELINE.md dated supplement.
+SHARED SYSTEM CHANGE by coordinator NONE: accepted/reviewed owner content/scaling/UI only. Source/project/global QC/caches remain read only. Original owner tasks have released exact source reservations; Crossbows70 architecture decision remains open and unimplemented.
+Phases100 fixed: readiness15%(1unit); snapshot+dualbuild+QC+preservation50%(4units); backup+install+integrity25%(3units); report/docs/handoff10%(1unit).
+Acceptance: approved hashes, distinct dualbuild/provenance, current focused Magic/Combat/Crossbow/Pantheon+retained contracts, strict unrelated type preservation incl already installed100, task-local stale patch123 expectations reconciled or separately classified; both DLL rollback/atomic/hash/oneplugin verification.
+Runtime: client/server absent at scope check; preserve stopped state, no launch or manual production state writes. If process starts before install, defer replacement until safe normal shutdown, no forcekill.
+Regression HEADLESS VFX_SFX OWNER_AUTHORITY NETWORK RECONNECT SERVER_RESTART SAVE_ORDER; live UI/gameplay/transport/persistence UNTESTED, baseline remains INCOMPLETE.
+Status ACTIVE reservations HELD. No agents/messages/release packaging/Git/memory updates.
+FINAL COMPLETE installation / STATIC VERIFIED; reservations RELEASED. All weighted units accepted100%, current-SHA gameplay UNTESTED, baseline INCOMPLETE. Exact report/canonical supplements/handoff read back. Source/core protected; no runtime launch.

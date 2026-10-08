@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net8.0</TargetFramework></PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\src-modern\GoldPatronLedger.cs" Link="GoldPatronLedger.cs" />
+    <Compile Include="..\src-modern\GoldPatronState.cs" Link="GoldPatronState.cs" />
+    <Compile Include="..\src-modern\GoldCraftingLedger.cs" Link="GoldCraftingLedger.cs" />
+    <Compile Include="..\src-modern\GoldReceiptPolicy.cs" Link="GoldReceiptPolicy.cs" />
+    <Compile Include="..\src-modern\GoldCooldownPolicy.cs" Link="GoldCooldownPolicy.cs" />
+  </ItemGroup>
+</Project>

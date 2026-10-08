@@ -1,0 +1,6 @@
+# GOLD_CORE_FISTS_ATGEIR_BRIEF_LOOKUP_20261005
+- SIMPLE read-only retrieval; прямий людський запит передано Combat100 thread01a1087c-6880-75e3-82ff-9e8813515094. Знайти лише вже наявні original Fists100/Atgeir100 briefs, source identity та approved decisions; не вигадувати mechanics. Основна Favor economy задача збережена.
+- Exact write reservations лише own3: .agent/tasks/gold/GOLD_CORE_FISTS_ATGEIR_BRIEF_LOOKUP_20261005.md; .agent/progress/GOLD_CORE_FISTS_ATGEIR_BRIEF_LOOKUP_20261005.md; .agent/handoffs/GOLD_CORE_FISTS_ATGEIR_BRIEF_LOOKUP_20261005.md. Source/Combat100 records/runtime/shared state READ-ONLY.
+- Обсяг пошуку: доступний контекст цього Gold owner; rg exact aliasesFists100/Atgeir100/Polearms100/українські варіанти у .agent,docs/gold,docs/exports; поточна inventory35 непінованих чатів плюс pinned. Не читати unrelated chats або видавати catalog за original brief.
+- Acceptance weights: scope20%(1unit),lookup60%(3units:context,repo,chatinventory),handoff/readback20%(1unit). Негативний bounded lookup є результатом пошуку, не доказ відсутності тексту всюди.
+- Status COMPLETE; own reservations RELEASED після readback. Shared system change NONE; no subagent/newchat/source/code/build/deploy/messages.

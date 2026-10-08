@@ -1,0 +1,30 @@
+# COMBAT100_FISTS_ATGEIR_REVIEW_20261005
+- Owner COMBAT_100; current human task: recover exact Fists100/Atgeir100 prompts from delegated Pantheon design context, parallel work explicitly allowed.
+- Goal: recover original approved intent, inspect current source/native architecture in two bounded read-only tracks; root reconciles constraints, exact implementation plan/reuse/shared integration/regression/asset evidence/risks.
+- Exact write reservations: .agent/tasks/combat100/COMBAT100_FISTS_ATGEIR_REVIEW_20261005.md; .agent/progress/COMBAT100_FISTS_ATGEIR_REVIEW_20261005.md; .agent/handoffs/COMBAT100_FISTS_ATGEIR_REVIEW_20261005.md; .agent/research/combat100/COMBAT100_FISTS_ATGEIR_BRIEF_20261005.md; .agent/research/combat100/COMBAT100_FISTS_ATGEIR_SOURCE_REVIEW_20261005.md. Root writes only these5; scouts read-only, no overlap source writes.
+- Complexity COMPLEX; two bounded parallel source/native scouts, Fists and Atgeir. Root owns final architecture; no shared integration delegated.
+- Acceptance: exact combined prompt/source human decisions identified and preserved; current execution classification per slot; each track provides source/native evidence and limitations; root report covers8 requested outcomes; documents readback. Required dependent questions exposed, never silently simplify.
+- Authorization: retrieval/source/design/review/implementation planning under baseline. No source/build/persistence/UI/config/gameplay mutation or runtime deployment/launch. New implementation task needs explicit human instruction after concrete plan.
+- Current confirmed human decisions: Fists patronTyr,750Favor,60sec reactive lethal survival; Atgeir patronOdin,750Favor,5min Muster; eligible buffs +5min once rather than frozen timers. Preserve dual trinkets75% combined cost and reflection before player center.
+- Gold cooldown supersession: direct human clarification in this chat keeps cost<=250=>0,250<cost<=500=>5min,cost>500=>20min; active patronA blocks allA and foreignB>250, leavesB<=250 allowed without changingA timer. Original design-chat generated prompt contains stale rule; corrected preface authoritative.
+- Patron pools: individual player/world/patron, associated skills fill/spend same pool, no common wallet. Real Tyr/Odin wallets/admission not established.
+- Shared systems touched NONE (source/native reads and docs only). Future required Gold/equipment/SE/damage/event changes must be named as proposed, not implemented; SHARED SYSTEM CHANGE before mutation, affected-owner review and root serial integration.
+- Relevant files: root AGENTS/profile/bootstrap; previous Combat100 baseline/handoff; current Gold policy/PANTHEON_CORE; vanilla asset workflow/catalog; actual targeted Polearms/Fists/shield reflection/movement/shared source; existing native inspectors permitted as static reads only.
+- Presentation required in future; this task discovers evidenced donor candidates/limits only, selects no exact unapproved VFX/SFX/animation.
+- Non-goals: new economy design, oldalternative Loki'sWager/Odin'sLine, source implementation, new packages/build tools/tests/game/client/server launch/deployment/release, production state, other owner records, external memory.
+- Weighted measurable phases fixed before parallel tracks: prompt/authorization20%(1unit); source/native reviews40%(2units); root architecture/8outputs25%(1unit); handoff/readback15%(1unit),total100.
+- Status COMPLETE for retrieval/source/design review; exact5 documentation reservations RELEASED after final readback.
+
+## Direct user attachment confirmation
+User supplied original combat brief directly during this task: C:/Users/Domesos/.codex/attachments/e94b64d1-a170-4ea0-9033-1a3a85691fea/Вставлений текст.txt. Normalized newline comparison against recovered12275-character body: identical. Direct brief requests source/architecture findings and exact implementation plan with8 required output categories. Current confirmed Gold rule still overrides its stale cooldown paragraph; both750-cost actions still20min.
+
+Definitive direct user attachment2026-10-05: C:/Users/Domesos/.codex/attachments/5649210d-c50b-488c-82aa-937dfb192013/Вставлений текст.txt;12275 normalized characters, identical to original brief. Interrupted read-only scouts resumed without repeating completed work.
+
+APPROVED HUMAN RESOLUTION2026-10-05: «Зберегти автоактивацію: місткість і поріг шкали = C». C=.75*(isolated native thresholds withTrinketA andTrinketB under equal othermodifiers). No separate manualactivation button. Formula,capacity and auto-trigger now explicit; current native float cost needs no integer rounding.
+
+## Completion2026-10-05
+Review acceptance fulfilled: exact original brief preserved/compared with direct user attachment; both read-only source/native scouts complete; root report covers8 outputs and classifies dedicated mechanics DESIGN ONLY/catalog slots CATALOG ONLY; current human Gold and dual auto-proc decisions authoritative.
+Report: .agent/research/combat100/COMBAT100_FISTS_ATGEIR_SOURCE_REVIEW_20261005.md. Full exact readback verified before completion; five-file readback follows final metadata writes. Weighted phases20/40/25/15:1/1,2/2,1/1,1/1=100% review scope only.
+Additional bounded read-only reactive-protocol reviewer accepted escrow as direction but exposed durability/terminal revoke/crash settlement/clock/recovery gates; no production readiness claim. Authorized Pantheon-part handoff sent to Gold owner with explicit design-only boundary.
+Shared source mutations NONE; no implementation, build, tests, client/server launch, deploy, production save/config/schema/package or external memory write. Source214-file count is dated read, not frozen historical198 baseline or compiled gameplay proof.
+Next implementation needs new explicit human task with exact reservations, drift verification, affected-owner reviews and proposed SHARED SYSTEM CHANGE declarations. Open future protocol/presentation/clock gates do not make this completed review an unfinished implementation task.

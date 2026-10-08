@@ -1,0 +1,1 @@
+COMPLETE100=preparation20/ownercompletion30/combinedbuildreviewQC30/backupinstallintegrity20. Installedclient02A103FD/server39130910 exacthashverified+oldE9/904rollback/config/sampledjournals/singleDLL/nopendingPASS. Assets excluded/defaultOFF/no launch. ActualFPSgain/UI/gameplayUNTESTED;baselineINCOMPLETE.

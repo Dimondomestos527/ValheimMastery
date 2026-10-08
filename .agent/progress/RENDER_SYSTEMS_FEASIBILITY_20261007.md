@@ -1,0 +1,1 @@
+COMPLETE100 boundedreadonlyaudit40+40+20;actualnativeCecil/source paths+Unity6officialdocs inspected. Socialconcepttechnicallyfeasible pendingexactanimation/runtimeproof. NPCfastpaths/Workshopworldrefresh/zoneallocation/Visualdirtywrites/nativeAI/path/smoke/support/render batching candidates;CPU/GPUcausalityandgainsUNTESTED. No build/deploy/game/settings/statechanges.

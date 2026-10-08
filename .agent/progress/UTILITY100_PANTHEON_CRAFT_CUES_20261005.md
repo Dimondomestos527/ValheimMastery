@@ -1,0 +1,7 @@
+# UTILITY100_PANTHEON_CRAFT_CUES_20261005 progress
+- COMPLETE / SOURCE STATIC ACCEPTED / RELEASED; weights15/45/30/10, accepted1/1,3/3,3/3,1/1=100%. Final client/server builds/provenance and34 compiled Gold100 checks each PASS after current-core sync; bounded reviewer PASS, Enabled deferred-cue finding closed. Gold affected-owner approval/release and exact5-file root integration/readback PASS.
+- Exact owned/shared reservations RELEASED after Gold approval and root integration. No deployment/game/server launch performed or authorized.
+- Screenshot and human success report read. Actual source has no start cue; success donor-only cue exists but audible/visible result unconfirmed. New core admits by patron-aware CanStart; do not restore old scalar admission.
+- User selected forging sparks/brief flash; native donor identities/source recorded in task/native-donors.txt. Final tiny-fill geometry and Enabled callback guards included in accepted rebuilt/integrated candidate.
+- GoldCore affected-owner review/release and bounded read-only reviewer PASS. Native resources/cosmetics only; all protocol/current patron-aware admission preserved, Forge F7 retained.
+- Final evidence: pantheon-craft-cues-final-results.csv, bounded-review.md, gold-accepted-dependency-check.csv, integration-manifest.csv, REPORT_UA.md. Snapshot-only build outputs, no DLL installation. Live look/sound not observed; future live checklist remains, no source/static unit pending.

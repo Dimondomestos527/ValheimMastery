@@ -1,0 +1,10 @@
+# GOLD_CORE_COST_TIER_COOLDOWN_20261005 progress
+- Status ACTIVE; reservations HELD exactly as task, no Utility100 file writes.
+- Defined weights15/35/40/10; accepted units0/1,0/2,0/5,0/1 at creation.
+- Human price tiers and shared exhaustion clarification recorded; old1.4.123 Commit writes1200sec for every cost. Pending/auth/receipt gating remains required even at0cd.
+- Next: central policy/Commit + boundary/replay/shared-blocking/legacy tests; isolated builds/QC and bounded reviewer; canonical rule/handoff. No runtime/deploy.
+- Human amendment supersedes blanket shared blocking: only zero-cooldown actions of OTHER patrons bypass active exhaustion; same-patron cheap actions still blocked. Allowed action must preserve existing timer. Current consumers are Völundr-only; policy exception model-tested, real second-patron state/routing not silently invented.
+- Прийнято scope15%(1/1) та core/tests35%(2/2): центральна політика, Reserve/Commit, явні межі ціни, replay/newPending/reload/legacy1200 і Commit-write-failure сценарії. Незалежний read-only reviewer SOURCE REVIEW APPROVED, блокувальних дефектів немає; review1/5 verification accepted. Ledger/receipt QC і client/server builds виконуються в окремій snapshot. Прийнято58%=15+35+40*(1/5), runtime не входить у цю оцінку.
+- Фінальний статус COMPLETE / ACCEPTED / RELEASED. Прийняті фази: scope15%(1/1), core/tests35%(2/2), verification40%(5/5: ledgerQC,receiptQC,clientBuild,serverBuild,read-onlyReview), docs/handoff10%(1/1 після фінального readback). Разом100% погодженого source/static обсягу; не100% gameplay regression.
+- Обидва QC exit0, обидві variant build exit0; provenance32 fingerprints/4 generated inputs/no cross-variant dependency PASS. Фіксовані DLL/source SHA та логи в handoff; scoped diff лише передбачені ledger/policy/tests/project changes; source copy hash manifest без дрейфу.
+- Canonical rule та Ukrainian handoff містять межу current Völundr vs pure other-patron exception й необхідність real PatronId persistence/migration. No deploy/live/source-version bump. Utility100 синхронізує прийнятий core самостійно; його source файли не змінювались цим task. Точні reservations RELEASED.

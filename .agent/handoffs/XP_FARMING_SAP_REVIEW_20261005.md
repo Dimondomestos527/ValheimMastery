@@ -1,0 +1,12 @@
+# XP_FARMING_SAP_REVIEW_20261005 handoff
+- Стан: COMPLETE read-only review2026-10-05, version1.4.123. Canonical repository server/MasteryDev/ValheimMastery. BASELINE limits remain in this chat.
+- Виконано: scoped source/native/client+server installed DLL trace; build gates/native Harmony parameter bindings; hashes/current logs/config Enabled. Докази, точні рядки й SHA у matching progress.
+- Висновок: бонус реалізований у source та обох installed DLL; native SetStack hook reachable. p=rawFarming*.005 per base stored unit, no35/70 gate; level of harvester controls chance; extra items spawn on ground. No unconditional blocking defect found in inspected ordinary native path.
+- Межа доказу: LIVE_TEST_REQUIRED. Поточні два LogOutput.log не містять [SapBonus]; це не факт failed tested scenario. Planned bonus log occurs before delivery; потрібен фактичний count.
+- Підтверджене обмеження: world multiplier scales base output stacks, bonus counts unique base drops and is unscaled. Зміна потребує balance decision; не оголошувати це автоматично багом.
+- Ризики: two-RPC claim ordering/owner transfer; sender resolution; missing/expired claim gives base output silently; other players can pick ground bonus. Native/custom persistence not changed or live tested.
+- Межі відповідальності: SapHarvestBonus навігаційно UTILITY_35_70, inspected effect passive with no milestone; XP user-requested read-only cross-domain review, no owner reassignment/source edits.
+- Точна наступна дія: авторизований ordinary live collection on Farming100, multiplier1, current installed hashes; owner log [SapBonus] + actual spawned/collected count, then multiplayer owner/harvester matrix if needed. No ForceProc acceptance.
+- Мінімальні файли: цей task/progress/handoff; src-modern/SapHarvestBonus.cs; PerkRuntimeServices.cs:GetActualSkillLevel/RollChance; ProcessingStationProgressionService.ResolveSender; BUILD_RUNTIME_BASELINE; native SapCollector RPC_Extract and installed assemblies.
+- Runtime/deployment: no launches/build/install/config/save/world edits. Installed client SHA23A8CF38D29D8165B3976B16B46A7B2AB81B11DE79EA80212E4C01015A177F41; server DDFBFB93E30C1BD07E2A231E442C937C499B689A9E20D2C0443AF18C02EC8ABD inspected.
+- SHARED SYSTEM CHANGE:NONE; exact three documentation reservations released after readback. No external memory update, no subagents.

@@ -1,0 +1,1 @@
+Utility35/70 notified with current-native inventory requirement, prefab/theme/executable bonus/tooltip mapping, implement approved policies and propose missing designs. Need bounded regression evidence food-no-decay/duration/stacking/reconnect/headless before baseline integration. No source or gameplay deployment here.

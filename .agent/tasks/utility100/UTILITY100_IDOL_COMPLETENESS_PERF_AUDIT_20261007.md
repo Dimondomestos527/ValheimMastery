@@ -1,0 +1,6 @@
+# UTILITY100_IDOL_COMPLETENESS_PERF_AUDIT_20261007
+ACTIVE human20261007: audit all6idols against approved requests and inspect technical optimization opportunities WITHOUT LIVE tests. Readonly canonical source/native/assets/installed DLL identity. No source/gameplay/deploy/launch/config/production writes. Only reserve own .agent/tasks/utility100,progress,handoff taskfiles and validation/utility100-idol-completeness-perf-audit-20261007/**.
+NORMAL rootonly bounded audit; no parallel agents needed. No shared-system mutations; recommendations identify affected domains and regressions before any later implementation. Source path rather than catalog. Distinguish source/static/installed/live/queued. Native/source hotpaths sufficient for recommendations; don't promise FPS/CPU savings fromcounts alone.
+Weights request/source inventory40 technical hotpath audit40 report/handoff20. Candidate latest PlainsMist source/static previous task, current installed identities freshly read. Queued NPCpresentation/perf/socialdesign checked separately.
+
+FINAL COMPLETE100/100 readonlyaudit; allownartifactreservationsRELEASED. REPORT_UA.md andhandoff authoritative; no source/gameplay/deploy/runtimechanges. Shared-riskrecommendations recorded only, no affectedownerapproval claimed.

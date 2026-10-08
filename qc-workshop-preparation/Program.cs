@@ -1,0 +1,47 @@
+using Mono.Cecil;
+using ValheimMastery;
+
+int passed = 0;
+void Check(bool value, string name) { if (!value) throw new Exception(name); passed++; Console.WriteLine("PASS " + name); }
+var cache = new WorkshopPreparationCache();
+Check(!cache.ShouldSend("A", 0) && !cache.ShouldSend("A", .1f) && cache.ShouldSend("A", .16f), "Вибрана деталь очікує debounce");
+Check(!cache.ShouldSend("A", 1) && cache.ShouldSend("A", 4.2f), "Повторні кадри не засипають сервер запитами");
+Check(!cache.ShouldSend("B", 4.3f) && cache.ShouldSend("B", 4.5f), "Нова деталь отримує окрему підготовку");
+Check(!cache.ShouldSend("A", 4.6f) && !cache.ShouldSend("A", 4.8f) && cache.Count == 2, "A-B-A зберігає попередню підготовку");
+cache.Idle(); Check(!cache.ShouldSend("A", 5) && !cache.ShouldSend("A", 5.2f), "Cancel не стирає короткий кеш і не поновлює запит одразу");
+Check(!cache.ShouldSend("C", 40) && cache.Count == 0, "Невикористані записи спливають через30с");
+for (int i = 0; i < 40; i++) { cache.ShouldSend("piece" + i, 40 + i * .4f); cache.ShouldSend("piece" + i, 40.2f + i * .4f); }
+Check(cache.Count == 32, "Кеш має жорсткий ліміт32");
+cache.Clear(); Check(cache.Count == 0 && !cache.ShouldSend("piece39", 60), "Нова сесія очищає підготовку");
+string token = Guid.NewGuid().ToString("N"), other = Guid.NewGuid().ToString("N");
+byte[] before = { 1, 2, 3 }, afterDebit = { 1, 2, 1 };
+string stamp = WorkshopPreparationReturn.Stamp(token, afterDebit);
+Check(!WorkshopPreparationReturn.Matches(stamp, token, before), "Повернення власника раніше нових байтів не розморожує старий запас");
+Check(WorkshopPreparationReturn.Matches(stamp, token, afterDebit), "Повернення після реального списання завантажує саме поточні байти");
+Check(!WorkshopPreparationReturn.Matches(stamp, other, afterDebit), "Запізнілий токен не звільняє іншу підготовку");
+Check(!WorkshopPreparationReturn.Matches("", token, before) && WorkshopPreparationReturn.Stamp("invalid", before) == "", "Відсутнє підтвердження закриває доступ");
+Check(WorkshopPreparationRetirementRules.Evaluate(5, 20, true, false, true, false) == WorkshopPreparationRetirement.Ready, "Часткова відмова: підтверджену скриню повертаємо без списання");
+Check(WorkshopPreparationRetirementRules.Evaluate(5, 20, true, false, false, false) == WorkshopPreparationRetirement.Wait, "Живий власник: owner change без ACK не дозволяє повернення");
+Check(WorkshopPreparationRetirementRules.Evaluate(5, 20, true, true, false, false) == WorkshopPreparationRetirement.Ready, "Від'єднаний власник: зберігаємо native world stock і відновлюємо доступ");
+Check(WorkshopPreparationRetirementRules.Evaluate(21, 20, false, true, false, false) == WorkshopPreparationRetirement.Quarantine, "Запізніла native ownership отримує стійкий recovery marker");
+Check(WorkshopPreparationRetirementRules.Evaluate(21, 20, true, false, false, false) == WorkshopPreparationRetirement.Quarantine, "Розбіжність байтів не залишає невидимий нескінченний Held");
+Check(WorkshopPreparationRetirementRules.Evaluate(21, 20, true, true, true, true) == WorkshopPreparationRetirement.Wait, "Escrow/atomic lock не звільняємо як preparation");
+if (args.Length != 1) throw new ArgumentException("Pass the rebuilt candidate DLL explicitly.");
+using var module = ModuleDefinition.ReadModule(args[0]);
+TypeDefinition Type(string name) => module.Types.Single(t => t.Name == name);
+MethodDefinition Method(string type, string name) => Type(type).Methods.Single(m => m.Name == name);
+IEnumerable<MethodDefinition> Methods(TypeDefinition type) => type.Methods.Concat(type.NestedTypes.SelectMany(Methods));
+IEnumerable<MethodReference> Calls(MethodDefinition method) => method.HasBody ? method.Body.Instructions.Select(i => i.Operand).OfType<MethodReference>() : Enumerable.Empty<MethodReference>();
+int Index(MethodDefinition method, string type, string name) => method.Body.Instructions.ToList().FindIndex(i => i.Operand is MethodReference r && r.DeclaringType.Name == type && r.Name == name);
+var prepCalls = Methods(Type("WorkshopPreparation")).SelectMany(Calls).ToArray();
+Check(!prepCalls.Any(r => new[] { "WorkshopAtomicDebit", "WorkshopRecovery", "WorkshopDurableRequests", "WorkshopRequestLedger" }.Contains(r.DeclaringType.Name) && r.Name != "get_Outstanding"), "Підготовка та її callback не списують і не створюють квитанцій");
+Check(prepCalls.Any(r => r.DeclaringType.Name == "WorkshopChestLease" && r.Name == "Acquire"), "Підготовка використовує чинний owner handshake");
+var request = Method("WorkshopRemoteCraft", "Request");
+Check(Index(request, "WorkshopChestLease", "WaitForPreparation") >= 0 && Index(request, "WorkshopChestLease", "WaitForPreparation") < Index(request, "WorkshopRequestLedger", "Remember"), "Очікування preparation передує exactly-once admission");
+Check(Index(Method("WorkshopChestLease", "ReturnSettled"), "WorkshopPreparationReturn", "Stamp") < Index(Method("WorkshopChestLease", "ReturnSettled"), "ZDO", "SetOwner"), "Сервер фіксує поточний запас перед поверненням власника");
+Check(Calls(Method("WorkshopChestLease", "Tick")).Any(r => r.DeclaringType.Name == "WorkshopPreparationReturn" && r.Name == "Matches"), "Freeze перевіряє token та точні поточні байти");
+Check(Calls(Method("WorkshopRemoteCraft", "CommitRequest")).Any(r => r.DeclaringType.Name == "WorkshopWorldRecords" && r.Name == "Chests") && Calls(Method("WorkshopRemoteCraft", "CommitRequest")).Any(r => r.DeclaringType.Name == "WorkshopAtomicDebit" && r.Name == "Begin"), "Реальна дія зберігає свіже планування та atomic debit");
+Check(Calls(Method("WorkshopRemoteCraft", "Tick")).Any(r => r.DeclaringType.Name == "WorkshopPreparation" && r.Name == "Tick"), "Підготовка виконується під час native timer без нового gameplay hook");
+Check(Methods(Type("WorkshopChestLease")).SelectMany(Calls).Any(r => r.DeclaringType.Name == "WorkshopPreparationRetirementRules" && r.Name == "Evaluate"), "Native cleanup використовує протестовані retirement rules");
+Check(!Calls(Method("WorkshopChestLease", "RecoverPreparationAborts")).Any(r => r.DeclaringType.Name == "WorkshopRecordStore" || r.Name == "Restore" || r.Name == "Remove"), "Recovery повертає доступ без запису/відновлення inventory");
+Console.WriteLine($"PASS {passed} перевірок; лише static/model, без LIVE VERIFIED.");

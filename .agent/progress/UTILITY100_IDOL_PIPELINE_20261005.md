@@ -1,0 +1,8 @@
+﻿# UTILITY100_IDOL_PIPELINE_20261005
+COMPLETE SOURCE / STATIC; root integrated10 own files. Weighted trace15/15, implementation45/45, checks/reviews30/30, docs10/10 =100/100. Не LIVE VERIFIED; no installation/config/world/profile mutations.
+
+Реалізовано: frozen aim ray + fresh full native validation/explicit rotation-menu-selection cancellation;32m spatial coverage/local bench radii;ALL station cachednetwork geometry/opaque members for future powers; durable eventpublication+retry; phase5terminalACK memory-only (successful4->3fullprofile saves), timingstages. Gold phase1/2/3/4, rejection Save, receipt/admission schemas unchanged. Compact Requested sidecar не погоджений і не впроваджений. Legacy Workshop Component uses original Covered; new owned geometry API не підміняє його int IDs.
+
+Докази: validation/utility100-idol-pipeline-20261005/REPORT.md, integrated.csv/root10readbacks, artifacts.csv, before-integration.60actual-linkedmodels/nativeprofilestubs+disposableactualadmission files;15compiled each;445contracts each0errors;bothbuild0errors/provenance32+4;1097unrelatedcompiledtypes preserved each. Native andregistryboundedreviewersPASS; exactboundedGoldACK approved .agent/handoffs/GOLD_CORE_IDOL_SETTLED_SAVE_REVIEW_20261005.md Journal7F747E64... Placement4EEFD818...
+
+Наступне: explicit install authorization, rebase frozen artifacts onto CURRENT accepted installed foreign changes before copying DLLs, preservationcheck+rollback; then LIVE checks fromREPORT includingactualprofilecloudfailure/ACK crash sequencing, camera/gamepad/cancel/freshhit/BlackForest/FX/ward/network/lifecycle/timings. No claim all lag eliminated. Reservations released.

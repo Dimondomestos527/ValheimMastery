@@ -1,0 +1,14 @@
+# UTILITY35_70_RUN_WORKSHOP_INVESTIGATION_20261005
+- Owner/profile: UTILITY_35_70; root owns investigation and integration.
+- Goal: establish a read-only evidence baseline for Run phase-2/phase-3 VFX, workshop-crafting latency, and chest-to-station feedback attribution.
+- Acceptance criteria (observable): exact phase recipe/runtime differences recorded; existing timing stages and any available timing evidence assessed; current visual attribution compared with actual successful debit path; implementation requirements and regression matrix recorded without gameplay changes.
+- Scope/allowed files; exact write reservations: only this task plus matching progress/handoff Markdown. Source, build, config, logs, runtime and state are read-only.
+- Non-goals: VFX rebalance; workshop optimization; instrumentation changes; gameplay launch; config changes; build/deploy/package; protocol/state-format changes; performance claims without measurements.
+- Complexity: NORMAL read-only investigation; root-only because the user did not request delegation and current evidence paths are bounded.
+- Relevant canonical docs: AGENTS.md; UTILITY_35_70 profile; CONTEXT_AND_STATUS; SHARED_SYSTEMS; KNOWN_ISSUES; UTILITY_35_70 perk index; completed baseline task.
+- Relevant source/classes and build gates: Stride70Perk; RoadRhythmPhaseVisual; VfxRecipes; NativeLandingBurst; WorkshopConnectionVisual; WorkshopStoragePreview; WorkshopResourcePlan; WorkshopRemoteCraft; WorkshopHostCrafting; WorkshopTiming; Build123 workshop gate.
+- Shared systems touched: NONE. Read-only inspection only. Any future common VFX/pooling/network mutation requires a SHARED SYSTEM CHANGE declaration before edits and affected-owner review.
+- Required regression: equal scene/camera/route/settings for Run phase comparison; host and remote workshop timing; personal/chest split; owned/unowned storage; multiple candidate versus actual debit chests; full output inventory; denial/cancel/retry; exactly-once debit/result; no feedback before successful output.
+- Deployment requirement: NONE.
+- Status: COMPLETE for read-only investigation; phase remains BASELINE / READ-ONLY.
+- Known dependencies/overlapping tasks: completed UTILITY35_70_BASELINE_20261004; no source reservation is taken.

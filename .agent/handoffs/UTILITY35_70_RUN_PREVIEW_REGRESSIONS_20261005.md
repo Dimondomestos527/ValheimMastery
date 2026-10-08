@@ -1,0 +1,24 @@
+# Handoff — Run / сірі рецепти / build pending feedback
+- COMPLETE SOURCE/STATIC CANDIDATE, LIVE_TEST_REQUIRED;1.4.123 remains. Root Utility integration complete; all reservations released. No installation/client/server launch/config/world/save writes.
+- Exact changed source: RoadRhythmPhaseVisual; NativeMovementPulse; VfxRecipes.Play (3 Run70 IDs only); WorkshopStoragePreview; WorkshopNetworkStorage; WorkshopRemoteCraft; WorkshopRecovery.Clear; WorkshopBuildBridge. Tests qc-utility-regressions new, existing NativeMovementPresentationChecks updated only superseded Run expectations. Preserve current other-owner source.
+
+## Поведінка та причини
+- Run uses exact air-jump donor Assets/Effects/fx_perfectdodge.prefab (ring_gradient +pixel_additive stretch). Phase1:32 streaks/no ring; phase2:64 streaks +one vertical ring,90% jump root scale=1.035; phase3:64 +one ring, jump scale1.15, alpha.9 vsphase2.55, lifetime×1.8 vs1.5. Detached at torso.95m,2.2s pooled lease, transitions only; no loop/trail/custom assets/audio change. Air-jump existing route/tuning unchanged. Root connected natural VfxRecipeService.Play Run IDs to previously-unused RoadRhythmPhaseVisual; generic cue/audio behavior unchanged.
+- Recipe grey source cause: native DoCrafting rebuilds recipe list during executing/receipt gate; preview previously cleared stock, and expiry could remain future; no later panel refresh. UI stock observation now separated from action admission and native privacy/creator/wards/coverage/quarantine preserved. Actual debit retains frozen access/escrow/CAS gates. Outcome and receipt removal queue bounded deferred native UpdateCraftingPanel(false) to rebuild rows after execution/settlement and replicated-stock frames.
+- Build false error source cause: native UpdatePlacement calls HaveRequirements before TryPlacePiece, and false immediately prints missing requirement. Busy/recovery snapshot can last about100ms after successful output (observed898f…124.540→225.461ms). New native placement scope accepts only supported pending input to reach bridge; bridge rejects pending input without new action or native success. Real idle missing stock still fails normally. Do not change TryPlacePiece false to true: native caller would consume stamina/durability/resources too early.
+- No RPC/economic receipt/CAS protocol changes; early preparation/10–30s caching preserved.
+
+## Перевірено / кандидати
+- Isolated source snapshot avoids overlapping other-owner builds; final own-source hashes match current source8/8. Snapshot source includes other owner state at capture, not a release approval for their unfinished work.
+- validation/utility-run-preview-20261005/snapshot/validation/utility-run-preview-20261005-build3/: both variants0 errors; dependency provenance32 fingerprints PASS.
+- validation/utility-run-preview-20261005/qc-results.csv: all11 results exit0. Per variant23 targeted native/source contracts;404 Harmony targets/0 errors;27 prep checks;60 Workshop boundaries;17 movement presentation checks.61 atomic managed checks PASS. Source reviewer utility_prep_review no blockers. No visual/runtime acceptance claim.
+- Client candidate validation/utility-run-preview-20261005/snapshot/bin/Perks123Client/ValheimMastery.dll SHA256 F28EC66D38F351298EC4AE6F01EAA3BC4BBC92A390F53DD329FD2A14710FB8F7.
+- Server candidate validation/utility-run-preview-20261005/snapshot/bin/Perks123Server/ValheimMastery.dll SHA256 91F5E1C757DEDF813AC410020922809E106584049E501F3754FE5F028A01A1D2.
+- Installed read-only baseline hashes recorded installed-read-only.csv; installation unchanged. Do not infer generic shared bin now holds these candidates.
+
+## Наступні live кроки після окремого встановлення
+1. Завершити крафт із ресурсами зі скринь; протягом1с інші рецепти мають відобразити актуальний залишок. Рецепти з реальним дефіцитом лишаються сірими, доступні — звичайними. Перевірити зміну рецепта, cancel, Crafting35 preserve, full inventory.
+2. Повторно натискати build до grant і між output/settlement: немає хибного missing, немає другої будівлі/списання/stamina/durability. Після settlement наступна дія проходить нормально.
+3. Вичерпати матеріали: звичайна нестача лишається. Private іншого власника/Group/ward/quarantine не дають UI доступності чи server credit. Два гравці, зміна запасу та ownership під час prep — актуальний дебіт/result один.
+4. Порівняти air jump і Run2/3 в однаковому світлі/камері: Run1 без ring; Run2 трохи менший; Run3 того самого розміру та виразніший, обидва вертикальні. Cold pooled first effect, sprint reset, VFX disabled, scene exit, observer/current existing network behavior. Visible appearance remains unverified.
+- Before integrated deployment, coordinate active Combat/Magic owners and rebuild fresh combined source rather than deploying this capture over their later changes.

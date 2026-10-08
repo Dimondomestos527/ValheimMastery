@@ -1,0 +1,294 @@
+VALHEIM MASTERY — ACTIVE35/70 CHECKPOINT (2026-10-04)
+
+INSTALLED123 supersedes122 implementation details below. Installed2026-10-04.
+Backup:dist/Backup_pre_1.4.123_20261004_135410;62 worldfiles verified.
+Client/friendSHA256:08DB58D47592B0F6A9729570D81D962DF6411E3419419E0D3B5B68A6D88BA93C
+ServerSHA256:75903BE4B1B073273C33145605E24AB7A34C7D0D8AC2D6500E4ABDBAF3AD106B
+Bothbuilds0errors,398contracts0errors. Bothpassedpatch12324,magic7060,
+native-movement-presentation17,deferred-vfx20,carrier11926; other13suite
+regressions also passed. Client/serverNOTstarted; LIVE_TEST_REQUIRED.
+Current user TZ: hammer35 delayed.75s half-everything echo, no radius/fracture;
+maxcharge second echo+.75s; mace35 corpse launch; mace70primary staggeronly,
+secondary spatial echo+.5s damage.75 with full finalstagger/force. Charge pause/
+resume15s, mace15/s hammer10/s, smoothnativegnista+quietforge loop.
+Shield70 smallcontact AoEstagger and stop; tower halftravel, mobpassthrough,
+sidepush, solidworld blocks. Native vfx_blocked single wave. No invulnerability.
+Cargo rootcause: serialized ItemData has no m_shared at Inventory.Load;
+validation now resolves native prefabHash. Skeleton native distanceunsummon
+disabled only for authoredfriendly skeletons beforeUpdateSummon; logout kept.
+Torba chestmesh removed, barestrawhat(no cloth/collider), nativeDraugrWakeup+
+skeletonsummoncue; hard GenerateDropList gate. Fullragclothesnotimplemented.
+Run explicit nativefx_perfectdodge historicalfallback, phase-only, no wind;
+old105 actualsource inferred notproven. UserLIVECONFIRMED122: doublejumpgood,
+dismissworks. Do nottouchdoublejump. Spear nativeanimation neveroverridden;
+removed extraSpears35launchproc, projectilegameplayunchanged.
+Testdoc:PERKS123_CANDIDATE_TEST_UA.txt. No game/server launch authorized.
+
+INSTALLED122 — CURRENT STATUS, supersedes earlier paragraphs
+Client/server/friend122 installed2026-10-04. No game/server processes launched.
+Backup:dist/Backup_pre_1.4.122_20261004_123003;62 world files hash verified.
+Client/friendSHA256:9635CC4B1D862B8F663136BB31B1E415A95F14A610C428D51A6CBE05ECB81507
+ServerSHA256:250B736ADB6002E43D0E684501F3088956D88C20345CD03CA76404A98670C7F8
+Build/install:tools/Build122.ps1 + tools/Install122.ps1. Tests:PERKS122_CANDIDATE_TEST_UA.txt.
+Both builds0errors;394Harmony contracts0errors each. Both passed patch122(9),
+patch121(11),native-movement-presentation(17),native-landing(10),deferred-vfx(20),
+carrier119(26),summon-raven119(14),movement(35),magic70(60),native-feedback,patch120(16).
+LIVE_CONFIRMED121 user: carrier spawns and portals; Surtling works. LIVE_FAIL121:
+carrier cargo empty after portal; skeleton portal/dismiss and Run/Jump visual fail.
+122: Torba display name, actual inventory title Shlunok Torby, owner hand-weapon
+removal and render-only wooden chest pack. Independent cargo ZDO preserved/relinked/
+relocated when closed; native Load before showing inventory, no item-byte writes.
+Old cargo loss NOT proven vs stale managed inventory; byte/count diagnostics added.
+Owned authored skeleton persistence at birth and before portal, private revisioned
+pulse + ForceSend because native Persistent setter alone never increments revision.
+Dismiss uses actual Time.time after ACK, not pre-admission frame delta; aim/LOS guards.
+Hammer one native block_wave per real outer/core zone, no full victim-body duplicate;
+mace compact contact accents. Existing35 mechanics and70 numerical balance unchanged.
+User requested exact approved phase-only Run from wind-removal patch. Verified104
+creates Wake and105 removes it;105 release matches installed pre106 backup hash.
+Restored105 source priority scene fx_land -> actual player native jump effects ->
+catalog fx_land (no dodge substitution). Scales.35/.5/.7, size.8/.9/1,
+speed1.1/1.2/1.4, emission1/1.75/2.5, audio.65/.8/1, native scheduled bursts/rates,
+source Local scaling/cap, no tint. Native content root receives old direct-root
+transform; safe deferred sanitation retained. New AirJump uses bounded native
+dodge ring/streak pulse. Appearance and cargo/skeleton behavior LIVE_TEST_REQUIRED.
+NO further Run redesign without user approval. Pickaxe redesign still deferred.
+
+HISTORICAL121 — NOT CURRENT INSTALL
+Client/server/friend121 deployed2026-10-04 00:12 local. No processes launched.
+Backup:dist/Backup_pre_1.4.121_20261004_001249;62 world files hash verified.
+Client/friendSHA256:1CC854BBD212BBAFC41B0D4BF77505B1772C8CA70945B50C03D4A8656E104952
+ServerSHA256:DC2697B8B2DF115700B7703F9D5AFE634036B9072C46A535BCCD593C26548CD1
+Build/install:tools/Build121.ps1 + tools/Install121.ps1. Tests:PERKS121_CANDIDATE_TEST_UA.txt.
+Both builds0errors;394Harmony contracts0errors each. Both passed patch121(11),
+native-landing(10),deferred-vfx(20),carrier119(26),summon-raven119(14),movement,
+magic70(60),combat-input,native-feedback,patch120(16),native-storm-cage(14).
+All automated results STATIC or pure rules only;121 LIVE_TEST_REQUIRED.
+120 user test: huge mace charge/light-hit visual, charge zero, Torb missing,
+skeleton dismiss/portal missing, run/jump visual absent. Do not mark120 working.
+121: food max decay trims excess reserved stamina instead of cancelling charge;
+charge/ready sparks instead of Demolisher explosion; small impact particles use
+instance Hierarchy scaling with pool restoration. Actual host current-staff/mastery,
+remote native either-hand staff/quality. Portal retains unknown nonresident IDs,
+prunes proven stale records and consumes negative server replies. Dismiss locks
+one target but retains aim/range/LOS cancellation. Landing native t0 burst replay
+after safe readiness, source-derived run counts5/9/13, air-jump5; trace particles,
+size/alpha/visibility/bounds, bounded budgets and baseline restore. Actual native
+fx_land bundle has burst5 and Local scaling, not a missing emitter controller.
+Unchanged mechanics/assets outside this targeted batch; storm user-approved.
+
+PRIORITY
+HISTORICAL120 — NOT CURRENT INSTALL
+Client/server/friend120 deployed2026-10-03 23:47 local. No processes launched.
+Backup:dist/Backup_pre_1.4.120_20261003_234752;62 world files hash verified.
+Client/friendSHA256:6E3C2F88E578089CE47CD5B21C75859B653505E06F9A296059C94E159C5FE32C
+ServerSHA256:8EA859815250EF055BD40F372734AF58DED35A175E038771BC5962D7C6A1C77F
+Build/install:tools/Build120.ps1 + tools/Install120.ps1. Tests:PERKS120_CANDIDATE_TEST_UA.txt.
+Both builds0errors,9/7existingwarnings.394Harmony contracts0errors each.
+Both passed patch120(16),deferred-vfx(20),carrier(26),summon/raven(14),native storm/cage(14),
+magic/combat(60),combat-input,native-feedback,movement(35). NOT live proof.
+LIVE_CONFIRMED119 by user: storm appearance good; Surtling portal/dismiss works;
+club charge operates but held-full resets; mace burst visible.
+120 changes: paid storm relocation same zone (no stacked zones); fire/bow RMB cancellation;
+club held-charge latch, cancel/refund once, expiry HUD; smaller primary vs secondary impact;
+native skeleton author binding at SpawnAbility birth, portal/dismiss validation,
+dismiss full5/1.4s AFTER server ACK; far summon wall-stall best-distance catchup;
+carrier slot selector fix and send/arrival/rejection/timeout diagnostics;
+shared VFX inactive wrapper+bounded LateUpdate sanitation (186 prohibited immediate destruction
+errors observed in119 Player.log); native burst/lifetime readiness and first-use Ice/Gold/cage compatibility;
+milestone animation repeats each genuine34→35,69→70,99→100 without resetting durable unlocks,
+one-time raven completion, Gold Favor or inventory. First Crafting100 still server-acknowledged.
+Pickaxe redesign DEFERRED explicitly by user. Only nonconvex ClosestPoint geometry fixed;
+same approved1–2neighbour destruction and20%/20% chance retained. Last119 log6 nonforced procs then1forced.
+Current120 effects, Torbjorn spawn, skeleton portal/dismiss need live verification.
+Do not infer server version from stale log alone; compare new startup after user launch.
+Workflow: small related releases; no unrelated additions midpatch; diagnose shared causes;
+one final client/server build after source freeze, risk-directed checks + contracts;
+preserve LIVE_CONFIRMED assets. Keep tests concise Ukrainian and evidence status explicit.
+
+HISTORICAL119 STATUS — NOT CURRENT INSTALL
+Client/server/friend119 final deployed2026-10-03 23:04 local. No processes launched.
+Finalbackup:dist/Backup_pre_1.4.119_20261003_230439,62world files SHA256 verified.
+Original118backup:dist/Backup_pre_1.4.119_20261003_225836 (before initial119copy).
+Client/friendSHA256:C784287D407ED704A342A02A6C6E05F4579D6B54B102CB61907D7893424258A6
+ServerSHA256:285D2E141A5DF86EF434F2EBD35CD00EA50CF05DFACD2D18317B0149BA3DCF85
+Reproduce build with tools/Build119.ps1; includes Clubs70 AND Carrier70 flags.
+Tools/Install119.ps1 is stopped-only, backups/rollback, never starts server/client.
+Client/server compile0errors (9/7existingwarnings),393Harmony contracts0errors each.
+Carrier25, summon/raven14, nativeStorm/cage14, magic70/weapon/shield60 each;
+movement35server, combatInput6client: STATIC_PASS, NOT Unity/live confirmation.
+Run35 phase bursts restored from saved105DLL routing: PerkFeedbackService.Play
+through native recipe, increasing phase emission, one audio cue, no manual emitter
+or persistent wind. Historical evidence is105DLL+user recollection, not a savedlive log.
+Previous trace119/manual-emission discussion below is obsolete; manual class unused.
+Torbjorn70 ENABLED: secondary StaffSkeleton cast, one noncombat Draugr carrier,
+native quality cap/shared skeleton slot. Fresh canonical world scans on admission;
+no required remote Player object. Native post-command skeleton cap reserves its slot.
+Independent persistent Container ZDO cargo perauthor, hidden/noncolliding model;
+author/range native-open guards, no quest/nonportal deposits, source-preserving
+native transfer paths, no body-death/drop/destruction coupling. Native close waits
+for final inventory revision before server reclaims/moves bag. Portal replacement
+updates canonical bag-body link. Ownerclient rebinds following in Skeleton35Travel.
+COOPERATIVE VANILLA TRUST: inventory owner edits native ZDO; not hostile-client
+anti-cheat. Do not invent server-authoritative transaction security for this bag.
+Portal roster full-state canonical copy, no heal/death/loot; all authored summons
+dismiss matching staff + focus/block5s. Native raven one-shot/persistent unread
+lessons: general before magic/gold-specific. Short staff narrative tooltips active.
+Detailed game tests:PERKS119_CANDIDATE_TEST_UA.txt; Torbjorn use cheap test items
+first until live death/dismiss/portal/restart persistence is confirmed.
+User restrictions: do not start game/server for checks. Ore is DIAGNOSE ONLY.
+Latest118ore forcedCollapse20%x20%=4% unique hit; nonconvexClosestPoint+animation
+DestroyImmediate AV error found. No mining mechanics/probability edits in119.
+Workshop118:11/11outputs/settlements; medianrequest->visible133.849ms,max510.256ms.
+No workshop transaction architecture changes in119; don't claim latency solved.
+Gold100feedback deferred; no new design without approval, Crossbow70 pending choice.
+All new gameplay/AV/persistence/raven arrivals remain LIVE_TEST_REQUIRED.
+
+HISTORICAL WORKING NOTES — NOT CURRENT INSTALL STATUS:
+LATEST119 IMPLEMENTATION UPDATE (supersedes initial-build status below)
+Installed remains118. No game/server launch and no119 deployment yet.
+Added native weather clone for Storm70 (448 aggregate particles/zone, native
+textures/property blocks/modules, no bare-card fallback or global fog). Source
+fills the whole8m control volume. Missing textured source fails closed with logs.
+BloodCage now has native cast orb and owner-authenticated rupture presentation
+before damage, using real SE_Shield break FX. Cosmetic snapshot survives victim
+destruction AFTER RPC delivery; lethal-delivery itself still needs live verification.
+Hammer35 cosmetic construction deferred from attack animation callback to safe
+Player.Update queue; mace70 charged contact gets native Demolisher impact AV.
+Vfx pool now restores maxParticles/emission enable flags to avoid budget leakage.
+Staff purple descriptions shortened to functional narrative sentences; magic70
+explicitly mentions secondary attack. Native vanilla item stats remain unchanged.
+Server summon portal replacement copies full canonical native ZDO state into a
+new identity, then retires old via native tombstone. No OnDeath/loot/explosion or
+health reset. Departure roster captured before zone unload; exactly-once receipt,
+author/mastery checks, bounded retries; free45s summon waits while roster in flight.
+Dismiss matching authored summon: aimed matching staff + held block~5s, purple HUD;
+server validates author/staff/range and minimum elapsed hold. No death side effects.
+One-shot native Hugin35/70 + Munin magic35/70/general100/per-skill100 lessons;
+unheard lessons persist in character customData, native Talk records completion.
+Run visibility remains UNRESOLVED: trace119 added, no runtime trace from119 exists.
+No nearby proven known-good source was found; do not say previous visuals restored.
+Torbjorn foundation exists but normal-build prefab registration gated until usable
+native cargo access/deposit/slot paths complete. Native vanilla owner trust boundary
+must be documented honestly, not presented as hostile-client server validation.
+Current structural passes:365 Harmony targets/errors0; native storm/cage14;
+summon/raven13; magic70/clubs/shield60; movement35; combat-input6. Rebuild after
+any further carrier edits and run both client/server checks before deployment.
+Runtime appearance, portals, persistence and raven arrivals: LIVE_TEST_REQUIRED.
+
+LATEST118 LOG REVIEW
+11 workshop outputs/settlements and matching11server grants/commits: no failures.
+Client request->visible output84.956–510.256ms, median133.849ms; builds max415.637,
+only craft510.256. RTT78.772–244.840. Post-output settlement54.137–174.966ms.
+Coordination/availability/lease/owner ACK dominates; final material debit is tiny.
+Ore21:54:55: neighbours2, forcedCollapseFalse, veinDestroyedFalse.
+Ore21:55:05: forcedCollapseTrue, veinDestroyedTrue; actual20% followed by20%=4%
+per successful unique hit. ForceProcFalse. Thor70+collapse70 are two semantic cues.
+Native nonconvex Collider.ClosestPoint warning is real neighbour-query defect.
+At collapse presentation Player.log5422–5437 also records forbidden DestroyImmediate
+inside animation callback, explaining missing AV path; ore is DIAGNOSE ONLY,
+no odds, segment, support or effect-routing changes until next user decision.
+
+NEW USER LIVE REPORT / REQUESTS AFTER INITIAL119 BUILD
+User confirms BloodCage immobilization/damage works, Zharik recall works.
+Requests cage shield-break burst at damage and native shield-cast orb above captive;
+storm native snow/blizzard volume instead of white-square placeholder; terse narrative
+staff tooltips, magic70 narrative explicitly names secondary attack (text changed);
+portal summon respawn preserving roster instead of failed catchup; Torbjorn opens
+separate persistent cargo (already chosen architecture); all authored summons can
+be dismissed by aiming with their staff and holding block5s; one-shot Hugin tutorial
+first ANY35/70, Munin for magic and each100 plus first100 general explanation.
+Run phase VFX still LIVE_FAIL: logs prove EmitPhase route, not visible particles.
+Mace/Hammer readability pending; user suggests Demolisher shockwave for mace70.
+Ore collapse request is DIAGNOSE ONLY, balance decision later. No chance edits.
+These new AV/tutorial/portal/dismiss/carrier tasks are NOT implemented by initial119.
+Initial119 compiled DLLs predate latest tooltip/diagnostic changes: rebuild after batch.
+
+User deferred Gold100 UI/Favor feedback; recorded in CRAFTING100_ACTIVE_CHECKPOINT.txt.
+Finish approved35/70 mechanics first. Do not resume Gold100-B or invent new perks.
+Source119 candidate; client/server/friend INSTALLED118, unchanged this pass.
+No game/server started. Candidate is NOT installed or LIVE_PASS.
+
+LATEST USER DECISIONS
+- Dodge70:50% refund of actual roll cost after truly avoiding an enemy attack.
+  Root-selected short cooldown8s, once per admitted roll. No extra damage or i-frames.
+- StaffSkeleton70: finish Torbjorn carrier first, not the later undead-taming idea.
+- Crossbow70 idea asked asynchronously: stationary-aim bolt, extra force/stagger,
+  no extra damage/boss immobilization. NOT approved or implemented yet.
+- Retain approved strengthened Jump70 (.8 native force), current Run sound and
+  phase-only particles. Do not revert them based on the original movement spec.
+
+SOURCE119 CANDIDATE CHANGES (STATIC_IMPLEMENTED / LIVE_TEST_REQUIRED)
+- Clubs70Reservation candidate flag ON: approved arming1s, reserve10stamina/s,
+  cap half natural maximum, ready15s. Same-item next admitted attack consumes
+  charge even on miss. Other weapon/expiry/logout returns reserve; death never heals.
+  Existing mace/hammer damage/stagger/force/radius profiles unchanged.
+  Owner/session/current-item binding. Actual stamina debit respects world rate;
+  zero-cost stamina cannot create a free reserve. Native save projects natural
+  max/refundable current stamina, restores live fields in finalizer; autosave
+  does not cancel the charge. Charge itself is transient, not duplicated on reload.
+  Ready HUD has separate gold fill/text. Old secondary shockwave excluded by flag.
+- Dodge70Refund: Player.UpdateDodge scope captures Player.UseStamina override,
+  measuring actual debit, not configured theoretical cost. Character base method
+  is empty and would not capture virtual dispatch. Native roll must be admitted;
+  existing owner-local enemy/dodgeable/invulnerable Dodge35 path confirms avoided hit.
+  One50% refund per roll, clamped headroom,8s persisted cooldown. Scope restored
+  on exceptions. Removed old target-side stagger RPC/gameplay registration.
+- EN/UA functional narrative updated for refund. Unsupported swimming-bow promise
+  removed from descriptions only. No Swim/Jump/Run balance or physics changes.
+
+MUST PRESERVE
+Native weapon primary/secondary admission and equipment identity; Sword/Polearm/
+Spear/Fire input forwarding; Shield Rush no native dodge i-frames; native food/stat
+max updates; Gold/Workshop receipts; normal save format and character inventory;
+no generated XP/extra loot or resurrection via cancellation; no ruins/support edits.
+
+VERIFICATION
+Native client Release119:0errors/9existing warnings.
+Native server Release119:0errors/7existing warnings.
+Both:359 Harmony contracts/errors0;60 magic/clubs/shield structural checks PASS;
+35 focused movement formula/structural checks PASS. Client combat-input6 checks PASS.
+Server Gold10021 structural checks PASS (Gold mechanics not edited).
+Historical player-feedback-followup suite passes new Dodge checks but FAILS its
+obsolete kick-balance expectation (+250%/+150%); it also expects old pickaxe15%.
+Do not present this old suite as fully passing or change current balance to satisfy it.
+These checks are NOT Unity animation, physics, persistence-playthrough or multiplayer.
+Build outputs: bin/Perks119Client/ValheimMastery.dll and bin/Perks119Server/ValheimMastery.dll.
+Read PERKS119_CANDIDATE_TEST_UA.txt only AFTER installing a later approved candidate.
+
+NEXT REQUIRED WORK — TORBJORN70 (NOT IMPLEMENTED)
+Current tooltip honestly says carrier unavailable. No carrier prefab/RPC/store exists.
+Approved: one noncombat Draugr carrier, one ordinary skeleton slot, one per author;
+follow/path catchup/portal; cargo survives creature death/recast/world restart;
+reject quest OR vanilla nonteleportable items regardless world portal override.
+Name Torbjorn; Ukrainian summon line in MAGIC_REDESIGN_CHECKPOINT.txt:81-86.
+
+Root architecture chosen for implementation: separate persistent native Container
+ZDO for cargo, not inventory on the destructible living Draugr, not a second custom
+inventory protocol. Native Container saves full Inventory/ItemData bytes to s_items;
+opening transfers its network ownership. Reuse native persistence/open handshake,
+strict author+sender/range checks, one authoritative inventory, stable cargo link.
+DO NOT destroy cargo on creature death. Enforce acceptance before all deposit paths;
+do not truncate/rebuild existing item metadata on load. Recast reuses the SAME cargo.
+Creation recovery must find persistent author-tagged cargo before minting a new one;
+ambiguous duplicate stores with items must never be silently cleared/merged.
+Neither living model nor a HUD buff is authoritative inventory state.
+
+Native slot constraint: SpawnAbility.Spawn IEnumerator calls five-arg
+SpawnSystem.GetNrOfInstances(prefab,point,0,false,false), native count matches prefab
+names over loaded BaseAI, not author. Draugr is not counted as Skeleton_Friendly.
+Need scoped correction ONLY for StaffSkeleton SpawnAbility/coroutine cap decision;
+no global spawning cap changes. BloodSkeleton35Service.OwnedCount must include
+living authored carrier so the free45s skeleton cannot occupy its reserved slot.
+Continue ownership/slot/cargo implementation before declaring all35/70 complete.
+
+OTHER LIVE/TECHNICAL GATES
+Hammer35 has actual width writer+inner zone but user radius failure not LIVE_PASS;
+use existing [Hammer35] dispatch/target logs, not another speculative multiplier.
+Magic cage/frost/storm/fire charge/Run phase VFX require user-side acceptance of116+.
+Axe70 server readiness versus target-owner execution remains audit risk, not a
+proven current failure. Crafting/gathering/cooking existing mechanics not rewritten.
+Fishing35 explicitly RollChance(.50f); previous subagent guaranteed-refund claim
+was incorrect. Do not infer windmill absence merely because it uses Smelter hooks.
+Do not start server for checks. Install only with stopped game/server and backup;
+formal CURRENT BUILD/LIVE VERIFIED/etc report only together with actual installation.

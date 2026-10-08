@@ -1,0 +1,1 @@
+Next: read coordinator TRIAGE; prepare effective NPC label contract and audit actual Animator/ZSyncAnimation/Fireplace refill before mutation. Inspect active shared reservations. No install or FPS gain claims.

@@ -1,0 +1,22 @@
+# INTEGRATED_UI_DEPLOY_20261005
+- Owner REGRESSION_INTEGRATION/root; infrastructure build/deploy rules.
+- Human authorization2026-10-05: "тепер і юай" resumes previous client/server install scope and explicitly includes previously excluded UI/UX update.
+- Acceptance: only four approved UX source files differ from installed gameplay source; released UX handoff accepted; fresh dual Build123/reference provenance; compiled affected EN/UA/staff strings and routing; no gameplay or raven compiled change; exact distinct installed hashes with rollback; no source/config/state/launch mutations.
+- Complexity NORMAL; root only.
+- Read-only src-modern/**, canonical project/tools and accepted owner handoffs. No gameplay or UX implementation/version bump.
+- Exact write reservations:
+  - .agent/tasks/regression/INTEGRATED_UI_DEPLOY_20261005.md
+  - .agent/progress/INTEGRATED_UI_DEPLOY_20261005.md
+  - .agent/handoffs/INTEGRATED_UI_DEPLOY_20261005.md
+  - validation/integrated-ui-deploy-20261005/** (new build/QC/manifests/report/scripts/rollback)
+  - bin/Perks123Client/**; bin/Perks123Server/**; obj/isolated123/Perks123Client/**; obj/isolated123/Perks123Server/**; project .nuget/**/.dotnet-home/** and validation/temp/** generated caches
+  - C:/ValheimModDev/BepInEx/plugins/ValheimMastery/ValheimMastery.dll and ValheimMastery.INTEGRATED_UI_DEPLOY_20261005.pending
+  - C:/Program Files (x86)/Steam/steamapps/common/Valheim dedicated server/BepInEx/plugins/ValheimMastery/ValheimMastery.dll and ValheimMastery.INTEGRATED_UI_DEPLOY_20261005.pending
+  - docs/architecture/BUILD_RUNTIME_BASELINE.md; docs/validation/1.4.123_POST_MIGRATION_BASELINE.md: dated installation supplements
+- Dependencies: UX_DESCRIPTIONS_RAVEN_REVIEW_20261005 COMPLETE/released/idle. Prior INTEGRATED35_70_UPDATE_NO_UX_20261005 complete; all three gameplay refinements remain source-identical outside four UX files. No overlap in planned writes.
+- UI source: PerkLocalization.cs/.Ukrainian.cs, PerkNarrativeService.cs, MasteryItemTooltipPatch.cs. Raven tutorials/seen flags unchanged.
+- Shared system mutation NONE by coordinator; existing owner-reviewed UI source only built/installed.
+- Regression: fresh source manifest stability; compiled UI strings, UA length guard and staff route; Harmony contracts; compiled non-UX type preservation against installed baseline (raven included); already verified29 gameplay groups remain scoped previous evidence, no new gameplay PASS.
+- Rollback: exact current DLL backups outside loader; staging and atomic replacement explicit backup paths; restore if verification fails. Both processes absent; no production launch or save/config edits.
+- Presentation N/A installation only. Actual UI wrapping/layout/language switches LIVE_TEST_REQUIRED, not tested by static checks.
+- Status COMPLETE;100% installation acceptance. All reservations RELEASED. Actual UI/gameplay live acceptance UNTESTED; see report/progress/handoff.

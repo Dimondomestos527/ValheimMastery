@@ -1,0 +1,114 @@
+VALHEIM MASTERY — CRAFTING100 CURRENT CHECKPOINT (2026-10-03)
+
+USER PRIORITY UPDATE (2026-10-03)
+Crafting100 is deferred at the user's request. Finish approved level35/70 perks first.
+Keep installed118 Gold behavior intact; no Phase100-B until actual LIVE_PASS.
+Deferred feedback: remove activation inner subframe and duplicate Hammer icon;
+place activation text directly in Volundr card; use native Valheim button styling
+for Pantheon, Mastery and activation; show armed state visually, not only in text.
+Investigate final Favor point after admin999: user could not earn it; screenshot
+showed1000/1000. Rounded animated display is a hypothesis, not a verified cause.
+Check real ledger value, accepted events and notification before changing gain.
+Arming below1000 currently follows approved costs500/250; requiring a full bar is
+a possible NEW design decision, not an established bug. Resolve on Gold resumption.
+No Gold LIVE_PASS recorded. All player-facing test instructions must be Ukrainian.
+
+ACTIVE SPEC
+C:\Users\Domesos\.codex\attachments\e9b909af-02c0-44b7-9cd1-480b2da4d128\Вставлений текст.txt
+Crafting only. Phase100-A STATIC_IMPLEMENTED / LIVE_TEST_REQUIRED.
+STOP: do not begin Phase100-B or functional biome Idols before user LIVE_PASS.
+Read the full specification when resuming; this checkpoint is not a substitute.
+
+CURRENT BUILD
+Installed client/server/friend: 1.4.118. Gold118 native builds PASS.
+Source119 candidate resumes35/70 only; see PERKS35_70_ACTIVE_CHECKPOINT.txt.
+Installed with tools/Install118.ps1; both game processes absent before/after.
+Neither game nor server was started. No live Gold gameplay/render/network test.
+Backup: dist/Backup_pre_1.4.118_20261003_212129
+Prior DLL/config and all 62 DEEEP saved-world files backed up and hash checked.
+Client/friend SHA256: 6EC2A6A552E148CAE53047C4AB24914B6BEAEDD3147C08DD423F77559D935E86
+Server SHA256: 5A18C8B54904758A7D5C015415DB5110E48A2B96C35B0D0A55DAA41466AF5FDC
+Friend: dist/ValheimMastery_1.4.118_ForFriend/ValheimMastery.dll
+
+LATEST118 CORRECTIONS
+Gold ceremony waits generic Duration5s plus .1s and actual local frame disappearance.
+Stronger bounded native forge ignition, pressure ring and rising sparks; one impact.
+Pantheon text fixed (all fixed-Y rows normalized), arm button within Hammer patron card.
+Full Favor crossing notification+sound once, no rejoin/sync replay. Cosmetic debug:
+vm favor ceremony (admin/debug only; no progression/seen/ledger mutation).
+GoldCrafting.FavorChargeTimeMultiplier defaults4, awards divided AFTER event cap.
+CraftingBuildReuseModel/Service: per-player, per-world, per-piece-type negative
+replacement credits, TTL300s from last manual removal. Matching placement consumes
+one and skips RaiseSkill/action context, hence no XP/Favor; other types unaffected.
+Local profile customData uses native autosave/logout, server mirror kept in session
+and checked before Favor. No synchronous disk flush per hammer press; crash-before-save
+can lose recent local debts, server restart loses mirror. This is a bounded anti-spam
+feature under vanilla owner trust, not a new anti-cheat/progression architecture.
+Native RemovePiece accepted path captured; ruins/natural collapse/support untouched.
+Ukrainian checklist Gold100A_LIVE_TEST.txt. Current change report PATCH118_REPORT.txt.
+
+IMPLEMENTED PHASE A
+- GoldCrafting.EnableCrafting100=true by default. Item actions require authenticated
+  server state and an available durable ledger; unavailable storage fails closed.
+- GoldCraftingService: authoritative world+character Crafting100 unlock, persisted
+  BEFORE one-shot Volundr recognition; nearby presentation relay; no replay on relog.
+  Shared Crafting100 protected floor unchanged. Native forge/anvil/embers assets.
+- GoldPantheonUi: Skills-window entry hidden before Gold unlock, only Volundr;
+  Favor0..1000, smooth display, restrained pulses; future Idols clearly deferred.
+- GoldCraftingLedger schema3: CRC, atomic replacement/backup, signed player IDs,
+  dirty flush15s/shutdown; reservation/commit/unlock synchronous durability.
+  Persistent online game-time Divine Exhaustion1200s; Favor never decays.
+- Divine Inspiration: configurable F7 (native R hides weapons); Hammer required,
+  including its native station-hidden logical slot. Manual cancel/unequip/death/logout
+  spend nothing. Armed state is marker-only, not a hidden stat buff.
+- GoldDivineTransactions: independent authenticated grant/receipt protocol;
+  intercepts BEFORE Workshop/native resource consumption. Free Masterwork: ONE
+  upgradeable nonstackable equipment item, Q5/full durability, correct known recipe,
+  station/level/access, variant and legitimate crafter; gold patron metadata/tooltip.
+  Cost500Favor, only successful settlement starts shared cooldown and clears arm.
+- Divine Forge: SAME existing ItemData +3 quality without native-max clamp,
+  full durability, original metadata retained; EXACTLY ONE native recipe-selected
+  upgrade idol. Cost250Favor, guaranteed divine success. Not ordinary Forge.
+- Owner profile journal REQUESTED/APPLIED/REJECTED bound to current world/player.
+  Reserve before grant; native result AND receipt durably saved before ACK;
+  server commit before SETTLED. Native FileWriter.Finish success explicitly checked.
+  APPLIED recovery never reapplies result; committed-token replay never double spends.
+  Pending grants never auto-refunded/expired after delivery. Save/rollback ambiguity
+  quarantines current session until rejoin; UI/transport failure cannot undo saved item.
+- GoldFavorService/Model/Telemetry: authenticated semantic Crafting events, bounded
+  rolling cheap-repetition diminishing, diversity preserved with bounded LRU history,
+  maximum100Favor/event. Conversion configurable0.5Favor/XP, PROVISIONAL.
+  Processing uses attributed completion evidence, persistent64-proof station ring,
+  out-of-order replay bitmap and owner ACK/retry. Canonical processing boss multiplier;
+  no guessed first-unique bonus. Persisted background cap300Favor/player/hour,
+  online Gold author and real workshop coverage required; no idle time minting Favor.
+- vm favor show/set/add/trace: server-authoritative reply, admin/host plus server
+  UIDebugLogging required; trace OFF by default; raw XP/diminishing/gain telemetry.
+- StationBulkLoad: quarter TOTAL capacity including native first unit; ceil for odd
+  capacities, free-space/resources/input checks. UA/EN Crafting35/100 text updated.
+
+PRESERVED
+Current Workshop chest craft/build/upgrade latency strategy, atomic debit, leases,
+proofs and recovery unchanged. No obsolete Repair All/station-level bypass restored.
+Crafting35 resource-saving chance unchanged. Ordinary Potential Forge keeps one
+chosen idol; within resource cap0break and10% failure/downgrade, above-cap risk unchanged.
+Other approved combat/magic/movement/gathering mechanics unchanged by this phase.
+
+STATIC VERIFICATION
+Native client build:0errors9warnings; native server:0errors7warnings.
+Latest DLL contracts352/errors0 per target; Gold100 Cecil21 shape checks each.
+Managed ledger/Favor QC: persistence, cooldown, duplicates, cap, corruption/write
+failure, legacy migration, ordered/unordered production, bounded diversity history PASS.
+Managed receipt-policy/ledger recovery QC PASS. This models durable states, not Unity.
+Earlier same-phase workshop-boundaries, workshop-atomic, forge-safety and patch116
+regression shape checks PASS. No assertion here establishes live gameplay correctness.
+Use recognized qc-harmony-smoke modes; bare/unrecognized mode attempts native
+Harmony inside net8 and fails AccessTools initialization (not a game runtime result).
+
+KNOWN LIMITATIONS / NEXT
+Favor target60–90min normal active session is NOT measured/calibrated live yet;
+0.5 conversion / charge-time multiplier4 = provisional rate; no verified balance claim.
+Visual/audio quality, actual inventory/above-cap item save/repair/transfer and live
+dedicated-server recovery require Gold100A_LIVE_TEST.txt (A–R + focused edges).
+User starts the server. Do not start server/game for automated checks.
+After user LIVE_PASS only: Phase100-B Idol framework, then separately gated biome phases.

@@ -1,0 +1,2 @@
+ACTIVE trace25/25; exact live failing line unknown. Source hypotheses Suspend missing Piece or missing table collection/native teardown; no blind financial repair. Reservations held.
+COMPLETE bounded owner candidate100/100 (25trace+30implementation+35static/review+10handoff), SOURCE/STATIC only. ReviewerPASS final3hashes; exact live cause/reentry impact UNKNOWN. Combined7overlay and cumulativeDLL validation/utility100-idol-shutdown-lifecycle-20261007. Allsource reservations RELEASED; installedunchanged/no deployment. Root final acceptance +liveexit/reentry/reconnect next.

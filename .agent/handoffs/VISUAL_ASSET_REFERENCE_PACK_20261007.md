@@ -1,0 +1,9 @@
+# External design reference export
+
+Delivered v001 ZIP under validation/visual-asset-reference-pack-20261007. Read README_UA.md, PRIORITY_BATCH_B_UA.md and UNRESOLVED_AND_COVERAGE_UA.md first. BROWSE.html is an offline searchable index with relative image references; structurally checked, browser interaction not tested.
+
+Valheim1.0.16 verified through Version..cctor and hashed local native sources. 13 categories /20106 evidence records; this is not a count of unique complete assets. Native extraction + direct ItemDrop icon bindings establish12 BatchB identities. Reviewer PASS. AxeEarly is the real paired Early Axes. Its native64px transparent canvas was restored from63px packed crop using serialized native offset; no scaling or invented pixels. Historical wiki downloads and tier filenames had wrong substitutions. Senior identities from older mappings are controls, not newly approved art.
+
+Native inventory/UI pixels and texture support were visually inspected in11 contact sheets. Large multi-angle model renders remain unavailable0/12; precise hidden geometry redraw is not justified. Audio37 and animation90 metadata samples are SOURCE VERIFIED ONLY, not auditions. VFX/component/material existence does not authorize safe cosmetic reuse. Style copies retain exact hashes and original approval provenance; latest Bronze Sword/Mace local version not established, no regeneration permitted. Supplied approved frame family copied; matte/gloss selection unresolved in this export.
+
+1985 PNGs decoded,12 redundant export copies deduplicated;4409 internal links checked,0 broken. ZIP CRC and all member hashes PASS. Native source/style hashes unchanged. Production gameplay/UI source, config, saves, server/client installs and asset approvals unchanged by this task. No builds or launches. Migration baseline not completed by an asset export.

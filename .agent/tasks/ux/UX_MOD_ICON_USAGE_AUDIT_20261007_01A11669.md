@@ -1,0 +1,12 @@
+# UX_MOD_ICON_USAGE_AUDIT_20261007_01A11669
+- Owner/profile: root / CORE_UX_TUTORIALS
+- Goal: Ukrainian source-grounded report of icons used by this mod's perk triggers, buffs and cooldowns only.
+- Acceptance: exact execution paths/icon sources; distinguish native donor reused by mod from unrelated vanilla effects, no generated art; compile guards noted; no live appearance claims.
+- Scope: read src-modern + current csproj/tools/Build123.ps1, named current architecture docs. Exact writes: own .agent/tasks/ux/UX_MOD_ICON_USAGE_AUDIT_20261007_01A11669.md; .agent/progress/UX_MOD_ICON_USAGE_AUDIT_20261007_01A11669.md; .agent/handoffs/UX_MOD_ICON_USAGE_AUDIT_20261007_01A11669.md; validation/icon-usage-audit-20261007-01a11669/**.
+- Non-goals: custom art generation/import; code/mechanic/build/deploy/launch changes; unrelated vanilla effect inventory; memory updates.
+- Complexity: NORMAL, root-only.
+- Shared systems touched: NONE (read-only).
+- Regression: static source-path/icon callsite review only, no gameplay tests.
+- Status: COMPLETE
+- Dependencies: no source write reservations; current source may evolve in other chats, capture evidence snapshot.
+- Presentation/VFX/SFX plan: N/A, audit only.

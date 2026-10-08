@@ -1,0 +1,7 @@
+﻿# UTILITY100_IDOL_PIPELINE_INSTALL_20261006
+COMPLETE INSTALLED NORMAL root-only deployment. Human explicitly said «Встановлюй» after completed reviewed pipeline. Authorizes Client+Server DLL install with backups/readback; no game launch, world/profile/config changes.
+Exact reservations: client C:/ValheimModDev/BepInEx/plugins/ValheimMastery/ValheimMastery.dll; server BepInEx/plugins/ValheimMastery/ValheimMastery.dll; task-specific sibling staging paths .UTILITY100_IDOL_PIPELINE_INSTALL_20261006.pending; own validation/utility100-idol-pipeline-install-20261006/**; own task/progress/handoff.
+Actual installed Client161130B0... /Server06417C3B... matches utility100-polish-install-20261005 baseline. Candidate pipeline285C9CEA.../15FB30D6... includes reviewed memory-index+pipeline changes only; verify cumulative foreign IL preservation before deployment. Gold ACK exact approval retained; no new Gold change. Build/models/native contracts already passed candidate; do not broaden redundant tests.
+Phases: baseline/protection25, preservation35, install/readback30, docs10. No gameplay/runtime verified claim.
+
+Root-only install complete.25+35+30+10=100 measured installation phases. Baseline/preservationPASS1080foreign types each; atomicclient/serverreplace andbackup/readbackPASS; bothconfigsunchanged. Evidence validation/utility100-idol-pipeline-install-20261006/REPORT.md andinstalled.csv. No runtime launch/LIVE claims. Reservations released.

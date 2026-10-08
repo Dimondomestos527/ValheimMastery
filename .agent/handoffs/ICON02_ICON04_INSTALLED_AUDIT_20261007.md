@@ -1,0 +1,5 @@
+# ICON02_ICON04_INSTALLED_AUDIT_20261007
+READ-ONLYauditCOMPLETE100/100, reservationsRELEASED. Handoff validation/icon02-icon04-combat-audit-20261007/HANDOFF_UA.md andClient/ServerILlogs. No source/build/deploy/launch/assets/config/statewrites; no LIVE/migrationcausalityclaim.
+ICON02 STATICFAILstatusconsume-lifecycle: ReadyUntil0 onacceptedDodge butnoRemoveStatusEffect inConfirmDodge/PlayDodge/Tick/EndDodge, readySEttl5 separate. HUDactualappearanceUNTESTED. Boundfuturefix ShadowStep35Servicenotifications+PhaseAVfx ShadowStepVisualService owneduniquename/hash+cleanup/rearm; donottouchAssassinBlinkcooldown/globalSE.
+ICON04 STATICPASS10buff/15cooldown separation, P3UXAMBIGUITY single15smarker. ApplySlashBuff onlySlashBuffUntil>=Time.time/1.25m_slash, marker15notdamagepath. Human/CoreUXchoice splitmarkers vsonephase-switchmarkerpending, ONLYpresentationfix; no combatduration/damagechange. Fulltiming/remote/manualtests inhandoff.
+Authority installedperformance-pilot-a-deploy-20261007/snapshotClient02A103FD.../Server39130910... freshlymatch; canonicalpending100notused. Rootintegrationpermissionseparate.

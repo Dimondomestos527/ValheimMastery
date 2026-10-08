@@ -1,0 +1,7 @@
+# AVAILABLE_PATCHES_DEPLOY_20261006
+Human authorizes available finalized patches client/server. REGRESSION_INTEGRATION.
+Reservations HELD own3records,validation/available-patches-deploy-20261006/**,client/serverDLL + AVAILABLE_PATCHES_DEPLOY_20261006.pending,dated2baselineappendices.
+Actual installed combat-presentation3CDC/E016 frozenbase. Accepted cumulative Utility social/recruitment/effects/welcome snapshotGold9 ONLY MasterIdol diffs; knife70 accepted1file; combat divine trial5reviewedsource/test files. No active/unreviewed/coreGold10/paidCombat/scaffolding, no canonical/source/config/save/launch edits.
+SHARED SYSTEM CHANGE accepted owner-reviewed nativeAI/ZDOseat/resident authority plus scopedknifeexistingRPC timing andUXassets/localization. Reviews source approvals in released ownerhandoffs. ROOT isolatedserialintegration; preserve Gold/Crossbow/Pickaxe/other source+compiledIL. HEADLESS VFX_SFX RECONNECT SERVER_RESTART SAVE_ORDER.
+Phases15readiness1;50snapshot/build/preservation/QC4;25rollback/install/integrity3;10docs1. LIVE UNTESTED/baseline INCOMPLETE. Runtime absent; halt if runtime starts.
+COMPLETE INSTALL/STATIC VERIFIED;15%(1/1)+50%(4/4)+25%(3/3)+10%(1/1)=100% scoped deployment. ExactreservationsRELEASED.28overlays/6QC499contracts0errors/1158unrelatedtypesunchanged;allinstalled/backup/config/statehashesPASS. No runtime orprotectedstate edits. LIVEUNTESTED/baselineINCOMPLETE. Report validation/available-patches-deploy-20261006/DEPLOYMENT_REPORT_UA.md; nextmanualknife/divinetrial/Utilitysocial+networktests.

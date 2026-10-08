@@ -1,0 +1,2 @@
+# COMBAT35_70_NATIVE_HAMMER_MACE_CROSSBOW_20261005
+HANDOFF_READY / STATIC_PARTIAL / LIVE_PENDING. Reservations RELEASED. No installed DLL change/runtime launch. Evidence20/20; hammer25/25 SOURCE; mace25/25 SOURCE; dual/static15/20 (dualbuild,focused28,contracts406/0,combat-input PASS; general patch123 FAIL run scheduler); handoff10/10. Measured source/static95/100, not visual/gameplay acceptance. Crossbow scout complete; user new TZ tracked separately.

@@ -1,0 +1,3 @@
+ACTIVE80%static/log/research/planning/handoffprepared; runtimeA/B20%NOTRUN. CauseUNTESTED; lowFPSuserFAIL. Ownerdispatchpending; no config/install/source/protectedstate edits.
+Workshopaudit messageUtility35/70DELIVERED;NPC/lightperformanceauditUtility100DELIVERED. Readonlystatic/research/ownerdispatch80% complete;requiredcontrolledruntime20%pending. Existingidolreloadfix retainspriority; no settings/gameplay/source changes.
+User reports major FPS improvement lowering shadows/lighting, 2026-10-07. Qualitative settings comparison recorded; no numerical controlled A/B or frame profiling. See live-log-monitor-20261007/SESSION_REVIEW_UA.md. Render contribution supported; mod contribution UNTESTED. Capture closed, causal audit remains ACTIVE80%.

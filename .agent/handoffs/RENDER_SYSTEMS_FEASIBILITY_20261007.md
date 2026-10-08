@@ -1,0 +1,1 @@
+Next onlywithhumanapproval: chooseboundedmeasurement/optimizationproposalfromvalidation/render-systems-feasibility-20261007/FEASIBILITY_UA.md. Native/worldsupport/smoke/AI/networksemantics mustpreserve. Do notstartnewimplementation or optimizationplugin/API/engineupgrade basedonaudit. Existingapproveddomainworknotcancelled;thisfeasibilitydoesnotextendit. Baselineincomplete.

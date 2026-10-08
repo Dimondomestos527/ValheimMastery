@@ -1,0 +1,1 @@
+COMPLETE100%=preparation20/build20/combinedQC35/install-integrity25. Exact report validation/ready_patches_deploy_20261007/DEPLOYMENT_REPORT_UA.md. Installed client A267373E/serverE938CF63 verified +rollback/config/sampledstate/singleDLL/no pending PASS. Actual gameplay UNTESTED; baseline INCOMPLETE.

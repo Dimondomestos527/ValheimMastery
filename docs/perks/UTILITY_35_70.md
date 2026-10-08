@@ -1,0 +1,26 @@
+# Canonical source-derived index
+
+As of2026-10-04,1.4.123. Read CONTEXT_AND_STATUS and KNOWN_ISSUES. This is a concise source navigation/status placeholder, not a full gameplay specification. Exact mechanics require current source and compile gates; no new design approval. Gameplay regression DEFERRED. No source presence promoted to LIVE VERIFIED.
+
+## Status: MIXED
+IMPLEMENTED IN SOURCE: Run/Jump/Sneak/Swim/Fishing/Ride/Farming/WoodCutting/Pickaxes/Cooking/Crafting35/70; workshop/network storage; processing attribution; Potential Forge paths listed below; build-gated exceptions must be checked.
+STATIC VERIFIED: current variant build/registration evidence; not mechanical acceptance.
+LIVE VERIFIED: no complete current1.4.123 domain matrix. Historical user reports/checkpoints are reference, not current PASS.
+## Owner / source
+UTILITY_35_70. MovementPerks.cs, RoadRhythmPhaseVisual.cs, Stride70Perk.cs, Fishing70Perk.cs, RidingPerkAuthority.cs, FarmingPerks.cs, Cooking35Perk.cs, CookingAuthorNetwork.cs, WoodCuttingChainService.cs, Pickaxes70SuperHit.cs, Workshop*.cs, ProcessingPersistentBatches.cs, SapHarvestBonus.cs, PotentialForgeSafetyPatch.cs, PotentialForgeRepair.cs.
+## Required regression
+Local/remote/owned/unowned inventory; debit/result once/cancel/retry/concurrent players; automatic output attribution; food/mead metadata; forge max quality/failure; sprint phases/jump/water; vein proc versus native support collapse.
+## Boundaries / current unresolved work
+Workshop network transactions/processing attribution/sap/Potential Forge remain utility, not separate gameplay chats. Run phase visuals and pickaxe vein/support behavior unresolved from previous live reports; pickaxe70 redesign explicitly DEFERRED pending user decision. ExtraToQuarterCapacity is current test contract, not historical HalfCapacity.
+Exact content/description owned here; UX framework changes need UX review. Shared systems require root record/review. Do not fix known issues during architecture work.
+
+## Pickaxes70 approved redesign candidate —2026-10-05
+UTILITY35_70_PICKAXE_IMPL_20261005 supersedes prior pickaxe design-deferred source status: human approved20% ordinary proc,1-2 nearest neighbours within3m receive50% raw incoming pickaxe damage; conditional fullcollapse5% (nominal1% eligible hit). Ordinary neighbours are no longer guaranteedkill; vanilla support cascades remain possible. Rawdamage captured before native resistance, native damage/drop/tier/owner gates retained; generated skillRaise0. Removed2s witness: scoped native RPC completion confirms actual wholevein destruction once; original-lethal scan stays native, extra scan only original-survived+bonus-kill to resolve current proc support loss. No indefinite old-proc attribution. Existing native VFX/SFX retained; EN/UA descriptions aligned without stale15%/x5 claims. Dual isolated builds/provenance PASS;41 actual-source deterministic/native contracts,432Harmony targets0errors,8tooling contracts per variant PASS; reviewer accepted. See matching handoff and validation/utility-pickaxes70-20261005/. SOURCE/STATIC VERIFIED candidate; not installed, live ore balance and VFX/SFX LIVE_TEST_REQUIRED.
+
+## Approved implementation candidate —2026-10-05
+Workshop early preparation is IMPLEMENTED IN SOURCE and STATIC VERIFIED for both1.4.123 variants: WorkshopPreparation/WorkshopPreparationCache; scoped ChestLease/RemoteCraft integration. Active native craft timer and selected building piece prewarm contributing ownership without quantity reservation/debit/output; actual actions still replan fresh stock/CAS. Craft warmth10s, build warmth30s; scheduling hints32/30s, debounce150ms; optional cap8 contributors/actor and64 candidate decodes. Protocol4 preparation falls back to legacy3 actual transactions. Actor-bound waiting, partial-handoff retirement, authenticated current-stock return stamps and recoverable preparation quarantine are included.
+Task/handoff: .agent/tasks/utility35_70/UTILITY35_70_EARLY_PREPARATION_IMPL_20261005.md and matching handoff; final validation/utility-early-preparation-20261005-accepted/. Dual builds and27 prep checks/60 boundaries per variant plus61 atomic model checks PASS. No deployment or live speed/regression verification; LIVE_TEST_REQUIRED. Run/chest-flow presentation unchanged by this task.
+
+## Run/preview regression candidate —2026-10-05
+UTILITY35_70_RUN_PREVIEW_REGRESSIONS_20261005 source/static candidate: Run70 natural feedback now uses air-jump native donor at reference size, vertical ring phase2/3 only, final phase more visible;32/64/64 streaks. Workshop observational recipe availability no longer collapses during busy/receipt/freeze; deferred native row refresh follows outcome/settlement. Native building pending-input scope avoids false missing-resource feedback without granting placement/output; actual missing stock and debit/CAS gates retained. Dual isolated builds/provenance and23 new contracts +404 Harmony targets per variant PASS; existing prep/boundary/movement/atomic checks PASS. See matching handoff and validation/utility-run-preview-20261005/. Not installed and LIVE_TEST_REQUIRED; source-level fixes do not establish visible ring/UI gameplay acceptance.
+

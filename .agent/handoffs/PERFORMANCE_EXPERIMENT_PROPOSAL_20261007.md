@@ -1,0 +1,1 @@
+See validation/performance-experiment-proposal-20261007/PROPOSAL_UA.md. Recommend first Visual settled-write guards and NPC component caches/inactive fastpaths; later geometry/world index after freshness review. No code or installed changes. DefaultOFF exact baseline rollback. Await selected pilot; separate explicit installation.

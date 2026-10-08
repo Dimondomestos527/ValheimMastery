@@ -1,0 +1,13 @@
+# UX_MOD_ICON_USAGE_AUDIT_20261007_01A11669 handoff
+- Status COMPLETE — source-grounded reports delivered. Date2026-10-07.
+- Scope: only this mod's usage of proc/status/cooldown icons. Generated visual drafts and unrelated native effect inventory excluded.
+- Source authority: current src-modern, ValheimMasteryPoC.csproj1.4.123, tools/Build123.ps1 constants. Canonical baseline documents used as navigation, not current live behavior proof.
+- Main report: validation/icon-usage-audit-20261007-01a11669/MOD_ICON_USAGE_REPORT_UA.html.35 descriptive rows; compact HUD native skill icons, ForPerk cached native icons/fallback, dynamic item/food icons,12 visible status variants (8 mechanics +4 idols), inherited native effects and no-icon indicators.
+- Separate technical report requested for main chat: validation/icon-usage-audit-20261007-01a11669/TECHNICAL_ICON_ISSUES_FOR_MAIN_CHAT_UA.html.5 issue cards: special-ID mapping fallback; consumed ready-marker lifetime; blocking cooldown-key aliases; Axe10s-buff/15s-marker UX ambiguity; cold icon cache risk.
+- Findings certainty: source facts verified; runtime reproduction pending. ICON-04 UX decision and ICON-05 cold-start risk are not claimed as proven live bugs. No fixes were made.
+- Evidence: SOURCE_EVIDENCE.json82 references/39 file hashes, MOD_ICON_USAGE_DATA.json35 rows, TECHNICAL_ICON_ISSUES_DATA.json5 cards; UTF-8/report row/card counts checked. make_reports.py regenerates local reports from data; no image generation or asset edits.
+- Active compile gates matter: old clubs shockwave, Blocking70 reflection/parry, retired #if false Blocking35 manual reflection, old elemental resonance are excluded from current proc inventory. Do not repair retired paths merely because they contain icon calls.
+- Native provenance: 4 idol-status types clone Piece icon from guard_stone. Bone cooldown uses hotbar StaffSkeleton icon; shieldrush current item icon; Feast actual food; Gold shared inspiration uses Crafting skill icon. Player.m_textIcon visual appearance not guessed or labelled as a specific exported PNG.
+- No screenshot/live gameplay test, no installed client/server DLL audit; do not promote to LIVE VERIFIED. No source files modified, no build/deploy/launch/import.
+- Exact next action: user reviews icon inventory; main chat may read technical report, confirm intended behavior, reserve shared files and implement only separately authorized fixes. No cross-chat message sent; report alone does not authorize integration/deployment.
+- Reservations: own report/task/progress/handoff released; no shared systems touched.

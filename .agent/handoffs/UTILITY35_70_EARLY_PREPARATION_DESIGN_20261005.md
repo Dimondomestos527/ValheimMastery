@@ -1,0 +1,9 @@
+# UTILITY35_70_EARLY_PREPARATION_DESIGN_20261005 handoff
+- COMPLETE design/source assessment. Owner remains BASELINE / READ-ONLY. No source/config/runtime/build/deploy changes.
+- Confirmed: chest RPC currently begins after native craft timer completes. Station-only prewarm exists. Existing old ResourceReservation service is uncalled and host-local/coarse network lock, unsuitable for dedicated background menu reservations.
+- Recommended first step: background source/count/ownership preparation during craft timer and build selected-piece dwell; distinct Prepared generation from action/escrow receipts. Actual debit/output after timer/placement validation, once. Cache metadata10–30s; short revocable ownership grace after cancel; no quantity hold just for idle menu.
+- Build: warm active category/recent material hints at menu open; selected-piece contributors before click; last32 pieces30s bounded LRU; preserve current guards and exact placement validation. Blanket wood/stone/marble basket reservation rejected because it hoards multiplayer stock and increases idle ownership work.
+- Quantity reservations optional later: only one actively crafting recipe/next hot piece; limited expiry and fairness; all relevant writers must honor it. Keep cache after cancel, release exclusive resource claim promptly. Full escrow/batch credits last resort due durable refund/replay risk.
+- Measurement: total click→output plus craft timer-end→output, prep hits/misses/revocations, cold/warm/menu dwell, competing players and cancellation. Early preparation can hide74–170ms ownership; cannot promise zero final RTT.
+- Next: explicit implementation authorization if user selects recommended first stage; unique task, exact reservations, SHARED SYSTEM CHANGE for protocol/core boundaries, root review/integration. No runtime deployment inferred.
+- Documentation reservations released after readback.

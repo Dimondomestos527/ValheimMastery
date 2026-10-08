@@ -1,0 +1,27 @@
+# GOLD_CORE_MULTIPATRON_LEDGER_20261005
+
+PROFILE: .agent/profiles/GOLD_CORE.md. Owner GOLD_CORE/root. COMPLEX.
+
+Authorization: human2026-10-05 «Продовжуй реалізацію» після Gold protocol review. Це перехід до implementation shared core; специфічні Combat100 effects залишаються поза scope. Runtime/deployment/production edits не авторизовані.
+
+Goal: реалізувати спільні patron wallets, frozen patron/action/cost transaction accounting, persisted cooldown origin, hold/conflict rules та Völundr-compatible migration. Підключити current Crafting consumer і authoritative wallet snapshots/Pantheon до нового core, не створюючи combat abilities або Favor economy rewards.
+
+Exact reservations RELEASED (root serial writes completed; final source/evidence readback PASS): src-modern/GoldCraftingLedger.cs; NEW src-modern/GoldPatronLedger.cs; NEW src-modern/GoldPatronState.cs; src-modern/GoldCooldownPolicy.cs comment only; src-modern/GoldCraftingService.cs shared state/admission; src-modern/GoldDivineTransactions.cs shared admission checks only, не effect methods; src-modern/GoldPantheonUi.cs domain wallet presentation only; qc-gold-ledger/Program.cs; qc-gold-ledger/qc-gold-ledger.csproj; qc-gold-transactions/qc-gold-transactions.csproj; NEW qc-gold-ledger/PatronChecks.cs; docs/gold/PANTHEON_CORE.md implementation appendix; own task/progress/handoff; NEW validation/gold-multipatron-20261005/** isolated source/build/QC/review evidence. No project/build script changes except own isolated verification script. Previous Gold/Utility100 reservations COMPLETE/RELEASED verified. GoldInspirationStatus.cs reservation amendment below also RELEASED.
+
+SHARED SYSTEM CHANGE:
+- System/files: Gold managed ledger/schema v4, frozen manual transaction/hold state and cooldown origin; shared Crafting admission; shared patron state sync/Pantheon cards; linked pure QC.
+- Reason: one authoritative player/world/patron wallet; linked skills use the same pool; A blocks all A and foreign>250 while foreign<=250 preserves timer; crash/replay-safe reserve/debit.
+- Affected domains: GOLD_CORE, UTILITY100 current Crafting consumer, future COMBAT100/MAGIC100, NETWORK shared state snapshots, UX domain presentation, INFRASTRUCTURE persistence/build.
+- Required regression: v1/v2/v3 migrations with pending/receipts/old1200 timers;999→1000, held cap, two skills/patrons/players/world files; price250/500 boundaries; duplicate requests/receipts/reject; write failure; reload/reconnect state; Crafting action equivalence; both reference variants. Runtime save-order/partition/native effect tests remain unexecuted, not model proof.
+
+Design: preserve existing GCL framing and legacy Völundr prefix, append bounded v4 wallet/coordinator state; old balance/pending/timer map only to Völundr. Shared Gold cooldown starts at durable financial commit as existing protocol; no claimed trusted lethal clock. New manual API uses monotonic generation and frozen patron/action/cost, replay only the same result. Prepared reactive hold is accounting/fence primitive; no client consume RPC, no optimistic native protection, no timeout refund; unresolved activation/effect atomicity remains Combat integration gate. Held funds remain within1000 cap. No rates/first rewards/unlock grants by inference.
+
+Review: maximum2 bounded read-only reviewers, exact proposal/source persistence + current Crafting/network/UI consumer compatibility. Root alone writes/integrates. No messages to other chats.
+
+Reservation amendment BEFORE write: src-modern/GoldInspirationStatus.cs, own shared marker-only availability/cleanup. Reason: чужий КД не повинен показувати Völundr250 як blocked; disabled/storage-fault reset видаляє marker. Affected GOLD_CORE/UX/UTILITY100; no stat/effect change. Reviewer source finding підтверджено; overlap held marker reservation не виявлено.
+
+Presentation/native plan: UI only runtime Unity Image/TMP/ScrollRect/RectMask2D primitives, existing font/icons; no new assets/VFX/SFX. Bounded panel480, one real card per unlocked wallet, total/available/held text. Headless has no local-player UI. Scene/character/disabled cleanup required; visual/controller/localization verification remains LIVE_TEST_REQUIRED. Existing action-specific cues/arm-removal requested in separate Utility100 task are not silently implemented here; Utility100 waits our GoldPantheonUi/GoldDivineTransactions release with isolated drafts.
+
+Weighted phases: scope/migration design15% (3units); implementation45% (wallets/schema,transaction/holds,consumer/sync/UI:3units); verification30% (managedQC,migration/failureQC,clientBuild,serverBuild,independentreview:5units); docs/handoff10% (2units). Total100 implementation/static scope, not LIVE VERIFIED. Status COMPLETE / SOURCE STATIC ACCEPTED; exact reservations RELEASED.
+
+Implementation criterion amendment BEFORE write: shared wallet/schema unit includes coordinator-only atomic split award + durable source/sequence receipt in the same Gold save. Це необхідна Gold accounting primitive для multiple skills/patrons, не Combat reward semantics/rates. Source id/sequence publisher-owned; no client award RPC/new live awards. Within existing exact GoldPatronLedger/GoldCraftingLedger/GoldPatronState/PatronChecks reservations. Additional shared domains COMBAT100 award adapter; regression duplicate/out-of-order/expiry, split all-or-none save, cap consumes once/no overflow bank, player/world isolation, write failure. Weights unchanged; previous successful build snapshots remain historical, final source requires new verification.

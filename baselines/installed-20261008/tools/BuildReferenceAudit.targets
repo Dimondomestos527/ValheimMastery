@@ -1,0 +1,11 @@
+<Project>
+  <Target Name="MasteryAuditBeforePublicize" BeforeTargets="Publicize" Condition="'$(MasteryReferenceAuditDirectory)' != ''">
+    <WriteLinesToFile File="$(MasteryReferenceAuditDirectory)/$(MasteryReferenceAuditVariant).pre-publicize.txt"
+      Lines="@(ReferencePath->'%(FullPath)|%(OriginalItemSpec)|%(ResolvedFrom)|%(Publicize)')" Overwrite="true" />
+    <Message Importance="high" Text="MASTERY_PROVENANCE $(MasteryReferenceAuditVariant) GameManaged=$(GameManaged) Intermediate=$(IntermediateOutputPath) CandidateSearch=$(AssemblySearchPath_UseCandidateAssemblyFiles)" />
+  </Target>
+  <Target Name="MasteryAuditCompilerReferences" BeforeTargets="CoreCompile" Condition="'$(MasteryReferenceAuditDirectory)' != ''">
+    <WriteLinesToFile File="$(MasteryReferenceAuditDirectory)/$(MasteryReferenceAuditVariant).compiler-references.txt"
+      Lines="@(ReferencePathWithRefAssemblies->'%(FullPath)|%(OriginalItemSpec)|%(ResolvedFrom)|%(Publicize)')" Overwrite="true" />
+  </Target>
+</Project>

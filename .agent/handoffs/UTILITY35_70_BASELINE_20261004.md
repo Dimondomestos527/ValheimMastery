@@ -1,0 +1,12 @@
+# UTILITY35_70_BASELINE_20261004 handoff
+- Current source/repository: C:\Program Files (x86)\Steam\steamapps\common\Valheim dedicated server\MasteryDev\ValheimMastery; project/plugin 1.4.123; 198 C# files in src-modern. Build123 symbols/variants recorded in progress. No Git initialization.
+- Completed: root/profile/bootstrap/canonical boundaries and bounded entry-point baseline for 11 skills plus workshop/storage/CAS/processing/forge. Evidence: matching progress source/class map. No full mechanic correctness audit; no new build/static-QC/live verification.
+- Current phase: BASELINE / READ-ONLY; persists until explicit human switch. Documentation lifecycle files only writable under this task.
+- Known gaps: KI03 Owned=true storage coverage; KI05 stale HalfCapacity QC; KI06/KI11 landing/run visuals and prior reports need current-build reproduction; KI10 native-support/pickaxe proc distinction and redesign DEFERRED; KI14 full gameplay regression DEFERRED.
+- Ownership: workshop/network storage/inventory locks/CAS/processing attribution/Potential Forge are Utility35/70 subsystems, not separate gameplay owners. Summon cargo belongs Magic35/70; XP/passives and 100 are outside this owner scope. Shared mixed classes require precise class boundaries; root integrates.
+- Exact next action: receive a named, bounded human task; bootstrap COMPLETE. Final source digest matched for 198 files and documentation readback completed. For further read-only work stay in current phase. Implementation requires explicit switch/scope, unique task/progress/handoff and exact file reservations checked for overlap. Shared mutation requires SHARED SYSTEM CHANGE before edits and affected-owner review. Native/concurrency investigations need bounded read-only scouts/reviewers where useful under root policy.
+- Minimal next-session files: AGENTS.md; .agent/profiles/UTILITY_35_70.md; .agent/tasks/utility35_70/UTILITY35_70_BASELINE_20261004.md; matching progress/handoff; relevant canonical sections and only targeted source/build gates.
+- Runtime/deployment/protected state: no game/server/client launch, install, build, packaging or production world/character/config/Workshop/Gold-state change. Prior installed-runtime statements in architecture docs were not revalidated here.
+- Shell limitation: sandbox ACL helper fails before shell startup; reviewed escalation works. Do not diagnose this as missing repository.
+- Reservations: only three documentation files, released after final verification. No implementation/shared files held.
+

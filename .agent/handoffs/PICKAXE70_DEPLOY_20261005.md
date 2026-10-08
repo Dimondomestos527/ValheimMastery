@@ -1,0 +1,7 @@
+# PICKAXE70_DEPLOY_20261005
+COMPLETE установка/STATIC VERIFIED; reservations RELEASED. BaselineINCOMPLETE/gameplayUNTESTED.
+Client39395EEE3D2F0635F97D15B36FE104091441C4EFADD985DD2F1992D66DEE5031/ServerEFCA3EC2A9B697C651AC0659C19D1A0D01A5F8463AB3B887DFC7B4130F6EBF05 version1.4.123.0.
+OnlyacceptedPickaxe4sourcefiles/scopedcontent;225inputs,39QC0fail,419contracts/variant;1031unrelatedincl53Gold100/34Crossbowunchanged,7miningtypesmatch. Active100excluded/sourceuntouched. LatestCrossbowownerdeployalreadyinstalled; stalefoundationhandoff notauthority.
+Evidence validation/pickaxe70-deploy-20261005/DEPLOYMENT_REPORT_UA.md/manifests/QC/preservation/content/provenance/deployment-installed/final-integrity;exactrollback.
+0processesatinstall, client35348externallystarted20:11:52afterinstall20:11:34; coordinatorno launch/stop/source/config/productionstate/agent/message/memory/Git/releasechanges.
+Nextaction manualcurrentSHAmining/turretcases/time/logs thennetwork/reconnect/restart/save; ForceProcnotfrequencyproof. Readroot/profile/bootstrap/thislifecycle/report and relevantowneronly.
