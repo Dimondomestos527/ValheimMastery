@@ -722,10 +722,19 @@ def framework(root,blob):
  if any_existing:
 
   if 'libdoorstop.dylib' in expected and all(
-      safe(root,n).is_file() and sha(safe(root,n).read_bytes())==digest
+      (n=='.doorstop_version' and not safe(root,n).exists()) or
+      (safe(root,n).is_file() and sha(safe(root,n).read_bytes())==digest)
       for n,digest in LEGACY_MAC_RUNTIME.items()):
    print('Preserving verified existing BepInEx macOS x64 5.4.23.2; updating Mastery only.')
    return {}
+
+  if 'libdoorstop.dylib' in expected and all(
+      safe(root,n).is_file() and sha(safe(root,n).read_bytes())==LEGACY_MAC_RUNTIME[n]
+      for n in ('libdoorstop.dylib','BepInEx/core/BepInEx.dll')):
+   differences=[n for n,digest in LEGACY_MAC_RUNTIME.items()
+       if not (n=='.doorstop_version' and not safe(root,n).exists())
+       and (not safe(root,n).is_file() or sha(safe(root,n).read_bytes())!=digest)]
+   raise ValueError('Recognized older Mac BepInEx; preserved without overwriting. Different or missing files: '+', '.join(differences))
 
   for n,b in expected.items():
 
