@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-ui-cooking-residents-20261008",
-  "archive": "server-1.4.123-ui-cooking-residents-20261008.zip",
-  "archive_sha256": "7917f7d646dff21bb557cf698c9e80f62fb9c072e9c5e353d39a70ec32f88ff6",
+  "version": "1.4.123-ui-hotfix-20261009",
+  "archive": "server-1.4.123-ui-hotfix-20261009.zip",
+  "archive_sha256": "9b16b604eed9da8a0ae1298b5cdaff27b1d20bb0d84335ae81ba0c8dda004478",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 19489280,
-      "sha256": "4bc15339b58a87e32b80dcc93b604489fd70876f949308b7da06b1b1b43c6b9e"
+      "size": 19492352,
+      "sha256": "e9e94ef3a66b42ef2652fcaa3f1a147af288285a2564e21c9be8014b66af2742"
     }
   ],
-  "validation": "DUALBUILD/PROVENANCE36/4;592ACTUALSTEAMCONTRACTS0ERRORS;10QCGATES;1462UNRELATEDTYPESAND73RESOURCESPRESERVED;OWNERSREVIEWED_UI_MEAD_FEASTXP_RESIDENTS;LIVEUNTESTED",
+  "validation": "UI_ONLY_F0EF_ON_PREVIOUS_APPROVED_RELEASE;NATIVE3_BUILD_AND19_QC_PASS;SOURCE_AND_FOREIGN_TYPES_AND73_RESOURCES_PRESERVED;HUMAN_APPROVED_IMMEDIATE_UI_RELEASE;LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
