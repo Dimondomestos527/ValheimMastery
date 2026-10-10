@@ -2,22 +2,24 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-xp-performance-20261010",
-  "archive": "server-1.4.123-xp-performance-20261010.zip",
-  "archive_sha256": "4ccc2eee8b1a39743fdb5e9ebe8959cc1c27e82da60b8f4f738cebe9cde22bd2",
+  "version": "1.4.123-startup-clock-hotfix-20261010",
+  "archive": "server-1.4.123-startup-clock-hotfix-20261010.zip",
+  "archive_sha256": "d7e8f4cd00d46adffc5421134c5780644f7f7d7576727353663e9cf748181516",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 24809984,
-      "sha256": "ac67bb7c42ad80b9cbc8c0e182124273e0588e1f40dfbc8960267da55f8cb022"
+      "size": 24809472,
+      "sha256": "62bfd24fce663548ec237f036b542a2a76a9ab52d92acb723661a1231d87ea7c"
     }
   ],
-  "validation": "XP_GRAPPLE_CRAFTING;RUN70_POI;FERMENTER_UI;P0P1_PERFORMANCE;73_RESOURCES_BYTE_PRESERVED;THREE_NATIVE_BUILDS;FOCUSED42_CRAFTING11;CLIENT_SERVER_METHODS_PRESERVED;HUMAN_AUTHORIZED_RELEASE_20261010;LIVE_UNTESTED",
+  "validation": "FROZEN_NATIVE3_STATIC_PASS;BASEAI_ONENABLE_TEST_LIVE_STARTUP_PASS;CLOCK_STATIC_PASS;MANUAL_GRAPPLE_RELEASE_LIVE_FAIL_DEFERRED;SERVER_PUBLIC_LIVE_UNTESTED;HUMAN_AUTHORIZED_RELEASE_20261010",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261009a"
+  "network_wire_identity": "1.4.123+rpc-20261009a",
+  "known_issues": [
+    "Block/JoyBlock early grapple release does not award XP; successor deferred to next package."
+  ]
 }
-
