@@ -2,20 +2,21 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-ui-hotfix-20261009",
-  "archive": "server-1.4.123-ui-hotfix-20261009.zip",
-  "archive_sha256": "9b16b604eed9da8a0ae1298b5cdaff27b1d20bb0d84335ae81ba0c8dda004478",
+  "version": "1.4.123-completion-20261010",
+  "archive": "server-1.4.123-completion-20261010.zip",
+  "archive_sha256": "47a18ecf58fa4334e192fe78b1db36a1f48505fc6e4478025f0d655d923988c7",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 19492352,
-      "sha256": "e9e94ef3a66b42ef2652fcaa3f1a147af288285a2564e21c9be8014b66af2742"
+      "size": 24802304,
+      "sha256": "701d362f2652b660ddf9663476e380f670be4babc7f6e42a2a59461755ae41b0"
     }
   ],
-  "validation": "UI_ONLY_F0EF_ON_PREVIOUS_APPROVED_RELEASE;NATIVE3_BUILD_AND19_QC_PASS;SOURCE_AND_FOREIGN_TYPES_AND73_RESOURCES_PRESERVED;HUMAN_APPROVED_IMMEDIATE_UI_RELEASE;LIVE_UNTESTED",
+  "validation": "SAME_REVIEWED_SOURCE_21_OVERLAYS;NATIVE3_BUILD_EXISTING_QC_PASS;73_RESOURCES_UNCHANGED;HUMAN_APPROVED_RELEASE_20261010;LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
-  "network_projection": 3
+  "network_projection": 3,
+  "network_wire_identity": "1.4.123+rpc-20261009a"
 }
