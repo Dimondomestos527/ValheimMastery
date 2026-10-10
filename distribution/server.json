@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-completion-connectfix-20261010",
-  "archive": "server-1.4.123-completion-connectfix-20261010.zip",
-  "archive_sha256": "6733ffb3fe2fca4c6d8e39972d6a8f1b5718dc0326b89e02cb0f9813b00a97ba",
+  "version": "1.4.123-xp-performance-20261010",
+  "archive": "server-1.4.123-xp-performance-20261010.zip",
+  "archive_sha256": "4ccc2eee8b1a39743fdb5e9ebe8959cc1c27e82da60b8f4f738cebe9cde22bd2",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 24802304,
-      "sha256": "d12c0d3965a7182673eade56020b0aed28480d62894ac2d41b1b5a3018cad3fa"
+      "size": 24809984,
+      "sha256": "ac67bb7c42ad80b9cbc8c0e182124273e0588e1f40dfbc8960267da55f8cb022"
     }
   ],
-  "validation": "PREWORLD_CONNECTION_FIX_ONE_SOURCE;61_CONTROLLED_LIFECYCLE_PASS;NATIVE3_BUILD;OTHER5428_METHODS_AND73_RESOURCES_UNCHANGED;HUMAN_APPROVED_CORRECTIVE_RELEASE_20261010;PATCHED_JOIN_LIVE_UNTESTED",
+  "validation": "XP_GRAPPLE_CRAFTING;RUN70_POI;FERMENTER_UI;P0P1_PERFORMANCE;73_RESOURCES_BYTE_PRESERVED;THREE_NATIVE_BUILDS;FOCUSED42_CRAFTING11;CLIENT_SERVER_METHODS_PRESERVED;HUMAN_AUTHORIZED_RELEASE_20261010;LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
@@ -20,3 +20,4 @@
   "network_projection": 3,
   "network_wire_identity": "1.4.123+rpc-20261009a"
 }
+
