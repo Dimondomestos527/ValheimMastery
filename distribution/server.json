@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-completion-20261010",
-  "archive": "server-1.4.123-completion-20261010.zip",
-  "archive_sha256": "47a18ecf58fa4334e192fe78b1db36a1f48505fc6e4478025f0d655d923988c7",
+  "version": "1.4.123-completion-connectfix-20261010",
+  "archive": "server-1.4.123-completion-connectfix-20261010.zip",
+  "archive_sha256": "6733ffb3fe2fca4c6d8e39972d6a8f1b5718dc0326b89e02cb0f9813b00a97ba",
   "files": [
     {
       "path": "ValheimMastery.dll",
       "size": 24802304,
-      "sha256": "701d362f2652b660ddf9663476e380f670be4babc7f6e42a2a59461755ae41b0"
+      "sha256": "d12c0d3965a7182673eade56020b0aed28480d62894ac2d41b1b5a3018cad3fa"
     }
   ],
-  "validation": "SAME_REVIEWED_SOURCE_21_OVERLAYS;NATIVE3_BUILD_EXISTING_QC_PASS;73_RESOURCES_UNCHANGED;HUMAN_APPROVED_RELEASE_20261010;LIVE_UNTESTED",
+  "validation": "PREWORLD_CONNECTION_FIX_ONE_SOURCE;61_CONTROLLED_LIFECYCLE_PASS;NATIVE3_BUILD;OTHER5428_METHODS_AND73_RESOURCES_UNCHANGED;HUMAN_APPROVED_CORRECTIVE_RELEASE_20261010;PATCHED_JOIN_LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
