@@ -15,17 +15,20 @@ namespace ValheimMastery
         {peer?.m_rpc?.Register<ZPackage>("VM_Idol_Dismantle_v1",Receive);peer?.m_rpc?.Register<ZPackage>("VM_Idol_Dismantle_Result_v1",Reply);}
         internal static void Tick()
         {
+            if(LegacyMasterIdolRemoval.LegacyActionsDisabled){Approved.Clear();PendingRequest=false;return;}
             if(Session!=ZNet.instance){Session=ZNet.instance;Approved.Clear();Next=NextReconcile=0;PendingRequest=false;}
             if(PendingRequest&&Time.unscaledTime>=Retry){Retry=Time.unscaledTime+.5f;var player=Player.m_localPlayer;var zdo=ZDOMan.instance?.GetZDO(Requested);if(Time.unscaledTime>=RetryUntil||!ReferenceEquals(player,RequestActor)||ZNet.instance.GetWorldUID()!=RequestedWorld||MasterIdolLoadIdentity.Generation!=RequestGeneration||(ZNet.instance.IsServer()?null:ZNet.instance.GetServerRPC())!=RequestRpc||player==null||player.m_nview?.IsValid()!=true||player.m_nview.GetZDO().m_uid!=RequestCharacter||player.IsDead()||zdo==null||zdo.GetString(MasterIdolWorldRegistry.TokenKey,"")!=RequestedToken){PendingRequest=false;}else{var packet=new ZPackage();packet.Write(RequestedWorld);packet.Write(player.GetPlayerID());packet.Write(Requested);packet.Write(RequestedToken);if(ZNet.instance.IsServer()){packet.SetPos(0);Receive(null,packet);}else ZNet.instance.GetServerRPC()?.Invoke("VM_Idol_Dismantle_v1",packet);}}
             if(Time.unscaledTime>=NextReconcile){NextReconcile=Time.unscaledTime+2f;MasterIdolFavor.Reconcile();}
         }
         internal static bool NativeAllowed(WearNTear wear)
         {
+            if(LegacyMasterIdolRemoval.LegacyActionsDisabled)return false;
             var zdo=wear?.GetComponent<ZNetView>()?.GetZDO();
             return ZNet.instance?.IsServer()==true&&Session==ZNet.instance&&zdo!=null&&Approved.TryGetValue(zdo.m_uid,out var token)&&zdo.GetString(MasterIdolWorldRegistry.TokenKey,"")==token;
         }
         internal static void Request(WearNTear wear)
         {
+            if(LegacyMasterIdolRemoval.LegacyActionsDisabled)return;
             var player=Player.m_localPlayer;var net=ZNet.instance;var idol=wear?.GetComponent<ZNetView>()?.GetZDO();
             if(player==null||net==null||idol==null||Time.unscaledTime<Next)return;
             Next=Time.unscaledTime+.5f;
@@ -48,6 +51,7 @@ namespace ValheimMastery
         }
         private static void Receive(ZRpc rpc,ZPackage packet)
         {
+            if(LegacyMasterIdolRemoval.LegacyActionsDisabled)return;
             var net=ZNet.instance;if(net?.IsServer()!=true||packet==null||packet.Size()>256)return;
             if(Session!=net){Session=net;Approved.Clear();}
             try

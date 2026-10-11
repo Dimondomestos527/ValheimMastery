@@ -199,8 +199,7 @@ namespace ValheimMastery
                 p.m_adrenaline = 0f; // Native full-bar excess policy: one proc, reset.
                 // Exact postcommit admission for direct-published timed buffs.
                 // Observer failure never rolls back the committed equipment proc.
-                try { Combat100BuffEligibility.RecordTrinketCommit(p); Combat100Muster.ObserveApplied(manager); }
-                catch (Exception error) { MasteryPlugin.Log.LogWarning("[Fists100] Muster observation failed: " + error.Message); }
+                // Passive-test build deliberately excludes the unwired paid Muster observer.
                 // Commit is now complete. Cosmetic callbacks cannot undo gameplay.
                 foreach (var clone in staged)
                 {

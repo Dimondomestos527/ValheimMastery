@@ -12,13 +12,23 @@ namespace ValheimMastery
         private readonly ParticleSystem.Particle[] Particles = new ParticleSystem.Particle[48];
         private float ChannelUntil;
         private float ChannelStarted;
+        private float NextAssetAttempt;
+        private bool Visible;
+
+        internal static Shield35HealingVisual Ensure(Character recipient)
+        {
+            if (recipient == null || Player.m_localPlayer == null || Application.isBatchMode) return null;
+            Shield35HealingVisual visual = recipient.GetComponent<Shield35HealingVisual>();
+            if (visual == null) visual = recipient.gameObject.AddComponent<Shield35HealingVisual>();
+            visual.enabled = true;
+            return visual;
+        }
 
         // Local cosmetic receipt only; shield state and renewal stay on the owner.
         internal static void Pulse(Character recipient)
         {
-            if (recipient == null) return;
-            Shield35HealingVisual visual = recipient.GetComponent<Shield35HealingVisual>();
-            if (visual == null) visual = recipient.gameObject.AddComponent<Shield35HealingVisual>();
+            Shield35HealingVisual visual = Ensure(recipient);
+            if (visual == null) return;
             if (Time.time >= visual.ChannelUntil) visual.ChannelStarted = Time.time;
             visual.ChannelUntil = Time.time + ChannelDuration;
         }
@@ -26,6 +36,14 @@ namespace ValheimMastery
         private void Awake()
         {
             Recipient = GetComponent<Character>();
+            if (Recipient == null || Player.m_localPlayer == null || Application.isBatchMode)
+            { Destroy(this); return; }
+        }
+        private bool TryInitialize()
+        {
+            if (Effect != null) return true;
+            if (Time.time < NextAssetAttempt) return false;
+            NextAssetAttempt = Time.time + .25f;
             Material material = null;
             GameObject asset = NativePerkAssetResolver.Resolve("vfx_StaffShield");
             if (asset != null)
@@ -33,7 +51,7 @@ namespace ValheimMastery
                     if (renderer.renderMode != ParticleSystemRenderMode.Mesh && renderer.sharedMaterial != null &&
                         renderer.GetComponent<ParticleSystem>()?.textureSheetAnimation.enabled != true)
                     { material = renderer.sharedMaterial; break; }
-            if (material == null) { Destroy(this); return; }
+            if (material == null) return false;
             GameObject root = new GameObject("VM_Shield35_Healing"); root.transform.SetParent(transform, false);
             Effect = root.AddComponent<ParticleSystem>(); Effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
             var main = Effect.main; main.maxParticles = Particles.Length; main.simulationSpace = ParticleSystemSimulationSpace.World;
@@ -44,14 +62,25 @@ namespace ValheimMastery
             visual.renderMode = ParticleSystemRenderMode.Billboard; visual.receiveShadows = false;
             visual.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             Effect.Play();
+            return true;
         }
         private void LateUpdate()
         {
-            if (Effect == null || Recipient == null) return;
+            if (Recipient == null || Player.m_localPlayer == null || Application.isBatchMode || Recipient.IsDead())
+            { Destroy(this); return; }
             bool channel = Time.time < ChannelUntil;
-            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value ||
-                (!MagicShield35Service.HasMasterShield(Recipient) && !channel))
-            { Effect.SetParticles(Particles, 0); return; }
+            if (!MagicShield35Service.HasMasterShield(Recipient) && !channel)
+            {
+                if (Effect != null) Effect.Clear();
+                Visible = false; enabled = false; return;
+            }
+            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+            {
+                if (Visible && Effect != null) Effect.Clear();
+                Visible = false; return;
+            }
+            if (!TryInitialize()) return;
+            Visible = true;
             Vector3 center = Recipient.GetCenterPoint();
             float radius = Mathf.Clamp(Recipient.GetRadius(), .35f, 1.25f) * .85f;
             // Consecutive one-second receipts extend the same flowing aftercast.

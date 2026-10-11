@@ -30,6 +30,11 @@ namespace ValheimMastery
         {
             if (player == null || player != Player.m_localPlayer || !MasteryRuntime.LegacyCatchUpEnabled)
                 return;
+
+            long id = player.GetPlayerID();
+            if (!QueuedPlayers.Contains(id) || !EligibleAt.TryGetValue(id, out float at) || Time.time < at)
+                return;
+
             ZNet net = ZNet.instance;
             if (net == null || net.GetWorld() == null)
                 return;
@@ -37,10 +42,6 @@ namespace ValheimMastery
             // Global keys are vanilla-synchronised to every connected client. Do not block the one-time
             // restoration behind our optional custom RPC handshake; this is essential for platform clients.
             WorldProgressionXpService.Refresh();
-
-            long id = player.GetPlayerID();
-            if (!QueuedPlayers.Contains(id) || !EligibleAt.TryGetValue(id, out float at) || Time.time < at)
-                return;
             QueuedPlayers.Remove(id);
             EligibleAt.Remove(id);
             Apply(player, net.GetWorldUID());

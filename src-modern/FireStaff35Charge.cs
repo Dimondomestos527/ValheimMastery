@@ -125,6 +125,13 @@ namespace ValheimMastery
         {
             if (player != Owner || player.m_animator == null) return;
             if (!Charging) return;
+            player.GetComponent<Fire35PoseDriver>()?.Draw(Held);
+            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+            {
+                if (CoreVisual != null) CoreVisual.Finish();
+                CoreVisual = null; VisualWeapon = null;
+                return;
+            }
             Transform weapon = player.m_visEquipment?.m_rightItemInstance?.transform;
             if (weapon != VisualWeapon || (CoreVisual == null && Time.time >= NextVisualRetry))
             {
@@ -133,7 +140,6 @@ namespace ValheimMastery
                 CoreVisual = Fire35CoreChargeVisual.Create(weapon);
                 NextVisualRetry = Time.time + .25f;
             }
-            player.GetComponent<Fire35PoseDriver>()?.Draw(Held);
             CoreVisual?.Draw(Held);
         }
         internal static void Prepare(Attack attack, Humanoid character, ItemDrop.ItemData weapon, ref float draw)
@@ -159,6 +165,7 @@ namespace ValheimMastery
                 bar.GetComponent<Image>().color = new Color(.12f, .05f, .02f, .9f);
                 GameObject fill = new GameObject("Fill", typeof(RectTransform), typeof(Image)); fill.transform.SetParent(bar.transform, false);
                 Fill = fill.GetComponent<Image>(); Fill.color = new Color(1f, .42f, .08f);
+                MasteryHudArtwork.Frame(bar.GetComponent<Image>(), "track.png"); MasteryHudArtwork.Fill(Fill);
                 GameObject text = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)); text.transform.SetParent(bar.transform, false);
                 Label = text.GetComponent<TextMeshProUGUI>(); Label.fontSize = 19f; Label.alignment = TextAlignmentOptions.Center;
                 text.GetComponent<RectTransform>().sizeDelta = new Vector2(300f, 35f); text.GetComponent<RectTransform>().anchoredPosition = new Vector2(0, 24f);
@@ -221,10 +228,10 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(Projectile), "OnHit")]
     internal static class Fire35ImpactVisualContextPatch
     {
-        internal sealed class State { internal EffectList Effects; internal float Scale; }
+        internal struct State { internal EffectList Effects; internal float Scale; internal bool Captured; }
         private static void Prefix(Projectile __instance, out State __state)
         {
-            __state = new State { Effects = FireStaff35Charge.ImpactEffects, Scale = FireStaff35Charge.ImpactScale };
+            __state = new State { Effects = FireStaff35Charge.ImpactEffects, Scale = FireStaff35Charge.ImpactScale, Captured = true };
             FireStaff35Charge.ImpactEffects = null; FireStaff35Charge.ImpactScale = 1f;
             if (FireStaff35Charge.IsStaff(__instance.m_weapon) && __instance.m_hitVariant >= 601 && __instance.m_hitVariant <= 606)
             {
@@ -234,7 +241,7 @@ namespace ValheimMastery
         }
         private static Exception Finalizer(State __state, Exception __exception)
         {
-            if (__state != null) { FireStaff35Charge.ImpactEffects = __state.Effects; FireStaff35Charge.ImpactScale = __state.Scale; }
+            if (__state.Captured) { FireStaff35Charge.ImpactEffects = __state.Effects; FireStaff35Charge.ImpactScale = __state.Scale; }
             return __exception;
         }
     }

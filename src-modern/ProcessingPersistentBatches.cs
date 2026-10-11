@@ -52,11 +52,12 @@ namespace ValheimMastery
             var ledger = ProcessingBatchLedger.Read(zdo.GetString(OutputKey, ""), previous);
             ledger.Items.Add(receipt); zdo.Set(OutputKey, ledger.Encode());
         }
-        internal static void Fx(Smelter station, long sender, int amount)
+        internal static void Fx(Smelter station, long sender, long playerId, int amount)
         {
-            if (station?.m_nview?.GetZDO()?.GetOwner() != sender || amount < 1 || amount > 4096) return;
+            if (station?.m_nview?.GetZDO()?.GetOwner() != sender || playerId == 0 || amount < 1 || amount > 4096) return;
             var player = Player.m_localPlayer;
-            if (player != null && (player.transform.position - station.transform.position).sqrMagnitude <= 900f)
+            if (player != null && player.GetPlayerID() == playerId &&
+                (player.transform.position - station.transform.position).sqrMagnitude <= 900f)
                 PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + amount, station.transform.position);
         }
     }
@@ -67,7 +68,8 @@ namespace ValheimMastery
         {
             if (__instance?.m_nview?.IsValid() != true) return;
             __instance.m_nview.Register<float>("VM_ProcessingAuthor", (sender, level) => ProcessingPersistentBatches.Claim(__instance, sender, level));
-            __instance.m_nview.Register<int>("VM_ProcessingBonusFx", (sender, amount) => ProcessingPersistentBatches.Fx(__instance, sender, amount));
+            __instance.m_nview.Register<long, int>("VM_ProcessingBonusFx",
+                (sender, playerId, amount) => ProcessingPersistentBatches.Fx(__instance, sender, playerId, amount));
         }
     }
     [HarmonyPatch(typeof(Smelter), "OnAddOre")]

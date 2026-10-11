@@ -9,11 +9,11 @@ namespace ValheimMastery
     // not the builder, the nearest bystander, or the network owner of the collector.
     internal static class SapHarvestBonus
     {
-        private sealed class Claim { internal float Level, Time; }
+        private sealed class Claim { internal long PlayerId; internal float Level, Time; }
         private static readonly ConditionalWeakTable<SapCollector, Dictionary<long, Claim>> Claims =
             new ConditionalWeakTable<SapCollector, Dictionary<long, Claim>>();
         internal sealed class Harvest
-        { internal int Units, Actual; internal float Level; internal SapCollector Collector; internal readonly HashSet<ItemDrop> Seen = new HashSet<ItemDrop>(); }
+        { internal long PlayerId; internal int Units, Actual; internal float Level; internal SapCollector Collector; internal readonly HashSet<ItemDrop> Seen = new HashSet<ItemDrop>(); }
         [System.ThreadStatic] internal static Harvest Active;
         internal static void ObserveOutput(ItemDrop item, int stack)
         {
@@ -29,18 +29,19 @@ namespace ValheimMastery
             if (collector?.m_nview?.IsValid() != true) return;
             collector.m_nview.Register<float>("VM_SapHarvestSkill", (sender, level) =>
             {
-                if (!collector.m_nview.IsOwner() || !OwnerSkillAuthority.Valid(level) ||
-                    ProcessingStationProgressionService.ResolveSender(sender) == 0) return;
+                long playerId = ProcessingStationProgressionService.ResolveSender(sender);
+                if (!collector.m_nview.IsOwner() || !OwnerSkillAuthority.Valid(level) || playerId == 0) return;
                 var claims = Claims.GetOrCreateValue(collector);
                 // Only live, short-lived interaction claims; no world-wide player cache.
                 foreach (long key in new List<long>(claims.Keys))
                     if (Time.time - claims[key].Time > 10f) claims.Remove(key);
-                claims[sender] = new Claim { Level = level, Time = Time.time };
+                claims[sender] = new Claim { PlayerId = playerId, Level = level, Time = Time.time };
             });
-            collector.m_nview.Register<int>("VM_SapBonusFx", (sender, count) =>
+            collector.m_nview.Register<long, int>("VM_SapBonusFx", (sender, playerId, count) =>
             {
                 Player player = Player.m_localPlayer;
-                if (collector.m_nview.GetZDO()?.GetOwner() != sender || count < 1 || count > 4096 || player == null ||
+                if (collector.m_nview.GetZDO()?.GetOwner() != sender || playerId == 0 || count < 1 || count > 4096 ||
+                    player == null || player.GetPlayerID() != playerId ||
                     (player.transform.position - collector.transform.position).sqrMagnitude > 900f) return;
                 PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + count, collector.transform.position);
             });
@@ -60,7 +61,7 @@ namespace ValheimMastery
             if (!claims.TryGetValue(caller, out Claim claim)) return null;
             claims.Remove(caller); // A repeated Extract cannot reuse the skill claim.
             if (Time.time - claim.Time > 10f || collector.GetLevel() <= 0) return null;
-            return new Harvest { Units = collector.GetLevel(), Collector = collector, Level = claim.Level };
+            return new Harvest { PlayerId = claim.PlayerId, Units = collector.GetLevel(), Collector = collector, Level = claim.Level };
         }
         internal static void After(SapCollector collector, Harvest harvest)
         {
@@ -79,7 +80,8 @@ namespace ValheimMastery
                 if (drop == null) break;
                 drop.SetStack(amount); bonus -= amount; delivered += amount;
             }
-            if (delivered > 0) collector.m_nview.InvokeRPC(ZNetView.Everybody, "VM_SapBonusFx", delivered);
+            if (delivered > 0 && harvest.PlayerId != 0)
+                collector.m_nview.InvokeRPC(ZNetView.Everybody, "VM_SapBonusFx", harvest.PlayerId, delivered);
         }
     }
     [HarmonyPatch(typeof(SapCollector), "Awake")]

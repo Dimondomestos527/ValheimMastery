@@ -82,7 +82,7 @@ namespace ValheimMastery
             { "farming_70", "vm_icon_skill_farming_silver_v002.png" },
             { "farming_100", "vm_icon_skill_farming_silver_v001.png" },
             { "cooking_35", "vm_icon_skill_cooking_v002.png" },
-            { "cooking_70", "vm_icon_skill_cooking_silver_v003.png" },
+            { "cooking_70", "vm_icon_skill_cooking_silver_v004.png" },
             { "cooking_100", "vm_icon_skill_cooking_gold_v002.png" },
             { "crafting_35", "vm_icon_skill_crafting_v001.png" },
             { "crafting_70", "vm_icon_skill_crafting_v001.png" },

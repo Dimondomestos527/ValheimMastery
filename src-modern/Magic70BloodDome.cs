@@ -29,6 +29,8 @@ namespace ValheimMastery
         private static string Pending;
         private static float PendingAt, PendingCost;
         private static float NextLeaseSweep;
+        private static readonly List<string> ExpiredLeases = new List<string>();
+        private static readonly List<long> ExpiredCooldowns = new List<long>();
         private static ZNet Session;
         private static void CheckSession()
         {
@@ -278,12 +280,12 @@ namespace ValheimMastery
         private static void PruneLeases()
         {
             if (ZNet.instance == null) return; long now = ZNet.instance.GetTime().Ticks;
-            List<string> remove = new List<string>();
-            foreach (var pair in ByToken) if (now >= pair.Value.Until) remove.Add(pair.Key);
-            foreach (string key in remove) { Lease value = ByToken[key]; ByToken.Remove(key); ByCaster.Remove(value.Author); }
-            List<long> expiredCooldowns = new List<long>();
-            foreach (var pair in Cooldowns) if (now >= pair.Value) expiredCooldowns.Add(pair.Key);
-            foreach (long player in expiredCooldowns) Cooldowns.Remove(player);
+            ExpiredLeases.Clear(); ExpiredCooldowns.Clear();
+            foreach (var pair in ByToken) if (now >= pair.Value.Until) ExpiredLeases.Add(pair.Key);
+            foreach (string key in ExpiredLeases) { Lease value = ByToken[key]; ByToken.Remove(key); ByCaster.Remove(value.Author); }
+            foreach (var pair in Cooldowns) if (now >= pair.Value) ExpiredCooldowns.Add(pair.Key);
+            foreach (long player in ExpiredCooldowns) Cooldowns.Remove(player);
+            ExpiredLeases.Clear(); ExpiredCooldowns.Clear();
         }
         internal static void Tick()
         {
@@ -532,16 +534,18 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(Character), "UpdateMotion")]
     internal static class Magic70BloodCageMotionPatch
     {
-        private static bool Prefix(Character __instance)
+        private static bool Prefix(Character __instance, out Magic70BloodCageHold __state)
         {
             Magic70BloodDome.Resume(__instance); // Also handles a live ownership handoff, not only a new spawn.
-            if (!Magic70BloodCageHold.Owns(__instance)) return true;
+            __state = __instance?.m_nview?.IsValid() == true && __instance.m_nview.IsOwner()
+                ? __instance.GetComponent<Magic70BloodCageHold>() : null;
+            if (__state?.Active != true) { __state = null; return true; }
             __instance.m_moveDir = Vector3.zero;
             return true; // Preserve native grounding, water and animation state updates.
         }
-        private static void Postfix(Character __instance)
+        private static void Postfix(Character __instance, Magic70BloodCageHold __state)
         {
-            if (!Magic70BloodCageHold.Owns(__instance) || __instance.m_body == null) return;
+            if (__state?.Active != true || __instance.m_body == null) return;
             __instance.m_body.linearVelocity = Vector3.zero; __instance.m_body.angularVelocity = Vector3.zero;
         }
     }

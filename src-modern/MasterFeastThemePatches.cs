@@ -81,7 +81,7 @@ namespace ValheimMastery
             marker.name = MarkerName;
             marker.m_name = "Master Feast — " + MasterFeastService.GetThemeDisplayName(state.Theme);
             marker.m_tooltip = MasterFeastService.GetTooltip(state);
-            marker.m_icon = state.FoodItem?.GetIcon() ?? PerkUiIconService.ForPerk("cooking_70", player.m_textIcon);
+            marker.m_icon = MasteryHudArtwork.Icon("cooking_70", state.FoodItem?.GetIcon() ?? player.m_textIcon);
             marker.m_ttl = Mathf.Max(1f, state.ExpireTime - Time.time);
             marker.m_flashIcon = false;
             player.m_seman.AddStatusEffect(marker, false, 0, marker.m_ttl, 0);

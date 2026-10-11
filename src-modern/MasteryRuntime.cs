@@ -55,7 +55,7 @@ namespace ValheimMastery
 
         internal static string Manifest()
         {
-            return MasteryPlugin.Version + "|" + TierStep.ToString("R", CultureInfo.InvariantCulture) + "|" +
+            return NetworkSync.WireIdentity + "|" + TierStep.ToString("R", CultureInfo.InvariantCulture) + "|" +
                 FirstUniqueMultiplier.ToString("R", CultureInfo.InvariantCulture) + "|" +
                 DodgeXpCoefficient.ToString("R", CultureInfo.InvariantCulture) + "|" +
                 WorldBossXpScalingEnabled + "|" + EarlyBossXpBonus.ToString("R", CultureInfo.InvariantCulture) + "|" +

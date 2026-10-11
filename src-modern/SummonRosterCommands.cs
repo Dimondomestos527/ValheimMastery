@@ -414,6 +414,7 @@ namespace ValheimMastery
             bar.GetComponent<Image>().color = new Color(.12f, .04f, .16f, .8f);
             var fill = new GameObject("Fill", typeof(RectTransform), typeof(Image)); fill.transform.SetParent(bar.transform, false);
             Fill = fill.GetComponent<Image>(); Fill.color = new Color(.7f, .3f, 1f, .9f);
+            MasteryHudArtwork.Frame(bar.GetComponent<Image>(), "track.png"); MasteryHudArtwork.Fill(Fill);
             var text = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)); text.transform.SetParent(bar.transform, false);
             var label = text.GetComponent<TextMeshProUGUI>(); label.fontSize = 17; label.alignment = TextAlignmentOptions.Center;
             label.text = Localization.instance?.GetSelectedLanguage() == "Ukrainian" ? "Відпустити супутника" : "Release companion";

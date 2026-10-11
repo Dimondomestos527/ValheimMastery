@@ -11,8 +11,10 @@ namespace ValheimMastery
         private static void Prefix()
         {
             MasterIdolCleanup.Run("interaction.reset",MasterIdolInteraction.Reset,Report);
+            MasterIdolCleanup.Run("legacy-removal.shutdown",LegacyMasterIdolRemoval.Shutdown,Report);
             MasterIdolCleanup.Run("placement.shutdown",MasterIdolPlacement.Shutdown,Report);
             MasterIdolCleanup.Run("pieces.suspend",MasterIdolPieces.Suspend,Report);
+            MasterIdolCleanup.Run("artwork.shutdown",MasterIdolArtwork.Shutdown,Report);
             // Reporting cannot interrupt the cleanup sequence; retain both exceptions and use Unity after all stages.
             if(MasterIdolCleanup.ReportingFailed)Debug.LogError(MasterIdolCleanup.Describe());
         }
@@ -27,13 +29,13 @@ namespace ValheimMastery
     {
         private static void Postfix()
         {
-            try { MasterIdolPlacement.Tick(); MasterIdolDismantle.Tick(); }
+            try { LegacyMasterIdolRemoval.Tick(); }
             catch (Exception error) { MasteryPlugin.Log.LogWarning("[MasterIdols] Update deferred: " + error.Message); }
         }
     }
     [HarmonyPatch(typeof(NetworkSync), nameof(NetworkSync.Register))]
     internal static class MasterIdolNetworkPatch
-    { private static void Postfix(ZNetPeer peer) { MasterIdolPlacement.Register(peer); MasterIdolInteraction.Register(peer); MasterIdolDismantle.Register(peer); } }
+    { private static void Postfix(ZNetPeer peer) { if(LegacyMasterIdolRemoval.LegacyActionsDisabled)return;MasterIdolPlacement.Register(peer); MasterIdolInteraction.Register(peer); MasterIdolDismantle.Register(peer); } }
     [HarmonyPatch(typeof(Player), nameof(Player.TryPlacePiece))]
     internal static class MasterIdolTryPlacePatch
     {
@@ -46,7 +48,8 @@ namespace ValheimMastery
     internal static class MasterIdolPlaceEntryPatch
     {
         [HarmonyPriority(Priority.First + 100)]
-        private static void Prefix(Player __instance, Piece piece, Vector3 pos, Quaternion rot) => MasterIdolPlacement.Enter(__instance, piece, pos, rot);
+        private static bool Prefix(Player __instance, Piece piece, Vector3 pos, Quaternion rot)
+        { if(MasterIdolPieces.Profile(piece)!=null&&LegacyMasterIdolRemoval.LegacyActionsDisabled)return false;MasterIdolPlacement.Enter(__instance,piece,pos,rot);return true; }
     }
     [HarmonyPatch(typeof(Player), "UpdatePlacement")]
     internal static class MasterIdolNativePaidPatch
@@ -74,7 +77,7 @@ namespace ValheimMastery
         private static void Prefix(ZDOMan __instance, ZDOID uid, out Observation __state)
         {
             __state=null;if(ZNet.instance?.IsServer()!=true)return;
-            var zdo=__instance.GetZDO(uid);var profile=MasterIdolWorldRegistry.Profile(zdo?.GetPrefab()??0);if(profile==null)return;
+            var zdo=__instance.GetZDO(uid);if(LegacyMasterIdolRemoval.IsLegacy(zdo))return;var profile=MasterIdolWorldRegistry.Profile(zdo?.GetPrefab()??0);if(profile==null)return;
             string token=zdo.GetString(MasterIdolWorldRegistry.TokenKey,"");var entry=MasterIdolWorldRegistry.Store?.Find(token);
             if(!MasterIdolLoadIdentity.Matches(entry,zdo))return;
             __state=new Observation{Token=token,Type=profile.Id,Creator=zdo.GetLong(ZDOVars.s_creator,0),Output=entry.Output,Session=ZNet.instance,World=ZNet.instance.GetWorldUID(),Manager=__instance,Object=zdo,LiveUid=uid,Generation=MasterIdolLoadIdentity.Generation};

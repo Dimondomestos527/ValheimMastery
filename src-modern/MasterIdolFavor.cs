@@ -12,6 +12,8 @@ namespace ValheimMastery
         internal static bool Buy(long payer,string token,string type)
         {
             var ledger=Ledger;if(ledger==null)return false;
+            var existing=ledger.FindIdol(World,payer,token,type);
+            if(existing==null&&!GoldCraftingService.EconomyEnabled)return false;
             if(!Success(ledger.BuyIdol(World,payer,token,type)))return false;
             var paid=ledger.FindIdol(World,payer,token,type);
             if(paid?.Phase!=GoldIdolPhase.Paid)return false;

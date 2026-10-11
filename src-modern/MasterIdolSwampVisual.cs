@@ -50,7 +50,7 @@ namespace ValheimMastery
     internal static class MasterIdolSwampDomeVisual
     {
         private sealed class Shell
-        {internal GameObject Object;internal Material Material;internal Vector3 Offset,Scale;}
+        {internal GameObject Object;internal Material Material;internal Vector3 Offset,Scale,TargetScale,Center;internal float Born;internal bool Opened;}
         private static readonly Dictionary<string,Shell> Shells=new Dictionary<string,Shell>(StringComparer.Ordinal);
         private static readonly HashSet<string> Seen=new HashSet<string>(StringComparer.Ordinal);
         private static readonly List<string> Remove=new List<string>();
@@ -58,10 +58,22 @@ namespace ValheimMastery
         internal static void Cleanup(){foreach(var shell in Shells.Values)Destroy(shell);Shells.Clear();Seen.Clear();Remove.Clear();Scene=null;Next=0;}
         private static void Destroy(Shell shell)
         {if(shell.Object!=null)UnityEngine.Object.Destroy(shell.Object);if(shell.Material!=null)UnityEngine.Object.Destroy(shell.Material);}
+        internal static float Opening(float age)=>Mathf.SmoothStep(.02f,1f,Mathf.Clamp01(age));
+        private static void Reveal(Shell shell)
+        {
+            if(shell.Object==null)return;
+            float age=Time.time-shell.Born;var scale=shell.TargetScale*Opening(age);
+            shell.Object.transform.localScale=scale;
+            shell.Object.transform.position=shell.Center-Vector3.Scale(shell.Offset,scale);
+            shell.Opened=age>=1f;
+        }
         internal static void Tick()
         {
             if(!ReferenceEquals(Scene,ZNetScene.instance)){foreach(var shell in Shells.Values)Destroy(shell);Shells.Clear();Scene=ZNetScene.instance;Next=0;}
-            if(Application.isBatchMode||Time.unscaledTime<Next)return;Next=Time.unscaledTime+.5f;Seen.Clear();
+            if(Application.isBatchMode)return;
+            // Animate only the existing bounded shells; donor/zone work stays .5s.
+            foreach(var shell in Shells.Values)if(!shell.Opened)Reveal(shell);
+            if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.5f;Seen.Clear();
             var player=Player.m_localPlayer;var domes=MasterIdolSwamp.Snapshot();
             if(player!=null&&Scene!=null)
             {
@@ -75,13 +87,14 @@ namespace ValheimMastery
                     if(!Shells.TryGetValue(dome.Id,out var shell))
                     {
                         var bounds=mesh.bounds;if(bounds.size.x<=0||bounds.size.y<=0||bounds.size.z<=0)continue;
-                        var obj=new GameObject("VM_SwampSanctuaryShell");obj.layer=donor.layer;
+                        var obj=new GameObject("VM_SwampSanctuaryShell");obj.SetActive(false);obj.layer=donor.layer;
                         obj.AddComponent<MeshFilter>().sharedMesh=mesh;var visual=obj.AddComponent<MeshRenderer>();
                         var material=new Material(nativeMaterial);visual.sharedMaterial=material;visual.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;visual.receiveShadows=false;
-                        shell=new Shell{Object=obj,Material=material,Offset=bounds.center,Scale=bounds.size};Shells.Add(dome.Id,shell);
+                        shell=new Shell{Object=obj,Material=material,Offset=bounds.center,Scale=bounds.size,Born=Time.time};Shells.Add(dome.Id,shell);
                     }
                     var scale=new Vector3(dome.Radius*2/shell.Scale.x,dome.Radius*2/shell.Scale.y,dome.Radius*2/shell.Scale.z);
-                    shell.Object.transform.localScale=scale;shell.Object.transform.position=dome.Center-Vector3.Scale(shell.Offset,scale);
+                    shell.TargetScale=scale;shell.Center=dome.Center;Reveal(shell);
+                    if(!shell.Object.activeSelf)shell.Object.SetActive(true);
                 }
             }
             Remove.Clear();foreach(var key in Shells.Keys)if(!Seen.Contains(key))Remove.Add(key);foreach(var key in Remove){Destroy(Shells[key]);Shells.Remove(key);}

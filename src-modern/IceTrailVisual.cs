@@ -30,7 +30,7 @@ namespace ValheimMastery
 
         internal static IceTrailVisual Create()
         {
-            if (Player.m_localPlayer == null || Application.isBatchMode) return null;
+            if (Player.m_localPlayer == null || Application.isBatchMode || !MasteryPlugin.Settings.EnablePerkProcVFX.Value) return null;
             GameObject root = new GameObject("ValheimMastery_NativeIceTrail");
             IceTrailVisual visual = root.AddComponent<IceTrailVisual>();
             visual.TryInitialize();
@@ -64,6 +64,12 @@ namespace ValheimMastery
         {
             // The first patch remains registered while asynchronous native assets
             // load, so the player need not cast a second patch to see it.
+            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+            {
+                if (Renderer != null) Renderer.enabled = false;
+                if (Flakes != null) Flakes.Clear(); if (AirborneSnow != null) AirborneSnow.Clear();
+                return;
+            }
             if (!TryInitialize() || Renderer == null) return;
             int zones = Mathf.Clamp(IceStaff35Trail.FillZonePoints(Points), 0, ZoneCapacity);
             bool visible = zones > 0 && MasteryPlugin.Settings.EnablePerkProcVFX.Value;

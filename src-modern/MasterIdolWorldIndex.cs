@@ -36,7 +36,8 @@ namespace ValheimMastery
         internal static void BeginLoad() { if (Loading == 0) LoadFailed = false; Loading++; Blocked = true; Reset(); }
         internal static void EndLoad(bool failed) { LoadFailed |= failed; Loading = Math.Max(0, Loading - 1); if (Loading == 0) Blocked = LoadFailed; }
         internal static void Shutdown() { Reset(); Loading = 0; Blocked = LoadFailed = false; }
-        internal static bool Ensure()
+        internal static bool Ensure()=>MasterIdolPilotA.Enabled?EnsureOptimized():EnsureOriginal();
+        private static bool EnsureOriginal()
         {
             var net = ZNet.instance; var manager = ZDOMan.instance;
             if (net?.IsServer() != true || net.GetWorld() == null || manager == null || ZNetScene.instance == null || MasterIdolPieces.Workbench == null || Blocked || Loading != 0) return false;
@@ -47,9 +48,19 @@ namespace ValheimMastery
             Populate(manager);
             StartupScans++; Ready = true; Revision++; return true;
         }
-        // Keep the cold scan closure outside Ensure: a captured local otherwise allocates on every cache hit.
+        private static bool EnsureOptimized()
+        {
+            var net = ZNet.instance; var manager = ZDOMan.instance;
+            if (net?.IsServer() != true || net.GetWorld() == null || manager == null || ZNetScene.instance == null || MasterIdolPieces.Workbench == null || Blocked || Loading != 0) return false;
+            if (!ReferenceEquals(Session, net) || !ReferenceEquals(Manager, manager) || World != net.GetWorldUID())
+            { Reset(); Session = net; Manager = manager; World = net.GetWorldUID(); }
+            if (Ready) return true;
+            // The only entire-world enumeration. Native load/reset invalidates completeness.
+            Populate(manager);
+            StartupScans++; Ready = true; Revision++; return true;
+        }
         private static void Populate(ZDOMan manager)
-        { MasterIdolTiming.Measure("index.startup", () => { foreach (var zdo in manager.m_objectsByID.Values) Add(zdo); return true; }); }
+        {MasterIdolTiming.Measure("index.startup",()=>{foreach(var zdo in manager.m_objectsByID.Values)Add(zdo);return true;});}
         private static Definition Describe(int hash)
         {
             if (Definitions.TryGetValue(hash, out var known)) return known;
@@ -172,7 +183,7 @@ namespace ValheimMastery
             var id=zdo.m_uid;if(definition.Family==null){if(Families.ContainsKey(id))RemoveFamily(id);return;}
             Families[id]=zdo;var point=zdo.GetPosition();
             if(!FamilyPoints.Location(id,out var old,out _)||Math.Floor(old.x/32f)!=Math.Floor(point.x/32f)||Math.Floor(old.z/32f)!=Math.Floor(point.z/32f))FamilyPoints.Set(id,point,0);
-            string home=zdo.GetString("vm.idol.home.v1","");if(home.Length>128)home="";
+            string home=MasterIdolNativeTaming.Token(zdo.GetString("vm.idol.home.v1",""))??"";
             if(FamilyHomes.TryGetValue(id,out string previous)&&previous==home)return;
             if(previous!=null&&HomeMembers.TryGetValue(previous,out var former)){former.Remove(id);if(former.Count==0)HomeMembers.Remove(previous);}
             FamilyHomes[id]=home;if(home.Length==0)return;
@@ -182,15 +193,16 @@ namespace ValheimMastery
         {
             if(!Ensure())yield break;var ids=new HashSet<ZDOID>();
             foreach(var circle in zone.Circles)FamilyPoints.FillNear(circle.Point,circle.Radius,ids,false);
-            if(HomeMembers.TryGetValue(zone.Id,out var homes))foreach(var id in homes)ids.Add(id);
+            if(HomeMembers.TryGetValue(MasterIdolNativeTaming.Token(zone.Id)??"",out var homes))foreach(var id in homes)ids.Add(id);
             foreach(string uid in previous)if(MasterIdolNetworkQuota.TryUid(uid,out long user,out uint id))ids.Add(new ZDOID(user,id));
             foreach(var id in ids)
             {
                 if(!Families.TryGetValue(id,out var zdo)||!Actual(zdo))continue;var definition=Describe(zdo.GetPrefab());
                 float health=zdo.GetFloat(ZDOVars.s_health,definition.Health);
-                if(definition.Family==null||float.IsNaN(health)||float.IsInfinity(health)||health<=0||zdo.GetBool(ZDOVars.s_tamed,false))continue;
-                bool existing=zdo.GetString("vm.idol.home.v1","")==zone.Id;
-                if(existing||zone.Contains(zdo.GetPosition())||System.Linq.Enumerable.Contains(previous,id.ToString()))yield return new MasterIdolResidentCandidate(id.ToString(),definition.Family,existing,zdo.GetString("vm.idol.home.v1",""));
+                if(!zdo.Persistent||zdo.GetBool(ZDOVars.s_eventCreature,false)||zdo.GetBool(ZDOVars.s_despawnInDay,false)||definition.Family==null||float.IsNaN(health)||float.IsInfinity(health)||health<=0)continue;
+                bool tamed=zdo.GetBool(ZDOVars.s_tamed,false);if(tamed&&(!MasterIdolNativeTaming.Assigned(zdo)||!MasterIdolNativeTaming.SameHome(zdo.GetString("vm.idol.home.v1",""),zone.Id)))continue;
+                bool existing=MasterIdolNativeTaming.SameHome(zdo.GetString("vm.idol.home.v1",""),zone.Id);
+                if(existing||zone.Contains(zdo.GetPosition())||System.Linq.Enumerable.Contains(previous,id.ToString()))yield return new MasterIdolResidentCandidate(id.ToString(),definition.Family,existing,existing?zone.Id:zdo.GetString("vm.idol.home.v1",""));
             }
         }
                 internal static IEnumerable<ZDO> NearbyForestResidents(Vector3 center,float radius,string family)
@@ -202,7 +214,7 @@ namespace ValheimMastery
                 if(++visited>256)yield break;
                 if(!Families.TryGetValue(id,out var zdo)||!Actual(zdo))continue;
                 var definition=Describe(zdo.GetPrefab());
-                if(definition.Family!=family||HorizontalSquared(center,zdo.GetPosition())>radius*radius||zdo.GetFloat(ZDOVars.s_health,definition.Health)<=0||zdo.GetBool(ZDOVars.s_tamed,false))continue;
+                if(!zdo.Persistent||definition.Family!=family||HorizontalSquared(center,zdo.GetPosition())>radius*radius||zdo.GetFloat(ZDOVars.s_health,definition.Health)<=0||zdo.GetBool(ZDOVars.s_tamed,false))continue;
                 yield return zdo;
             }
         }

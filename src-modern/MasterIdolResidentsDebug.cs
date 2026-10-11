@@ -7,6 +7,7 @@ namespace ValheimMastery
     {
         private static void Postfix()
         {
+            new Terminal.ConsoleCommand("vm_idol_behavior","Показати лічильники лікування/роботи/маршрутів; лише читання.",args=>Print(args,MasterIdolResidentMetrics.Describe()+"\n"+MasterIdolResidentSpacing.Describe()),false);
             new Terminal.ConsoleCommand("vm_idol_lighting","Показати бюджет/лічильники світла; лише читання.",args=>Print(args,MasterIdolLighting.Describe()+"\n"+MasterIdolActivity.Describe()),false);
             new Terminal.ConsoleCommand("vm_idol_recruitment","Таймери вільних місць ідола; лише читання на сервері/хості.",args=>
             {
@@ -17,7 +18,7 @@ namespace ValheimMastery
             {
                 var player=Player.m_localPlayer;if(player==null){Print(args,"local player=none");return;}var eye=player.GetEyePoint();
                 if(!Physics.Raycast(eye,player.GetAimDir(eye),out RaycastHit hit,60f,Physics.DefaultRaycastLayers,QueryTriggerInteraction.Ignore)){Print(args,"resident target=none");return;}
-                Print(args,hit.collider.GetComponentInParent<MasterIdolSocial>()?.Describe()??"social resident=none");
+                Print(args,(hit.collider.GetComponentInParent<MasterIdolSocial>()?.Describe()??"social resident=none")+"\n"+(hit.collider.GetComponentInParent<MasterIdolResidentWork>()?.Describe()??"work resident=none")+"\n"+(hit.collider.GetComponentInParent<MasterIdolSocialSeats>()?.Describe()??"seat resident=none")+"\n"+(hit.collider.GetComponentInParent<MasterIdolResidentPresentation>()?.Describe()??"cue not-created; check VFX flag/heal.broadcast")+"\n"+MasterIdolResidentDiagnostics.Describe(hit.collider.GetComponentInParent<Character>()));
             },false);
         }
         private static void Print(Terminal.ConsoleEventArgs args,string text){args.Context.AddString(text);MasteryPlugin.Log.LogInfo("[IdolTest] "+text);}

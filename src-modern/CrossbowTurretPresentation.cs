@@ -55,7 +55,7 @@ namespace ValheimMastery
             int revision = record.GetInt(CrossbowTurretCustody.RevisionKey, 0);
             byte[] bytes = record.GetByteArray(ZDOVars.s_items, null);
             // Aim updates also bump DataRevision; only decode actual cargo changes.
-            if (Revision != revision || !System.Linq.Enumerable.SequenceEqual(Cargo ?? System.Array.Empty<byte>(), bytes ?? System.Array.Empty<byte>()))
+            if (Revision != revision || !CargoEquals(Cargo, bytes))
             {
                 Revision = revision; Cargo = bytes == null ? null : (byte[])bytes.Clone();
                 if (CrossbowTurretStock.TryRead(bytes, Chest, out var stock, out _))
@@ -68,6 +68,13 @@ namespace ValheimMastery
                 else if (state != CrossbowTurretState.Active && WeaponRoot != null)
                 { Destroy(WeaponRoot); WeaponRoot = null; Loaded = Unloaded = null; WeaponPrefab = null; }
             }
+        }
+        private static bool CargoEquals(byte[] left, byte[] right)
+        {
+            int length = left?.Length ?? 0;
+            if (length != (right?.Length ?? 0)) return false;
+            for (int i = 0; i < length; ++i) if (left[i] != right[i]) return false;
+            return true;
         }
         private void BuildBase()
         {

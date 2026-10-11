@@ -46,11 +46,16 @@ namespace ValheimMastery
             }
             target.color = tint; target.preserveAspect = false; target.raycastTarget = false;
         }
-        internal void Frame(Image target) => Copy(target, _frame, new Color(1f, 1f, 1f, .96f));
+        internal void Frame(Image target)
+        {
+            Copy(target, _frame, new Color(1f, 1f, 1f, .96f));
+            MasteryHudArtwork.Frame(target, target != null && target.name.EndsWith("WalletCard", System.StringComparison.Ordinal) ? "patron.png" : "tooltip.png");
+        }
         internal void Bar(Image frame, Image fill)
         {
             Copy(frame, _barFrame ?? _frame, new Color(.55f, .50f, .40f, 1f));
             Copy(fill, _fill, new Color(.94f, .65f, .22f, 1f));
+            MasteryHudArtwork.Frame(frame, "track.png"); MasteryHudArtwork.Fill(fill);
             if (fill.sprite != null)
             { fill.type = Image.Type.Filled; fill.fillMethod = Image.FillMethod.Horizontal; fill.fillOrigin = 0; }
         }

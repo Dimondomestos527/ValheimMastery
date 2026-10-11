@@ -48,7 +48,7 @@ namespace ValheimMastery
             GoldInspirationStatus.Tick();
         }
         internal static bool Armed { get; private set; }
-        private static ConfigEntry<bool> DevelopmentEnabled, PantheonEnabled;
+        private static ConfigEntry<bool> DevelopmentEnabled, PantheonEnabled, FavorEconomyEnabled;
         private static readonly Dictionary<long, bool> ServerArmed = new Dictionary<long, bool>();
         private static readonly HashSet<long> ServerHolding = new HashSet<long>();
         private static bool ServerReady, ServerCoreReady;
@@ -71,7 +71,7 @@ namespace ValheimMastery
         internal static bool TryGetServerLedger(ZNet expectedSession, long expectedWorld, out GoldCraftingLedger ledger)
         {
             ledger = null;
-            return CoreEnabled && TryGetRecoveryLedger(expectedSession, expectedWorld, out ledger);
+            return EconomyEnabled && TryGetRecoveryLedger(expectedSession, expectedWorld, out ledger);
         }
         internal static bool IsServerLedgerCurrent(ZNet expectedSession, long expectedWorld, GoldCraftingLedger expectedLedger) =>
             TryGetRecoveryLedger(expectedSession, expectedWorld, out var ledger) && ReferenceEquals(ledger, expectedLedger);
@@ -94,7 +94,12 @@ namespace ValheimMastery
         private static bool FavorStateReceived;
         private static float LastStateAt;
         private const string SeenKey = "VM_Gold_Crafting_Ascended";
+        private static readonly HashSet<ZDOID> ObservedAscensions = new HashSet<ZDOID>();
+        internal static bool HasCraftingRecognition(Player player) => player?.m_customData.ContainsKey(SeenKey) == true;
         internal static bool CoreEnabled => PantheonEnabled?.Value == true && MasteryPlugin.Settings.Enabled.Value;
+        // This patch suspends the economy even if an older saved config says true.
+        // Maintenance, recognition and replacement Crafting100 permits retain separate gates.
+        internal static bool EconomyEnabled => false;
         internal static bool CraftingEnabled => CoreEnabled && DevelopmentEnabled?.Value == true;
         internal static bool Enabled => CraftingEnabled; // Existing crafting-only consumers keep their gate.
         internal static void Initialize(ConfigFile config)
@@ -103,6 +108,8 @@ namespace ValheimMastery
                 "Enable shared level-100 Pantheon actions. Previously admitted terminal receipts can still settle when disabled.");
             DevelopmentEnabled = config.Bind("GoldCrafting", "EnableCrafting100", true,
                 "Phase100-A Völundr mastery. Requires the same enabled client/server release. Later idol phases remain locked pending live approval.");
+            FavorEconomyEnabled = config.Bind("Pantheon", "EnableFavorEconomy", false,
+                "Enable NEW Favor earnings, purchases and paid actions. Saved balances, existing bound idols, terminal recovery and Celebration remain intact when false.");
             GoldFavorService.Initialize(config);
             MasteryExtendedEventBus.SkillXp += OnXp;
         }
@@ -114,6 +121,7 @@ namespace ValheimMastery
             rpc.Register<ZDOID>("VM_Gold_CeremonyPreview", PreviewCeremony);
             rpc.Register<string>("VM_Gold_DebugReply", DebugReply);
             GoldDivineTransactions.Register(rpc);
+            Crafting100PermitService.Register(rpc);
             GoldFavorService.Register(rpc);
         }
         internal static bool HoldsHammer(Player player)
@@ -161,6 +169,7 @@ namespace ValheimMastery
                 if (!Ledger.Load()) MasteryPlugin.Log.LogError("[Gold100] Persistent ledger unavailable; Gold actions fail closed.");
             }
             GoldDivineTransactions.Tick(); GoldFavorService.Tick();
+            Crafting100PermitService.Tick();
             float now = Time.unscaledTime;
             if (!Session.IsServer() && FavorStateReceived && now - LastStateAt > 8f) ResetLocalState();
             if (Ledger?.IsAvailable == true)
@@ -193,6 +202,8 @@ namespace ValheimMastery
         }
         internal static void Shutdown()
         {
+            Crafting100PermitService.Shutdown();
+            ObservedAscensions.Clear();
             Ledger?.Flush(); Ledger = null; LoadedWorld = 0;
         }
         internal static bool HasGold(WorkshopActor actor) => actor != null && actor.Available &&
@@ -207,13 +218,14 @@ namespace ValheimMastery
                         try
             {
                 int operation = package.ReadInt();
-                bool newUnlock = false, previouslySeen = true;
+                bool newUnlock = false, previouslySeen = true, recognize = false;
                 if (operation == 0)
                 {
                     bool holding = package.ReadBool(); previouslySeen = package.ReadBool();
                     holding = holding && CraftingEnabled;
                     if (holding) ServerHolding.Add(id); else ServerHolding.Remove(id);
-                    if (CraftingEnabled && HasGold(actor) && ledger.Get(id)?.Unlocked != true) newUnlock = ledger.Unlock(id);
+                    recognize = CraftingEnabled && HasGold(actor) && !previouslySeen;
+                    if (EconomyEnabled && CraftingEnabled && HasGold(actor) && ledger.Get(id)?.Unlocked != true) newUnlock = ledger.Unlock(id);
                     if (!holding || actor.IsDead() || actor.IsTeleporting()) ServerArmed.Remove(id);
                 }
                 else if (operation == 1)
@@ -242,6 +254,8 @@ namespace ValheimMastery
                         SendDebugReply(rpc, "Ceremony preview only; progression and first-unlock state unchanged.");
                         return;
                     }
+                    if (!EconomyEnabled && (mode == "add" || mode == "set"))
+                    { SendDebugReply(rpc, "Favor economy is suspended; saved balances are retained."); return; }
                     if (mode == "add") Ledger.Gain(id, value);
                     if (mode == "set") Ledger.SetFavor(id, value);
                     if (mode == "trace") GoldFavorTelemetry.Trace = value > 0;
@@ -249,7 +263,7 @@ namespace ValheimMastery
                 }
                 else return;
                 Reply(rpc, id);
-                if (newUnlock && !previouslySeen)
+                if (recognize)
                 {
                     if (Player.m_localPlayer?.m_nview?.GetZDO()?.m_uid == actor.CharacterId) Ascend(null, actor.CharacterId);
                     foreach (var peer in Session.GetPeers())
@@ -264,7 +278,7 @@ namespace ValheimMastery
             var state = ledger.Get(id);
             var package = new ZPackage(); package.Write(state.Unlocked); package.Write(state.Favor);
             package.Write(state.ExhaustionRemaining); package.Write(ServerArmed.ContainsKey(id));
-            package.Write(CraftingEnabled); // Legacy header remains crafting readiness.
+            package.Write(CraftingEnabled && EconomyEnabled); // Legacy paid-action readiness, not new permit availability.
             package.Write(GoldFavorTelemetry.Describe(id));
             package.Write(2); package.Write(SessionWorld); package.Write(id);
             package.Write(state.ExhaustedPatron); package.Write(state.Wallets.Count);
@@ -273,7 +287,7 @@ namespace ValheimMastery
             package.Write(state.Claims.Count + (state.Pending == null ? 0 : 1));
             if (state.Pending != null) { package.Write(GoldCooldownPolicy.LegacyPatronId); package.Write(state.Pending.Cost); }
             foreach (var claim in state.Claims.Values) { package.Write(claim.Patron); package.Write(claim.Cost); }
-            package.Write(CoreEnabled); // V2 shared readiness independent of Crafting100.
+            package.Write(EconomyEnabled); // V2 readiness means fresh economy; packet shape unchanged.
             if (rpc == null) { package.SetPos(0); State(null, package); }
             else rpc.Invoke("VM_Gold_State", package);
         }
@@ -372,11 +386,13 @@ namespace ValheimMastery
             {
                 if (local.m_customData.ContainsKey(SeenKey)) return;
                 local.m_customData[SeenKey] = "Volundr";
+                PerkStateService.MarkEverUnlocked(local, Skills.SkillType.Crafting, 100);
                 var profile = Game.instance?.GetPlayerProfile();
-                if (profile != null) { profile.SavePlayerData(local); if (!profile.Save()) MasteryPlugin.Log.LogWarning("[Gold100] Character recognition save failed; server unlock remains durable."); }
+                if (profile != null) { profile.SavePlayerData(local); if (!profile.Save()) MasteryPlugin.Log.LogWarning("[Gold100] Character recognition save failed; recognition stays in memory; no Favor unlock was implied."); }
                 foreach (PerkDefinition perk in PerkCatalog.Get(Skills.SkillType.Crafting))
                     if (perk.Milestone == 100) { MasteryMilestonePresentation.Show(local, Skills.SkillType.Crafting, 100, perk, false); break; }
             }
+            if (!recognition && !ObservedAscensions.Add(id)) return;
             GoldAscensionVisual.Play(target, recognition);
         }
         private static void OnXp(SkillXpEvent value)

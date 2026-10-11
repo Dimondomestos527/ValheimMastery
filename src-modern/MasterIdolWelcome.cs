@@ -13,7 +13,7 @@ namespace ValheimMastery
         internal bool IsPresenting=>Active&&Time.unscaledTime<End;
         private void Awake(){Ai=GetComponent<BaseAI>();Creature=GetComponent<Character>();View=GetComponent<ZNetView>();}
         private MasterIdolEffectZone Source()=>View?.IsValid()==true&&Creature!=null?MasterIdolEffectZones.ResidentHome(View.GetZDO().m_uid.ToString(),Utils.GetPrefabName(gameObject)):null;
-        private bool Battle=>Ai==null||Creature==null||Creature.IsDead()||Creature.InAttack()||Creature.IsStaggering()||Ai.IsAlerted()||Ai is MonsterAI monster&&(monster.m_targetCreature!=null||monster.m_targetStatic!=null);
+        private bool Battle=>Ai==null||Creature==null||MasterIdolResidentWork.Busy(Creature)||GetComponent<MasterIdolResidentPresentation>()?.Playing==true||Creature.IsDead()||Creature.InAttack()||Creature.IsStaggering()||Ai.IsAlerted()||Ai is MonsterAI monster&&(monster.m_targetCreature!=null||monster.m_targetStatic!=null);
         private void Update()
         {
             using var aggregate=new MasterIdolPerf.Scope("welcome.update");

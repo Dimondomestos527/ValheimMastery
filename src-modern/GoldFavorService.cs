@@ -15,7 +15,7 @@ namespace ValheimMastery
         private const string ProcessingSequenceKey = "vm.gold.processing.sequence.v1";
         private const string ProcessingProofPrefix = "vm.gold.processing.proof.";
         private const float MaxBossMultiplier = 100f;
-        private const float MaxFirstUniqueMultiplier = 100f;
+        private const float MaxFirstUniqueMultiplier = 2f;
         private const float MaxExpectedBaseXp = 10000f;
         private const float MaxExpectedFinalXp = 1000000f;
         private const int MaxPendingProcessingReceipts = 256;
@@ -34,7 +34,7 @@ namespace ValheimMastery
         private static ZNet Session;
         private static float NextPrune;
 
-        internal static bool Enabled => GoldCraftingService.Enabled;
+        internal static bool Enabled => GoldCraftingService.Enabled && GoldCraftingService.EconomyEnabled;
 
         internal static void Initialize(ConfigFile config)
         {
@@ -167,7 +167,7 @@ namespace ValheimMastery
                     if (recipe?.m_item?.m_itemData != null && String.Equals(TierDatabase.ItemKey(recipe.m_item.m_itemData), itemKey, StringComparison.OrdinalIgnoreCase))
                     { match = recipe; break; }
                 if (match == null) return false;
-                xp = .15f + ResourceValue(match.m_resources, quality);
+                xp = .15f + PeacefulXp.CompressedCraftingValue(ResourceValue(match.m_resources, quality));
                 return xp > 0f && xp <= MaxExpectedBaseXp;
             }
             if (kind == "build")
@@ -179,7 +179,7 @@ namespace ValheimMastery
                     if (prefab == null || !String.Equals(prefab.name.Replace("(Clone)", string.Empty), pieceKey, StringComparison.OrdinalIgnoreCase)) continue;
                     Piece piece = prefab.GetComponent<Piece>();
                     if (piece == null) continue;
-                    xp = .10f + ResourceValue(piece.m_resources, 1);
+                    xp = .10f + PeacefulXp.CompressedCraftingValue(ResourceValue(piece.m_resources, 1));
                     return xp > 0f && xp <= MaxExpectedBaseXp;
                 }
             }
@@ -289,7 +289,7 @@ namespace ValheimMastery
 
         private static void ProcessProcessingReceipt(ZRpc rpc, ZDOID stationId, long author, string ore, long sequence, string receiptWire)
         {
-            if (!Enabled || ZNet.instance?.IsServer() != true || GoldCraftingService.ServerLedger?.IsAvailable != true || author == 0 || sequence <= 0 ||
+            if (ZNet.instance?.IsServer() != true || GoldCraftingService.ServerLedger?.IsAvailable != true || author == 0 || sequence <= 0 ||
                 String.IsNullOrWhiteSpace(ore) || ore.Length > 64 || String.IsNullOrEmpty(receiptWire) || receiptWire.Length > 64) return;
             ZDO station = ZDOMan.instance?.GetZDO(stationId);
             if (station == null || station.m_uid != stationId || station.GetOwner() == 0 ||
@@ -299,6 +299,9 @@ namespace ValheimMastery
             if (GoldCraftingService.ServerLedger.HasBackgroundReceipt(author, stationKey, sequence) ||
                 GoldCraftingService.ServerLedger.IsBackgroundReceiptExpired(author, stationKey, sequence))
             { ReplyProcessing(rpc, stationId, sequence, true); return; }
+            // Known durable watermark duplicates above may ACK during suspension.
+            // Unawarded proofs must stay pending, including native history expiry.
+            if (!Enabled) { ReplyProcessing(rpc, stationId, sequence, false); return; }
             if (sequence > latest || latest <= 0) { ReplyProcessing(rpc, stationId, sequence, false); return; }
             if (latest - sequence >= 64) { ReplyProcessing(rpc, stationId, sequence, true); return; }
             string proof = station.GetString(ProcessingProofPrefix + (sequence % 64), "");

@@ -25,6 +25,9 @@ namespace ValheimMastery
                 Log = Logger;
                 Settings = new MasteryConfig(base.Config);
                 GoldCraftingService.Initialize(base.Config);
+                WorkbenchEnchantmentCooldownProtocol.Initialize(System.IO.Path.Combine(Paths.ConfigPath, "ValheimMasteryEnchantments"));
+                WorkbenchEnchantmentRuntime.Initialize(System.IO.Path.Combine(Paths.ConfigPath, "ValheimMastery", "WorkbenchEnchantments"));
+                LegacyMasterIdolRemoval.Initialize();
                 PantheonActiveInput.Initialize(base.Config);
                 // Extended catalog must be enabled BEFORE the game's first SoftRef load.
                 // This indexes assets; it does not load every bundle or instantiate prefabs.
@@ -52,6 +55,8 @@ namespace ValheimMastery
             PantheonActiveInput.Tick();
             Magic70Carrier.Tick();
             NetworkSync.Tick(); OwnerSkillAuthority.Tick(); WorkshopRemoteCraft.Tick(); WorkshopRecovery.Tick(); WorkshopChestLease.Tick();
+            WorkbenchEnchantmentCooldownProtocol.Tick();
+            WorkbenchEnchantmentRuntime.Tick();
 #if MASTERY_MAGIC70_EXPERIMENT
             Magic70Surtling.Tick();
 #endif
@@ -65,10 +70,21 @@ namespace ValheimMastery
         private void CleanupRuntime()
         {
             enabled = false;
+            // Also covers initialization failures, which bypass OnDestroy hooks.
+            try { Run70MapMarkerPresentation.ReleaseAssets(); }
+            catch (System.Exception cleanupError) { try { Log?.LogError("Mastery presentation cleanup failed: " + cleanupError); } catch { } }
             try { PantheonActiveInput.RequestShutdown(); }
             finally
             {
-                try { GoldCraftingService.Shutdown(); }
+                try
+                {
+                    try
+                    {
+                        try { LegacyMasterIdolRemoval.Shutdown(); }
+                        finally { WorkbenchEnchantmentRuntime.Shutdown(); }
+                    }
+                    finally { try { GoldCraftingService.Shutdown(); } finally { WorkbenchEnchantmentCooldownProtocol.Shutdown(); } }
+                }
                 finally
                 {
                     if (Instance == this) Instance = null;
@@ -84,6 +100,8 @@ namespace ValheimMastery
         internal readonly ConfigEntry<bool> EnforceMatchingMod;
         internal readonly ConfigEntry<bool> VerboseLogging;
         internal readonly ConfigEntry<bool> WorkshopTiming;
+        internal readonly ConfigEntry<string> ProductionDiagnosticsReset;
+        internal readonly ConfigEntry<bool> ExperimentalOptimization;
         internal readonly ConfigEntry<float> TierStep;
         internal readonly ConfigEntry<float> FirstUniqueMultiplier;
         internal readonly ConfigEntry<float> JumpBaseXp;
@@ -120,6 +138,7 @@ namespace ValheimMastery
             EnforceMatchingMod = config.Bind("Network", "EnforceMatchingMod", false, "Disconnect clients that do not complete the Mastery version handshake.");
             VerboseLogging = config.Bind("Debug", "VerboseLogging", false, "Log XP formula components and handshake details.");
             WorkshopTiming = config.Bind("Debug", "WorkshopTiming", false, "Opt-in bounded workshop stage timings and diagnostic RTT echo. Does not change resource transactions. Enable on client and server for profiling, then disable.");
+            ExperimentalOptimization = config.Bind("Performance", "ExperimentalOptimization", false, "Enable the experimental process-local Pilot A optimization. Configure a dedicated server separately.");
             TierStep = config.Bind("Progression", "TierStep", 0.30f, "Tier coefficient. Formula: BaseXP * BossXPModifier * (1 + coefficient*(target-1) + coefficient*(item-1)).");
             FirstUniqueMultiplier = config.Bind("Progression", "FirstUniqueMultiplier", 10f, "Multiplier applied after boss and tier multipliers for the first unique action.");
             JumpBaseXp = config.Bind("Progression", "JumpBaseXp", 0.25f, "Base XP awarded for a successful jump.");
@@ -149,9 +168,20 @@ namespace ValheimMastery
             CombatDamageSkillScalingBow = config.Bind("CombatScaling", "CombatDamageSkillScaling_Bow", 0.55f, "Legacy Bow skill-bonus fraction before the additional 0.15 rebalance reduction (0.55 here = 0.40 effective). Does not reduce total bow damage.");
             CombatDamageSkillScalingClub = config.Bind("CombatScaling", "CombatDamageSkillScaling_Club", 0.55f, "Keep this fraction of vanilla Club skill-level damage bonus.");
             ClubStaggerPerSkillLevel = config.Bind("CombatScaling", "ClubStaggerPerSkillLevel", 0.005f, "Additive Club stagger bonus per Club skill level.");
+            ProductionDiagnosticsReset = config.Bind("Migration", "ProductionDiagnosticsReset", "", "Internal one-time production diagnostics reset marker.");
+            if (ProductionDiagnosticsReset.Value != "20261009a")
+            {
+                // Development profiling leaked into persisted player/server configs. Reset it
+                // once for this production cohort; a later deliberate opt-in remains respected.
+                VerboseLogging.Value = false;
+                WorkshopTiming.Value = false;
+                UIDebugLogging.Value = false;
+                ProductionDiagnosticsReset.Value = "20261009a";
+            }
         }
     }
 }
+
 
 
 

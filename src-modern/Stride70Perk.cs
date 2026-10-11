@@ -5,7 +5,8 @@ namespace ValheimMastery
 {
     internal sealed class Stride70State
     {
-        internal float StartedAt = -1f, EmergencyUntil, WaterUntil, NextSplash, LastRunningAt;
+        internal float StartedAt = -1f, EmergencyUntil, WaterUntil, NextSplash, LastRunningAt, WaterEntryUntil;
+        internal float GroundContactSince = -1f, IneligibleSince = -1f;
         internal int Stacks;
         internal bool WaterActive;
     }
@@ -14,19 +15,43 @@ namespace ValheimMastery
         internal static void Update(Player player)
         {
             if (player == null || player != Player.m_localPlayer) return;
+            Run70PoiDiscovery.Update(player);
             Stride70State state = MasteryStateStore.GetPlayerState<Stride70State>(player);
             if (!MovementPerkService.OwnerReady(player)) state.EmergencyUntil = 0f;
             bool sprint = MovementPerkService.Valid(player) && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 35) && player.m_run && player.GetMoveDir().sqrMagnitude > .01f && player.GetStamina() > 0f && !player.IsCrouching() && !player.InAttack() && !player.InDodge();
-            if (sprint && player.IsRunning()) state.LastRunningAt = Time.time;
+            if (sprint && player.IsRunning())
+            {
+                state.LastRunningAt = Time.time;
+                if (state.Stacks == 3 && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70))
+                    state.WaterEntryUntil = Time.time + 1.25f;
+            }
+            if (state.WaterActive)
+            {
+                bool solidGround = HasSolidGround(player);
+                if (solidGround)
+                {
+                    if (state.GroundContactSince < 0f) state.GroundContactSince = Time.time;
+                    if (Time.time - state.GroundContactSince >= .25f)
+                        EndWater(player, state, "solid ground confirmed");
+                }
+                else state.GroundContactSince = -1f;
+                if (state.WaterActive && (Time.time >= state.WaterUntil || !PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70)))
+                    EndWater(player, state, Time.time >= state.WaterUntil ? "duration expired" : "perk lost");
+                return;
+            }
             // Preserve the built rhythm across a short airborne shore entry,
             // but do not accumulate new stacks while jumping.
             if (sprint && !state.WaterActive && !player.IsRunning() && !player.InLiquidSwimDepth() &&
                 !HasSolidGround(player) && Time.time - state.LastRunningAt < .8f) return;
-            if (state.WaterActive && (!sprint || Time.time >= state.WaterUntil || HasSolidGround(player) || !PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70)))
-                EndWater(player, state, !sprint ? "sprint stopped" : Time.time >= state.WaterUntil ? "duration expired" : HasSolidGround(player) ? "solid ground" : "perk lost");
+            // UpdateSwimming runs before this postfix. Keep the fully built rhythm
+            // alive while the shoreline changes from walking to swimming.
+            if (state.Stacks == 3 && Time.time <= state.WaterEntryUntil && sprint && !HasSolidGround(player) &&
+                player.m_waterLevel > player.m_tarLevel)
+                return;
             if (!sprint || (!player.IsRunning() && !state.WaterActive && !player.InLiquidSwimDepth()))
             {
                 state.StartedAt = -1f; state.Stacks = 0;
+                state.WaterEntryUntil = 0f;
                 RoadRhythmPhaseVisual.Clear(player);
                 if (state.EmergencyUntil > Time.time) RoadRhythmVisual.Set(player, 0);
                 else RoadRhythmVisual.Clear(player);
@@ -43,6 +68,8 @@ namespace ValheimMastery
             int stacks = RhythmTier(Time.time - state.StartedAt);
             if (stacks == state.Stacks) return;
             state.Stacks = stacks;
+            if (stacks == 3 && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70))
+                state.WaterEntryUntil = Time.time + 1.25f;
             if (MasteryPlugin.Settings.VerboseLogging.Value)
                 MasteryPlugin.Log.LogInfo("[RunRhythm] phase=" + stacks + " run70=" + PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70));
             RoadRhythmVisual.Set(player, stacks);
@@ -68,6 +95,9 @@ namespace ValheimMastery
         {
             if (!s.WaterActive) return;
             s.WaterActive = false;
+            s.WaterEntryUntil = 0f;
+            s.GroundContactSince = -1f;
+            s.IneligibleSince = -1f;
             if (MasteryPlugin.Settings.VerboseLogging.Value)
                 MasteryPlugin.Log.LogInfo("[Run70Water] ended: " + reason + ", groundTouch=" + p.m_lastGroundTouch.ToString("0.000") +
                     ", waterOffset=" + (p.transform.position.y - p.m_waterLevel).ToString("0.00"));
@@ -80,15 +110,44 @@ namespace ValheimMastery
             float offset = p.transform.position.y - p.m_waterLevel;
             // UpdateSwimming may be called before actually reaching water. Do not
             // erase the running rhythm on dry land or above the entry window.
-            if (!s.WaterActive && (HasSolidGround(p) || offset >= 1.5f || p.m_waterLevel <= p.m_tarLevel)) return false;
-            bool eligible = Trail(p) && p.GetStamina() > 0f && p.GetMoveDir().sqrMagnitude > .01f && !p.InAttack() && !p.InDodge() && !p.IsBlocking() && !p.IsDrawingBow() && !p.IsEncumbered() &&
+            bool solidGround = HasSolidGround(p);
+            if (!s.WaterActive && (solidGround || offset >= 1.5f || p.m_waterLevel <= p.m_tarLevel)) return false;
+            bool entryReady = MovementPerkService.Valid(p) && p.m_run && s.Stacks == 3 && Time.time <= s.WaterEntryUntil && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70);
+            bool eligible = MovementPerkService.Valid(p) && p.m_run && s.Stacks == 3 && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70) &&
+                p.GetStamina() > 0f && p.GetMoveDir().sqrMagnitude > .01f && !p.InAttack() && !p.InDodge() && !p.IsBlocking() && !p.IsDrawingBow() && !p.IsEncumbered() &&
                 p.m_waterLevel > p.m_tarLevel && !p.AboveOrInLava() && offset > -p.m_swimDepth - .35f && offset < 1.5f && p.m_body.linearVelocity.y > -5f;
-            if (s.WaterActive && (!eligible || Time.time >= s.WaterUntil)) EndWater(p, s, eligible ? "duration expired" : "motion eligibility lost");
+            if (s.WaterActive)
+            {
+                if (Time.time >= s.WaterUntil)
+                {
+                    EndWater(p, s, "duration expired");
+                    return false;
+                }
+                if (solidGround)
+                {
+                    if (s.GroundContactSince < 0f) s.GroundContactSince = Time.time;
+                    if (Time.time - s.GroundContactSince >= .25f) EndWater(p, s, "solid ground confirmed");
+                    return false;
+                }
+                s.GroundContactSince = -1f;
+                if (!eligible)
+                {
+                    if (s.IneligibleSince < 0f) s.IneligibleSince = Time.time;
+                    if (Time.time - s.IneligibleSince >= .20f) EndWater(p, s, "motion eligibility lost");
+                    return false;
+                }
+                s.IneligibleSince = -1f;
+            }
             if (!s.WaterActive)
             {
-                if (HasSolidGround(p)) return false;
-                if (!eligible || PerkCooldownStateService.GetRemainingSeconds(p, "run_70_water") > 0d) { s.Stacks = 0; s.StartedAt = -1f; return false; }
+                if (solidGround) return false;
+                if (!entryReady || !eligible || PerkCooldownStateService.GetRemainingSeconds(p, "run_70_water") > 0d)
+                {
+                    if (Time.time > s.WaterEntryUntil) { s.Stacks = 0; s.StartedAt = -1f; }
+                    return false;
+                }
                 s.WaterActive = true; s.WaterUntil = Time.time + 10f;
+                s.GroundContactSince = -1f; s.IneligibleSince = -1f;
                 if (MasteryPlugin.Settings.VerboseLogging.Value)
                     MasteryPlugin.Log.LogInfo("[Run70Water] started: offset=" + offset.ToString("0.00"));
                 MovementPerkService.Proc(p, "run_70", "run_70_water_start", Skills.SkillType.Run, 70);

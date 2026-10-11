@@ -22,16 +22,9 @@ namespace ValheimMastery
             if (string.IsNullOrEmpty(zdo.GetString(FeastPrefabKey, "")))
                 zdo.Set(FeastPrefabKey, feast.gameObject.name.Replace("(Clone)", ""));
             if (zdo.GetInt(FeastTierZdoKey, 0) >= 70) return;
-            Player author = Player.m_localPlayer;
-            long creator = feast.GetComponent<Piece>()?.GetCreator() ?? 0L;
-            // A remote replica does not contain that player's actual skills.
-            // Only the owner/author stamps the persistent record; peers read it.
-            if (author == null || creator == 0L || creator != author.GetPlayerID()) return;
-            int tier = PerkRuntimeService.HasPerk(author, Skills.SkillType.Cooking, 70) ? 70 :
-                PerkRuntimeService.HasPerk(author, Skills.SkillType.Cooking, 35) ? 35 : 0;
-            if (zdo.GetInt(FeastTierZdoKey, 0) == tier && zdo.GetString(AuthorNameKey, "") == author.GetPlayerName()) return;
-            zdo.Set(FeastTierZdoKey, tier);
-            zdo.Set(AuthorNameKey, author.GetPlayerName());
+            // Existing historical stored grants remain intact. A fresh placed feast
+            // is authored only by the exact paid material record, never by its placer.
+            return;
         }
 
         internal static bool IsFeast(ItemDrop.ItemData item)
@@ -126,15 +119,20 @@ namespace ValheimMastery
             // theme and consumption metadata on this serving, never on that prefab.
             ItemDrop.ItemData item = template.Clone();
             __state.Serving = item;
+            CookingProductRecord product = CookingFeastProvenance.Read(__instance);
+            if (product != null) product.Apply(item);
             item.m_customData[Cooking70Service.FeastMarkerKey] = "1";
             item.m_customData.Remove(MasterFeastService.ConsumedAtKey);
             string feastPrefab = __instance.m_nview?.GetZDO()?.GetString(Cooking70Service.FeastPrefabKey, "") ?? "";
             if (!string.IsNullOrEmpty(feastPrefab)) item.m_customData[Cooking70Service.FeastPrefabKey] = feastPrefab;
             else item.m_customData.Remove(Cooking70Service.FeastPrefabKey);
             int tier = __instance.m_nview?.GetZDO()?.GetInt(Cooking70Service.FeastTierZdoKey, 0) ?? 0;
-            item.m_crafterID = __instance.GetComponent<Piece>()?.GetCreator() ?? 0L;
-            if (tier >= 35) item.m_customData[Cooking70Service.CookMasteryKey] = tier.ToString();
-            else item.m_customData.Remove(Cooking70Service.CookMasteryKey);
+            if (product == null)
+            {
+                item.m_crafterID = __instance.GetComponent<Piece>()?.GetCreator() ?? 0L;
+                if (tier >= 35) item.m_customData[Cooking70Service.CookMasteryKey] = tier.ToString();
+                else item.m_customData.Remove(Cooking70Service.CookMasteryKey);
+            }
         }
 
         private static void Postfix(ServingContext __state) => Restore(__state);

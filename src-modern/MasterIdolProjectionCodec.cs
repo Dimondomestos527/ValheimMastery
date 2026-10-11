@@ -15,7 +15,7 @@ namespace ValheimMastery
             if(Chunks!=null&&now>Until)Reset();
             if(Chunks!=null&&(Epoch!=epoch||revision>Revision)){Reset();}
             if(Chunks!=null&&revision<Revision)return null;
-            if(Chunks==null){Epoch=epoch;Revision=revision;Digest=digest;Length=length;Chunks=new byte[count][];Until=now+6;}
+            if(Chunks==null){Received=0;Epoch=epoch;Revision=revision;Digest=digest;Length=length;Chunks=new byte[count][];Until=now+6;}
             if(Digest!=digest||Length!=length||Chunks.Length!=count)throw new FormatException();
             if(Chunks[index]!=null){var old=Chunks[index];for(int i=0;i<old.Length;i++)if(old[i]!=bytes[i])throw new FormatException();return null;}
             Chunks[index]=bytes;Received++;if(Received!=count)return null;

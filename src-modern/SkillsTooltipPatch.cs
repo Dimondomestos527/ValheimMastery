@@ -48,6 +48,8 @@ namespace ValheimMastery
                     UITooltip tooltip = elements[i].GetComponentInChildren<UITooltip>(true);
                     if (tooltip == null)
                         continue;
+                    if (tooltip.GetComponent<MasteryHudTooltipTag>() == null)
+                        tooltip.gameObject.AddComponent<MasteryHudTooltipTag>();
 
                     string vanillaTopic = string.IsNullOrWhiteSpace(tooltip.m_topic) ? skill.m_info.m_skill.ToString() : tooltip.m_topic;
                     tooltip.Set(vanillaTopic + " — " + Mathf.FloorToInt(skill.m_level), BuildText(player, skill), dialog.m_tooltipAnchor, Vector2.zero);

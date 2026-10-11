@@ -1,0 +1,52 @@
+{
+  "status": "READY_EXISTING_TEST_COHORT_STATIC_GATES_PASS",
+  "sourceGate": "validation/free-enchantment-cooldowns-20261011/FINAL_OWNER_ACCEPTANCE.json",
+  "sourceGateSha256": "BD0D643C433B003B840DE67C62B74868410EE7DCC151A1CACA11934D449A4D34",
+  "version": "1.4.123-test-free-enchantments-ashlands35-20261011",
+  "wireIdentity": "1.4.123+rpc-20261011-free-enchantments-ashlands35-test",
+  "sourceRoot": "artifacts/build-workspaces/free-enchantments-all-package-20261011",
+  "variants": [
+    {
+      "dll": "230104A1B5E0DA81679FCF998BEFF1DD1C1750C00CA893E6CEA1FC4367C41F3B",
+      "errors": 0,
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "variant": "Client"
+    },
+    {
+      "dll": "66771DA3FEAE538593222D4BE2515C8502860BCD4A90EBD032E71DBF2F8F2FEE",
+      "errors": 0,
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "variant": "Server"
+    },
+    {
+      "dll": "D0CD1E1A28F85064C2A914BA60F49300F7042FF26481D6B375E61473D530B7F3",
+      "errors": 0,
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "25A0A107DCE4D834C44C2B72D0EAFD5CB7793933BDA81816ACCFA1EA9543DACE",
+      "variant": "Steam"
+    }
+  ],
+  "contracts": "735 named contracts per exactnative variant errors0",
+  "preservation": "5973 methods unchanged after exact accepted cohort literal normalization;73 original resources unchanged+15 approvedart exact",
+  "transpilers": "3 unchanged exactcompiled methods/native pervariant evidence reused",
+  "paymentRemoval": "4 exclusive obsoletepayment types absent",
+  "protectedAuthority": "BepInEx/config/ValheimMasteryEnchantments primary/bak/GUIDtmp must preserve; explicitabsence when absent",
+  "knownIssues": [
+    "Völund causal routing diagnosis pending; accepted trace only",
+    "Bonus SeekerAspic identity needs human trace",
+    "Broad physical idol source cleanup unfinished",
+    "All-staff XP successor excluded"
+  ],
+  "live": "UNTESTED",
+  "authorizedTargets": [
+    "TestClient",
+    "DedicatedServer",
+    "GitDevExactSource",
+    "GitReleaseRuntimeForTest"
+  ],
+  "directSteam": "UNCHANGED",
+  "installer": "BASELINE UNCHANGED",
+  "runtimeStarted": false
+}

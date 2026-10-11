@@ -39,9 +39,8 @@ namespace ValheimMastery
         {
             string key = Normalize(raw);
 
-            // Deep North must remain its own eighth progression step. Exact prefab names
-            // are augmented by these stable content-family markers from the current build.
-            if (Has(key, "deepnorth", "deep_north", "frozenking", "jotunwarrior", "jotunwitch", "frysling", "writhan", "elaking")) return 8;
+            // Share the evidence-backed exact eighth tier with resource valuation and item/target consumers.
+            if (TierDatabase.IsDeepNorthContent(key)) return 8;
 
             if (skill == Skills.SkillType.Farming)
             {

@@ -31,6 +31,7 @@ namespace ValheimMastery
         private const string AuthorKey = "vm.skeleton.master";
         private const string PersistencePulseKey = "vm.skeleton.persistence.pulse";
         private static readonly HashSet<ZDOID> Followers = new HashSet<ZDOID>();
+        private static readonly List<ZDOID> FollowerSnapshot = new List<ZDOID>(32);
         private static ZNetScene Scene;
         private static Player Owner;
         private static float Next;
@@ -185,7 +186,8 @@ namespace ValheimMastery
                 if (zdo?.GetLong(AuthorKey, 0) == player.GetPlayerID() && Followers.Count < 32) Followers.Add(creature.GetZDOID());
             }
             int sent = 0;
-            foreach (ZDOID id in new List<ZDOID>(Followers))
+            FollowerSnapshot.Clear(); FollowerSnapshot.AddRange(Followers);
+            foreach (ZDOID id in FollowerSnapshot)
             {
                 ZDO zdo = ZDOMan.instance?.GetZDO(id);
                 if (Time.time < PortalUntil && PortalRoster.TryGetValue(id, out string token))

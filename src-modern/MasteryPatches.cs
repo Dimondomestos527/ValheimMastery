@@ -125,7 +125,8 @@ namespace ValheimMastery
                 if (skillType == Skills.SkillType.Crafting && milestone == 100 && GoldCraftingService.Enabled)
                 {
                     if (crossed && player == Player.m_localPlayer &&
-                        PerkStateService.WasEverUnlocked(player, skillType, milestone))
+                        PerkStateService.WasEverUnlocked(player, skillType, milestone) &&
+                        GoldCraftingService.HasCraftingRecognition(player))
                     {
                         MasteryRavenTutorials.Unlock(player, skillType, milestone);
                         if (MasteryPlugin.Settings.EnableMilestoneVFX.Value || MasteryPlugin.Settings.EnableMilestoneMessages.Value)

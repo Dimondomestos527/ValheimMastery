@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.CompilerServices;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
@@ -234,7 +235,9 @@ namespace ValheimMastery
 
     internal sealed class Bow70ShockwaveVisual : MonoBehaviour
     {
-        private LineRenderer[] Lines; private Material[] Materials; private Vector3 Direction; private Vector3 Right; private Vector3 Up; private Vector3 Origin; private float Born; private bool WeakPoint;
+        private LineRenderer[] Lines; private Material OwnedMaterial;
+        private static readonly Vector2[] UnitArc = CreateUnitArc();
+        private readonly Vector3[] Positions = new Vector3[17]; private Vector3 Direction; private Vector3 Right; private Vector3 Up; private Vector3 Origin; private float Born; private bool WeakPoint;
         internal static void Spawn(Vector3 origin, Vector3 direction, bool weakPoint = false)
         {
             PerkAudioService.Play("bows70_shockwave", "sfx_arrow_hit", origin, 0.34f);
@@ -245,11 +248,11 @@ namespace ValheimMastery
         private void Initialize(Vector3 origin, Vector3 direction, bool weakPoint)
         {
             Origin = origin; Direction = direction.normalized; Right = Vector3.Cross(Direction, Vector3.up); if (Right.sqrMagnitude < 0.01f) Right = Vector3.Cross(Direction, Vector3.right); Right.Normalize(); Up = Vector3.Cross(Right, Direction).normalized; Born = Time.time; WeakPoint = weakPoint;
-            Lines = new LineRenderer[3]; Materials = new Material[3];
+            Lines = new LineRenderer[3]; OwnedMaterial = MasteryVfxMaterial.CloneFromPrefab("vfx_arrowhit");
             for (int i = 0; i < Lines.Length; ++i)
             {
-                GameObject child = new GameObject("PressureArc" + i); child.transform.SetParent(transform, false); Lines[i] = child.AddComponent<LineRenderer>(); Materials[i] = MasteryVfxMaterial.CloneFromPrefab("vfx_arrowhit");
-                Lines[i].material = Materials[i]; Lines[i].useWorldSpace = true; Lines[i].positionCount = 17; Lines[i].numCapVertices = 2; Lines[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                GameObject child = new GameObject("PressureArc" + i); child.transform.SetParent(transform, false); Lines[i] = child.AddComponent<LineRenderer>();
+                Lines[i].sharedMaterial = OwnedMaterial; Lines[i].useWorldSpace = true; Lines[i].positionCount = 17; Lines[i].numCapVertices = 2; Lines[i].shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 if (weakPoint) { Lines[i].startColor = Lines[i].endColor = new Color(1f, 0.62f, 0.18f, 0.92f); }
             }
         }
@@ -260,12 +263,24 @@ namespace ValheimMastery
             for (int ring = 0; ring < Lines.Length; ++ring)
             {
                 float depth = Mathf.Lerp(0.30f + ring * 0.35f, 4.75f, t); float radius = Mathf.Lerp(0.25f, 1.75f, depth / 4.75f);
-                for (int i = 0; i < 17; ++i) { float angle = Mathf.Lerp(-1.18f, 1.18f, i / 16f); Lines[ring].SetPosition(i, Origin + Direction * depth + Right * (Mathf.Sin(angle) * radius) + Up * (Mathf.Cos(angle) * radius * 0.32f)); }
+                for (int i = 0; i < Positions.Length; ++i)
+                    Positions[i] = Origin + Direction * depth + Right * (UnitArc[i].x * radius) + Up * (UnitArc[i].y * radius * 0.32f);
+                Lines[ring].SetPositions(Positions);
                 float alpha = (1f - t) * (0.72f - ring * 0.12f); Color color = WeakPoint ? new Color(1f, 0.62f, 0.18f, alpha) : new Color(0.78f, 0.84f, 0.86f, alpha); Lines[ring].startColor = Lines[ring].endColor = color; Lines[ring].widthMultiplier = Mathf.Lerp(0.065f, 0.012f, t);
             }
             if (t >= 1f) Destroy(gameObject);
         }
-        private void OnDestroy() { if (Materials != null) foreach (Material material in Materials) if (material != null) Destroy(material); }
+        private static Vector2[] CreateUnitArc()
+        {
+            Vector2[] points = new Vector2[17];
+            for (int i = 0; i < points.Length; ++i)
+            {
+                float angle = Mathf.Lerp(-1.18f, 1.18f, i / 16f);
+                points[i] = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
+            }
+            return points;
+        }
+        private void OnDestroy() { if (OwnedMaterial != null) Destroy(OwnedMaterial); }
     }
 
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.OnHit))]
@@ -281,12 +296,18 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(Projectile), "Update")]
     internal static class OverdrawRemoteTrailPatch
     {
+        private sealed class Probe { internal float Next; internal bool Done; }
+        private static readonly ConditionalWeakTable<Projectile, Probe> Probes = new ConditionalWeakTable<Projectile, Probe>();
         private static void Postfix(Projectile __instance)
         {
-            if (__instance == null || !MasteryPlugin.Settings.EnablePerkProcVFX.Value ||
-                Player.m_localPlayer == null || __instance.GetComponent<OverdrawArrowTrail>() != null) return;
+            if (__instance == null || !MasteryPlugin.Settings.EnablePerkProcVFX.Value || Player.m_localPlayer == null) return;
+            Probe probe = Probes.GetOrCreateValue(__instance);
+            if (probe.Done || Time.unscaledTime < probe.Next) return;
+            probe.Next = Time.unscaledTime + .25f;
             ZDO zdo = __instance.m_nview?.GetZDO();
-            if (zdo?.GetBool(OverdrawProjectileTag.ActiveZdoKey, false) == true) __instance.gameObject.AddComponent<OverdrawArrowTrail>();
+            if (zdo?.GetBool(OverdrawProjectileTag.ActiveZdoKey, false) != true) return;
+            if (__instance.GetComponent<OverdrawArrowTrail>() == null) __instance.gameObject.AddComponent<OverdrawArrowTrail>();
+            probe.Done = true;
         }
     }
 

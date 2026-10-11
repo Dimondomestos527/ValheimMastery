@@ -37,6 +37,8 @@ namespace ValheimMastery
         private static ConditionalWeakTable<Player, Window> Windows = new ConditionalWeakTable<Player, Window>();
         private static ConditionalWeakTable<Projectile, Attempt> Attempted = new ConditionalWeakTable<Projectile, Attempt>();
         private static readonly Dictionary<ZDOID, Hold> Pending = new Dictionary<ZDOID, Hold>();
+        private static readonly Dictionary<ZDOID, WeakReference> ActiveDefenders = new Dictionary<ZDOID, WeakReference>();
+        private static readonly List<ZDOID> StaleDefenders = new List<ZDOID>();
         private static ZNet Session;
         private static long NextNonce;
         private static double Now => (double)Stopwatch.GetTimestamp() / Stopwatch.Frequency;
@@ -59,14 +61,20 @@ namespace ValheimMastery
         {
             CheckSession();
             Register(p);
-            if (p?.m_nview?.IsOwner() != true) return;
+            if (p?.m_nview?.IsValid() != true) return;
             ZDO data = p.m_nview.GetZDO();
+            if (!p.m_nview.IsOwner())
+            {
+                Track(p, data, data?.GetBool(ActiveKey, false) == true);
+                return;
+            }
             Window state = Windows.GetOrCreateValue(p);
             bool active = Eligible(p) && Polearms70ContinuousSpinService.TryGetConfirmedSpin(p, out var attack, out var radius);
             if (!active)
             {
                 state.Attack = null;
                 data.Set(ActiveKey, false);
+                Track(p, data, false);
                 return;
             }
             // Re-read after short-circuit eligibility for definite assignment.
@@ -74,7 +82,7 @@ namespace ValheimMastery
             if (state.Attack != attack)
             {
                 long previous = data.GetLong(EpochKey, 0L);
-                if (previous == long.MaxValue) { data.Set(ActiveKey, false); return; }
+                if (previous == long.MaxValue) { data.Set(ActiveKey, false); Track(p, data, false); return; }
                 state.Epoch = Math.Max(0L, previous) + 1;
                 state.Attack = attack;
                 data.Set(EpochKey, state.Epoch);
@@ -82,6 +90,18 @@ namespace ValheimMastery
             state.Radius = radius;
             data.Set(RadiusKey, radius);
             data.Set(ActiveKey, true);
+            Track(p, data, true);
+        }
+        private static void Track(Player player, ZDO data, bool active)
+        {
+            if (data == null || data.m_uid == ZDOID.None) return;
+            if (!active) { ActiveDefenders.Remove(data.m_uid); return; }
+            ActiveDefenders[data.m_uid] = new WeakReference(player);
+        }
+        internal static void Unregister(Player player)
+        {
+            ZDO data = player?.m_nview?.GetZDO();
+            if (data != null) ActiveDefenders.Remove(data.m_uid);
         }
         private static bool CurrentWindow(Player p, long epoch, out float radius)
         {
@@ -95,6 +115,8 @@ namespace ValheimMastery
             foreach (Hold old in new List<Hold>(Pending.Values))
             { old.Accepted = false; old.Rejected = true; ServiceHold(old); }
             Pending.Clear();
+            ActiveDefenders.Clear();
+            StaleDefenders.Clear();
             Windows = new ConditionalWeakTable<Player, Window>();
             Attempted = new ConditionalWeakTable<Projectile, Attempt>();
             Session = ZNet.instance;
@@ -105,6 +127,7 @@ namespace ValheimMastery
             if (!Owned(shot)) return true;
             ZDO data = shot.m_nview.GetZDO();
             if (Pending.TryGetValue(data.m_uid, out Hold held) && !ServiceHold(held)) return false;
+            if (ActiveDefenders.Count == 0) return true;
             Attempt history = Attempted.GetOrCreateValue(shot);
             if (Session == null || MasteryPlugin.Settings?.Enabled.Value != true || history.Expired || history.Used.Count >= 4 ||
                 Pending.Count >= MaxPending || shot.m_didHit || shot.m_hitMidFlight || shot.m_originalHitData == null ||
@@ -127,11 +150,14 @@ namespace ValheimMastery
             Vector3 contact = default;
             float fraction = float.MaxValue;
             long epoch = 0;
-            foreach (Character character in Character.GetAllCharacters())
+            StaleDefenders.Clear();
+            foreach (var entry in ActiveDefenders)
             {
-                Player defender = character as Player;
+                Player defender = entry.Value.Target as Player;
                 ZDO target = defender?.m_nview?.GetZDO();
-                if (defender == null || defender.IsDead() || target == null || !target.GetBool(ActiveKey, false) ||
+                if (defender == null || target == null || target.m_uid != entry.Key || !target.GetBool(ActiveKey, false))
+                { StaleDefenders.Add(entry.Key); continue; }
+                if (defender.IsDead() ||
                     !BaseAI.IsEnemy(defender, shot.m_owner) ||
                     history.Used.Contains(target.m_uid.ToString() + ":" + target.GetLong(EpochKey, 0L))) continue;
                 float radius = target.GetFloat(RadiusKey, 0f);
@@ -143,6 +169,7 @@ namespace ValheimMastery
                     (chosen == null || defender.GetPlayerID() < chosen.GetPlayerID())))
                 { chosen = defender; fraction = candidateFraction; contact = candidateContact; epoch = target.GetLong(EpochKey, 0L); }
             }
+            foreach (ZDOID stale in StaleDefenders) ActiveDefenders.Remove(stale);
             if (chosen == null || epoch <= 0 || Obstructed(shot, start, contact)) return true;
             ZDO defenderData = chosen.m_nview.GetZDO();
             ZDO sourceData = shot.m_owner.m_nview?.GetZDO();
@@ -363,6 +390,9 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(Player), "Awake")]
     internal static class Combat100ReflectionRegistrationPatch
     { private static void Postfix(Player __instance) => Combat100AtgeirReflection.Register(__instance); }
+    [HarmonyPatch(typeof(Player), "OnDestroy")]
+    internal static class Combat100ReflectionCleanupPatch
+    { private static void Prefix(Player __instance) => Combat100AtgeirReflection.Unregister(__instance); }
     [HarmonyPatch(typeof(Character), "CustomFixedUpdate")]
     internal static class Combat100ReflectionWindowPatch
     { private static void Postfix(Character __instance) { if (__instance is Player p) Combat100AtgeirReflection.Publish(p); } }

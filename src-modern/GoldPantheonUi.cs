@@ -3,6 +3,7 @@ using System.Reflection;
 using HarmonyLib;
 using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 namespace ValheimMastery
@@ -26,13 +27,14 @@ namespace ValheimMastery
         private static float _testFavor = 250f;
         private static Player _testPlayer;
         private static ZNet _testSession;
+        internal static bool PresentationAvailable => GoldCraftingService.EconomyEnabled && GoldCraftingService.CoreReady;
 
         // Local presentation fixture only: no patron unlock, RPC, receipt or save state.
         internal static bool TestVisible
         {
             get
             {
-                if (!MasteryPlugin.Settings.UIDebugLogging.Value || !GoldCraftingService.Enabled ||
+                if (!PresentationAvailable || !MasteryPlugin.Settings.UIDebugLogging.Value || !GoldCraftingService.Enabled ||
                     !GoldCraftingService.Unlocked || Player.m_localPlayer == null || ZNet.instance == null ||
                     _testPlayer != Player.m_localPlayer || _testSession != ZNet.instance)
                     ResetTest();
@@ -50,6 +52,12 @@ namespace ValheimMastery
         internal static void Debug(Terminal.ConsoleEventArgs args)
         {
             if (!MasteryPlugin.Settings.UIDebugLogging.Value) return;
+            if (!PresentationAvailable)
+            {
+                ResetTest();
+                args.Context.AddString(GoldUiLocalization.Text("Pantheon is temporarily unavailable.", "Пантеон тимчасово недоступний."));
+                return;
+            }
             if (args.Args.Length != 4 || args.Args[2] != "test")
             { args.Context.AddString("vm pantheon test on|off|<0..1000> (local UI only)"); return; }
             string value = args.Args[3].ToLowerInvariant();
@@ -79,14 +87,22 @@ namespace ValheimMastery
         {
             if (dialog == null || player == null || player != Player.m_localPlayer) return;
             GoldPantheonUiController controller = dialog.GetComponent<GoldPantheonUiController>();
+            if (!PresentationAvailable) { controller?.HidePanel(true); return; }
             if (controller == null) controller = dialog.gameObject.AddComponent<GoldPantheonUiController>();
             if (!Controllers.Contains(controller)) Controllers.Add(controller);
             controller.Initialize(dialog, player, FindFont(dialog));
         }
 
+        internal static void Hide(SkillsDialog dialog)
+        {
+            if (dialog == null) return;
+            dialog.GetComponent<GoldPantheonUiController>()?.HidePanel();
+        }
+
         // Called by GoldCraftingService at its bounded 0.2 second UI cadence.
         internal static void Tick()
         {
+            if (!PresentationAvailable) ResetTest();
             GoldInspirationStatus.Tick();
             for (int i = Controllers.Count - 1; i >= 0; i--)
             {
@@ -108,7 +124,6 @@ namespace ValheimMastery
 
     internal sealed class GoldPantheonUiController : MonoBehaviour
     {
-        private static readonly FieldInfo ExistingMasteryPanel = AccessTools.Field(typeof(MasteryWindowController), "_panel");
         private static readonly Color Gold = new Color(.96f, .66f, .20f, 1f);
         private SkillsDialog _dialog;
         private Player _player;
@@ -130,6 +145,7 @@ namespace ValheimMastery
         private Outline _buttonOutline, _panelOutline;
         private float _lastFavor = -1f, _favorPulseUntil;
         private bool _built;
+        private GameObject _previousSelection;
         internal void Initialize(SkillsDialog dialog, Player player, TMP_FontAsset font)
         {
             if (_player != player || _uiSession != ZNet.instance) ResetPresentation();
@@ -142,19 +158,25 @@ namespace ValheimMastery
         internal void Refresh()
         {
             if (_dialog == null || _player == null || !_built) return;
+            if (!GoldPantheonUi.PresentationAvailable)
+            {
+                HidePanel(true);
+                _testPatron.SetActive(false);
+                return;
+            }
             bool testVisible = GoldPantheonUi.TestVisible &&
                 !(GoldCraftingService.PatronWallets.TryGetValue("Tyr", out var tyr) && tyr.Unlocked);
             _testPatron.SetActive(testVisible);
             RefreshWalletCards(testVisible);
             bool unlocked = GoldCraftingService.AnyUnlocked && _player == Player.m_localPlayer;
-            _button.SetActive(unlocked);
             if (!unlocked)
             {
-                _panel.SetActive(false);
+                HidePanel(true);
                 return;
             }
+            _button.SetActive(true);
 
-            if (_panel.activeSelf && IsMasteryPanelOpen()) _panel.SetActive(false);
+            if (_panel.activeSelf && IsMasteryPanelOpen()) HidePanel();
             if (_panel.activeSelf) RefreshPanel();
             if (_buttonOutline != null)
             {
@@ -179,7 +201,7 @@ namespace ValheimMastery
             RectTransform buttonRect = _button.GetComponent<RectTransform>();
             buttonRect.anchorMin = buttonRect.anchorMax = new Vector2(1f, 0f);
             buttonRect.pivot = new Vector2(1f, 0f);
-            buttonRect.anchoredPosition = new Vector2(-194f, 18f); // 8px left of MasteryWindowService's 170px button.
+            buttonRect.anchoredPosition = new Vector2(-16f, 18f); // Clear of the centered Skills/Mastery tabs.
             buttonRect.sizeDelta = new Vector2(120f, 42f);
             _buttonImage = _button.GetComponent<Image>();
             _buttonImage.color = new Color(.24f, .15f, .055f, .98f);
@@ -223,7 +245,7 @@ namespace ValheimMastery
             closeRect.anchorMin = closeRect.anchorMax = new Vector2(1f, 1f); closeRect.pivot = Vector2.one;
             closeRect.anchoredPosition = new Vector2(-10f, -10f); closeRect.sizeDelta = new Vector2(32f, 30f);
             close.GetComponent<Image>().color = new Color(.30f, .13f, .055f, .98f);
-            close.GetComponent<Button>().onClick.AddListener(() => _panel.SetActive(false));
+            close.GetComponent<Button>().onClick.AddListener(() => HidePanel());
             AddText(close.transform, "×", font, 22f, TextAlignmentOptions.Center, Vector2.zero, Vector2.zero,
                 Vector2.zero, Vector2.one).raycastTarget = false;
 
@@ -285,25 +307,46 @@ namespace ValheimMastery
 
         private void TogglePanel()
         {
-            if (!GoldCraftingService.AnyUnlocked) return;
+            if (!GoldPantheonUi.PresentationAvailable || !GoldCraftingService.AnyUnlocked) return;
             bool show = !_panel.activeSelf;
-            if (show) HideMasteryPanel();
+            if (!show) { HidePanel(); return; }
+            _previousSelection = EventSystem.current?.currentSelectedGameObject;
+            HideMasteryPanel();
             _panel.SetActive(show);
             if (show) RefreshPanel();
+        }
+
+        internal void HidePanel(bool hideButton = false)
+        {
+            EventSystem events = EventSystem.current;
+            GameObject selected = events?.currentSelectedGameObject;
+            bool ownedSelection = selected != null &&
+                ((_panel != null && selected.transform.IsChildOf(_panel.transform)) ||
+                 (hideButton && _button != null && selected.transform.IsChildOf(_button.transform)));
+            if (ownedSelection)
+            {
+                GameObject restore = _previousSelection;
+                if (restore != null && (!restore.activeInHierarchy ||
+                    (_panel != null && restore.transform.IsChildOf(_panel.transform)) ||
+                    (hideButton && _button != null && restore.transform.IsChildOf(_button.transform))))
+                    restore = null;
+                events.SetSelectedGameObject(restore);
+            }
+            _previousSelection = null;
+            if (_panel != null) _panel.SetActive(false);
+            if (hideButton && _button != null) _button.SetActive(false);
         }
 
         private bool IsMasteryPanelOpen()
         {
             MasteryWindowController existing = _dialog != null ? _dialog.GetComponent<MasteryWindowController>() : null;
-            GameObject panel = existing != null ? ExistingMasteryPanel?.GetValue(existing) as GameObject : null;
-            return panel != null && panel.activeSelf;
+            return existing != null && existing.MasteryVisible;
         }
 
         private void HideMasteryPanel()
         {
             MasteryWindowController existing = _dialog != null ? _dialog.GetComponent<MasteryWindowController>() : null;
-            GameObject panel = existing != null ? ExistingMasteryPanel?.GetValue(existing) as GameObject : null;
-            if (panel != null) panel.SetActive(false);
+            existing?.ShowSkills();
         }
 
         private void RefreshPanel()
@@ -410,7 +453,7 @@ namespace ValheimMastery
         private void ResetPresentation()
         {
             _lastFavor = -1f; _favorPulseUntil = 0;
-            if (_panel != null) _panel.SetActive(false);
+            HidePanel(true);
             foreach (var card in _walletCards.Values)
                 if (card.Root != null) { card.Root.SetActive(false); card.Display = card.LastRefresh = 0; }
             _walletContent?.GetComponentInParent<ScrollRect>()?.StopMovement();
@@ -465,7 +508,7 @@ namespace ValheimMastery
 
         private void OnDisable()
         {
-            if (_panel != null) _panel.SetActive(false);
+            HidePanel(true);
         }
 
         private void OnDestroy() => GoldPantheonUi.Forget(this);

@@ -109,7 +109,7 @@ namespace ValheimMastery
         private static bool CanDispatch(Player player)
         {
             return !ShutdownPending && FrozenActions != null && ActiveKey != null && ActiveKey.Value != KeyCode.None &&
-                MasteryPlugin.Settings?.Enabled.Value == true && !Application.isBatchMode &&
+                MasteryPlugin.Settings?.Enabled.Value == true && GoldCraftingService.EconomyEnabled && GoldCraftingService.CoreReady && !Application.isBatchMode &&
                 player != null && player == Player.m_localPlayer && player.m_nview?.IsOwner() == true &&
                 !player.IsDead() && !player.IsTeleporting() && Hud.instance != null && Hud.instance.m_buildUi != null &&
                 !Game.IsPaused() && !Hud.InRadial() && !Hud.InBuildUi() && player.TakeInput();

@@ -585,6 +585,7 @@ namespace ValheimMastery
     {
         private static readonly Dictionary<ZDOID, Fists70ClientTargetState> States = new Dictionary<ZDOID, Fists70ClientTargetState>();
         private static readonly Dictionary<long, Fists70ClientMaulVisual> Visuals = new Dictionary<long, Fists70ClientMaulVisual>();
+        private static readonly RaycastHit[] TargetHits = new RaycastHit[64];
         internal static float FallProtectionUntil;
 
         internal static Character FindTarget(Player player, float range = Fists70MaulService.ActivationRange)
@@ -592,25 +593,32 @@ namespace ValheimMastery
             if (player == null) return null;
             Vector3 origin = player.GetEyePoint();
             Vector3 forward = player.GetAimDir(origin).normalized;
-            RaycastHit[] hits = Physics.SphereCastAll(origin, 0.22f, forward, range,
+            int count = Physics.SphereCastNonAlloc(origin, 0.22f, forward, TargetHits, range,
                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore);
-            Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-            foreach (RaycastHit hit in hits)
+            RaycastHit[] overflow = count >= TargetHits.Length
+                ? Physics.SphereCastAll(origin, 0.22f, forward, range, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore)
+                : null;
+            RaycastHit[] hits = overflow ?? TargetHits;
+            if (overflow != null) count = overflow.Length;
+            Character best = null;
+            float bestDistance = float.MaxValue, blockerDistance = float.MaxValue;
+            for (int i = 0; i < count; i++)
             {
+                RaycastHit hit = hits[i];
                 Character candidate = hit.collider?.GetComponentInParent<Character>();
                 if (candidate == player) continue;
                 if (candidate == null)
                 {
-                    // Solid terrain before the target breaks the lock.
-                    if (hit.collider != null && !hit.collider.isTrigger) return null;
+                    if (hit.collider != null && !hit.collider.isTrigger)
+                        blockerDistance = Mathf.Min(blockerDistance, hit.distance);
                     continue;
                 }
                 if (candidate.IsDead() || candidate.IsPlayer() || !BaseAI.IsEnemy(player, candidate)) continue;
                 CreatureClass cls = Fists70TargetClassifier.Classify(candidate);
                 if (cls == CreatureClass.SmallNormal) continue;
-                return candidate;
+                if (hit.distance < bestDistance) { best = candidate; bestDistance = hit.distance; }
             }
-            return null;
+            return best != null && bestDistance < blockerDistance ? best : null;
         }
 
         internal static bool IsReady(Character target)
@@ -745,9 +753,12 @@ namespace ValheimMastery
     {
         private static Character Candidate;
         private static Fists70TargetLockMarker Marker;
+        private static float NextProbe;
 
-        internal static Character Refresh(Player player)
+        internal static Character Refresh(Player player, bool force = false)
         {
+            if (!force && Time.unscaledTime < NextProbe) return Candidate;
+            NextProbe = Time.unscaledTime + .10f;
             Character next = null;
             bool eligible = player != null && player == Player.m_localPlayer && !player.IsDead() &&
                 Fists70MaulService.IsFistWeapon(player) &&
@@ -762,7 +773,7 @@ namespace ValheimMastery
             return next;
         }
 
-        internal static void Clear() => Set(null);
+        internal static void Clear() { NextProbe = 0f; Set(null); }
 
         private static void Set(Character target)
         {
@@ -1035,7 +1046,7 @@ namespace ValheimMastery
 
             // Preserve the vanilla kick unless the crosshair is explicitly locked
             // onto a ready Maul target. Merely owning the perk must never consume M3.
-            Character target = Fists70TargetLockService.Refresh(player);
+            Character target = Fists70TargetLockService.Refresh(player, true);
             if (target == null) return true;
             __result = false;
             Fists70MaulService.RequestActivation(player, target);
@@ -1117,6 +1128,7 @@ namespace ValheimMastery
                 GameObject go = new GameObject("ValheimMastery_Fists70Reserved", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
                 go.transform.SetParent(full, false); Reserved = go.GetComponent<Image>(); ReservedRect = go.GetComponent<RectTransform>();
                 Reserved.color = new Color(0.95f, 0.22f, 0.08f, 0.78f); Reserved.raycastTarget = false;
+                MasteryHudArtwork.Fill(Reserved);
             }
             float max = Mathf.Max(1f, state.TargetMaxHealth);
             float hp = Mathf.Clamp01(target.GetHealth() / max);

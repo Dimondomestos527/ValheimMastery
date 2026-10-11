@@ -8,7 +8,8 @@ namespace ValheimMastery
     {
         private static void Postfix(ItemDrop.ItemData __instance, ref string __result)
         {
-            if (__instance?.m_shared?.m_skillType != Skills.SkillType.Crossbows || string.IsNullOrEmpty(__result)) return;
+            if (__instance?.m_shared?.m_itemType != ItemDrop.ItemData.ItemType.Bow ||
+                __instance.m_shared.m_skillType != Skills.SkillType.Crossbows || string.IsNullOrEmpty(__result)) return;
             bool ua = Localization.instance != null &&
                 string.Equals(Localization.instance.GetSelectedLanguage(), "Ukrainian", StringComparison.OrdinalIgnoreCase);
             string marker = ua ? "<color=#D6B47A>Майстерність арбалета</color>" : "<color=#D6B47A>Crossbow Mastery</color>";

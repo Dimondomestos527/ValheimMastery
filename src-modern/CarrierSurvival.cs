@@ -10,11 +10,13 @@ namespace ValheimMastery
         private float LastCombat;
         private float NextThreatScan;
         private Character Threat;
-        private void Awake() { LastCombat = Time.time; }
+        private Character CachedCharacter;
+        private MonsterAI CachedAi;
+        private void Awake() { LastCombat = Time.time; CachedCharacter = GetComponent<Character>(); CachedAi = GetComponent<MonsterAI>(); }
         internal void MarkCombat() { LastCombat = Time.time; }
         private void Update()
         {
-            Character character = GetComponent<Character>();
+            Character character = CachedCharacter;
             if (!Magic70Carrier.IsCarrier(character)) return;
             if (!character.m_nview.IsOwner()) { WasOwner = false; return; }
             if (!WasOwner)
@@ -30,7 +32,7 @@ namespace ValheimMastery
                 Mathf.Abs(character.GetMaxHealth() - desired) > .01f)
                 character.SetupMaxHealth(); // scoped patch preserves the old live fraction
 
-            MonsterAI ai = character.GetComponent<MonsterAI>();
+            MonsterAI ai = CachedAi;
             if (Time.time >= NextThreatScan)
             {
                 NextThreatScan = Time.time + .5f;

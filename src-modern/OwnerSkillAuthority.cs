@@ -150,13 +150,13 @@ namespace ValheimMastery
             if (_session != net) { Snapshots.Clear(); CrossbowSnapshots.Clear(); _session = net; _nextSend = _nextPrune = 0f; }
             long world = net?.GetWorld() != null ? net.GetWorldUID() : 0;
             if (_polearmsWorld != world) { PolearmsSnapshots.Clear(); _polearmsWorld = world; }
-            foreach (var rpc in new List<ZRpc>(PolearmsSnapshots.Keys))
-                if (!ReferenceEquals(PolearmsSnapshots[rpc].Session, net) || net?.GetPeer(rpc) == null) PolearmsSnapshots.Remove(rpc);
             if (net == null) return;
             if (net.IsServer())
             {
                 if (Time.time < _nextPrune) return;
                 _nextPrune = Time.time + 2f;
+                foreach (var rpc in new List<ZRpc>(PolearmsSnapshots.Keys))
+                    if (!ReferenceEquals(PolearmsSnapshots[rpc].Session, net) || net.GetPeer(rpc) == null) PolearmsSnapshots.Remove(rpc);
                 Player local = Player.m_localPlayer;
                 if (local?.m_nview?.IsOwner() == true)
                     local.m_nview.GetZDO()?.Set(RidingPerkAuthority.LevelKey, PerkRuntimeService.GetActualSkillLevel(local, Skills.SkillType.Ride));

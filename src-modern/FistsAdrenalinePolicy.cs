@@ -22,26 +22,7 @@ namespace ValheimMastery
         }
     }
 
-    // All native AddAdrenaline callers converge here through Character's virtual call.
-    // Do not zero the stored bar or skip negative native costs/decay.
-    [HarmonyPatch(typeof(Player), nameof(Player.AddAdrenaline))]
-    [HarmonyPriority(Priority.First)]
-    internal static class FistsPositiveAdrenalineGate
-    {
-        internal struct GainState { internal float Before, Requested; internal bool Blocked; }
-        private static bool Prefix(Player __instance, float v, out GainState __state)
-        {
-            __state = new GainState { Before = __instance.GetAdrenaline(), Requested = v };
-            bool allow = FistsGainRules.Allow(MasteryPlugin.Settings.Enabled.Value, FistsAdrenalinePolicy.Eligible(__instance), v);
-            __state.Blocked = !allow;
-            if (!allow) FistsAdrenalinePolicy.Log(__instance, "blocked-nonfist", v, __state.Before, __state.Before, v, 0f);
-            return allow;
-        }
-        private static void Postfix(Player __instance, GainState __state)
-        {
-            if (!__state.Blocked && __state.Requested > 0f)
-                FistsAdrenalinePolicy.Log(__instance, "native-complete", __state.Requested, __state.Before,
-                    __instance.GetAdrenaline(), __state.Requested, __instance.GetAdrenaline() - __state.Before);
-        }
-    }
+    // Native Player.AddAdrenaline remains untouched. Trinkets and all ordinary game
+    // sources must keep filling the bar regardless of the currently equipped weapon.
+    // Only the mastery bonus multiplier is fists-only; see FistsPassiveAdrenalineGainPatch.
 }

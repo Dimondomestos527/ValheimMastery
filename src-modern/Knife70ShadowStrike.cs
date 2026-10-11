@@ -39,6 +39,14 @@ namespace ValheimMastery
         private const float DefaultChance = 0.35f;
         private const int DebugChainBudget = 64;
         private static readonly Queue<Knife70ShadowRequest> Queue = new Queue<Knife70ShadowRequest>();
+        // Only inactive storage is bounded. Live requests are never discarded.
+        private static readonly Stack<Knife70ShadowRequest> RequestPool = new Stack<Knife70ShadowRequest>(EventsPerFrame);
+        private sealed class SearchBuffer
+        {
+            internal readonly List<Character> Candidates = new List<Character>();
+            internal readonly List<float> Weights = new List<float>();
+        }
+        private static SearchBuffer CachedSearch;
         private static Knife70ShadowRunner Runner;
         private static float InitialChance = DefaultChance;
         private static float SameChance = DefaultChance;
@@ -87,19 +95,12 @@ namespace ValheimMastery
             }
             EnsureRunner();
             Vector3 spawn = ChooseVisualSpawn(source, target);
-            Knife70ShadowRequest request = new Knife70ShadowRequest
-            {
-                Source = source,
-                Target = target,
-                Damage = damage,
-                Generation = generation,
-                AnimationStateHash = animationStateHash,
-                SpawnPosition = spawn,
-                VisualTargetAtQueue = target.GetCenterPoint(),
-                VisualOrigin = visualOrigin,
-                OtherTargetBranch = otherBranch,
-                ExecuteAt = Time.time + Mathf.Max(0.02f, delay)
-            };
+            Knife70ShadowRequest request = RequestPool.Count > 0 ? RequestPool.Pop() : new Knife70ShadowRequest();
+            request.Source = source; request.Target = target; request.Damage = damage;
+            request.Generation = generation; request.AnimationStateHash = animationStateHash;
+            request.SpawnPosition = spawn; request.VisualTargetAtQueue = target.GetCenterPoint();
+            request.VisualOrigin = visualOrigin; request.OtherTargetBranch = otherBranch;
+            request.ExecuteAt = Time.time + Mathf.Max(0.02f, delay);
             Queue.Enqueue(request);
         }
 
@@ -107,13 +108,15 @@ namespace ValheimMastery
         {
             if (!IsAuthoritative())
             {
-                if (Queue.Count > 0) Queue.Clear();
+                if (Queue.Count > 0) DrainQueue();
                 return;
             }
             int count = 0;
             while (count < EventsPerFrame && Queue.Count > 0 && Queue.Peek().ExecuteAt <= Time.time)
             {
-                Execute(Queue.Dequeue());
+                Knife70ShadowRequest request = Queue.Dequeue();
+                try { Execute(request); }
+                finally { ReleaseRequest(request); }
                 count++;
             }
             if (DebugChain && DebugEnqueueBudget <= 0 && Queue.Count == 0)
@@ -189,8 +192,12 @@ namespace ValheimMastery
 
         private static Character ChooseOtherTarget(Player source, Character current, Vector3 origin)
         {
-            List<Character> candidates = new List<Character>();
-            List<float> weights = new List<float>();
+            SearchBuffer buffer = CachedSearch ?? new SearchBuffer();
+            CachedSearch = null; // Nested calls cannot overwrite the in-use snapshot.
+            List<Character> candidates = buffer.Candidates;
+            List<float> weights = buffer.Weights;
+            try
+            {
             float total = 0f;
             foreach (Character candidate in Character.GetAllCharacters())
             {
@@ -208,6 +215,25 @@ namespace ValheimMastery
                 if (roll <= 0f) return candidates[i];
             }
             return candidates[candidates.Count - 1];
+            }
+            finally
+            {
+                candidates.Clear(); weights.Clear();
+                if (CachedSearch == null) CachedSearch = buffer;
+            }
+        }
+
+        private static void ReleaseRequest(Knife70ShadowRequest request)
+        {
+            request.Source = null; request.Target = null; request.Damage = default;
+            request.Generation = 0; request.AnimationStateHash = 0;
+            request.SpawnPosition = default; request.VisualTargetAtQueue = default; request.VisualOrigin = default;
+            request.OtherTargetBranch = false; request.ExecuteAt = 0f;
+            if (RequestPool.Count < EventsPerFrame) RequestPool.Push(request);
+        }
+        private static void DrainQueue()
+        {
+            while (Queue.Count > 0) ReleaseRequest(Queue.Dequeue());
         }
 
         private static Vector3 ChooseVisualSpawn(Player source, Character target)
@@ -219,14 +245,11 @@ namespace ValheimMastery
             Vector3 side = Vector3.Cross(Vector3.up, back).normalized;
             float sideSign = UnityEngine.Random.value < 0.5f ? -1f : 1f;
             float distance = Mathf.Clamp(target.GetRadius() + 0.85f, 1.0f, 2.6f);
-            Vector3[] probes =
+            // Same ordered probes, without allocating an array for every shadow.
+            for (int probeIndex = 0; probeIndex < 3; ++probeIndex)
             {
-                center + back * 0.45f + side * sideSign * distance,
-                center + back * 0.75f - side * sideSign * distance,
-                center + back * distance
-            };
-            foreach (Vector3 probe in probes)
-            {
+                Vector3 probe = probeIndex == 0 ? center + back * 0.45f + side * sideSign * distance :
+                    probeIndex == 1 ? center + back * 0.75f - side * sideSign * distance : center + back * distance;
                 Vector3 candidate = probe;
                 if (Physics.Raycast(probe + Vector3.up * 3f, Vector3.down, out RaycastHit ground, 7f, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
                     candidate = ground.point + Vector3.up * 0.03f;
@@ -261,7 +284,8 @@ namespace ValheimMastery
 
         internal static void Reset()
         {
-            Queue.Clear(); Processed = 0; LastGeneration = 0; LastTarget = "-"; DebugChain = false; DebugEnqueueBudget = 0;
+            DrainQueue(); RequestPool.Clear(); CachedSearch = null;
+            Processed = 0; LastGeneration = 0; LastTarget = "-"; DebugChain = false; DebugEnqueueBudget = 0;
             InitialChance = SameChance = OtherChance = DefaultChance;
             Knife70ShadowRunner oldRunner = Runner;
             Runner = null;
@@ -297,7 +321,7 @@ namespace ValheimMastery
             }
             if (action == "stop")
             {
-                Queue.Clear(); DebugChain = false; DebugEnqueueBudget = 0; InitialChance = SameChance = OtherChance = DefaultChance;
+                DrainQueue(); DebugChain = false; DebugEnqueueBudget = 0; InitialChance = SameChance = OtherChance = DefaultChance;
                 return "Knife70 queue stopped; chances reset to 0.35.";
             }
             if (action == "shadow" && p.Length == 3 && long.TryParse(p[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out long user) && uint.TryParse(p[2], NumberStyles.Integer, CultureInfo.InvariantCulture, out uint id))

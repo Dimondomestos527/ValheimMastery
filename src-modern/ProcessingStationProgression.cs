@@ -149,7 +149,24 @@ namespace ValheimMastery
                     }
                 }
                 finally { BonusOutput = false; }
-                if (delivered > 0) __instance.m_nview.InvokeRPC(ZNetView.Everybody, "VM_ProcessingBonusFx", delivered);
+                if (delivered > 0)
+                {
+                    // Bonus units retain the input receipt's player identity. The RPC is
+                    // visible to loaded peers but only that player may render its personal cue.
+                    var bonusByAuthor = new Dictionary<long, int>();
+                    int remaining = delivered;
+                    foreach (var receipt in __state.Ledger.Items)
+                    {
+                        if (remaining <= 0) break;
+                        if (!receipt.Bonus) continue;
+                        remaining--;
+                        if (receipt.Author == 0) continue;
+                        bonusByAuthor.TryGetValue(receipt.Author, out int count);
+                        bonusByAuthor[receipt.Author] = count + 1;
+                    }
+                    foreach (var entry in bonusByAuthor)
+                        __instance.m_nview.InvokeRPC(ZNetView.Everybody, "VM_ProcessingBonusFx", entry.Key, entry.Value);
+                }
             }
             int tier = Math.Max(GatheringProgressionService.GetResourceTier(__state.Ore, Skills.SkillType.Pickaxes),
                 GatheringProgressionService.GetResourceTier(__state.Ore, Skills.SkillType.Farming));

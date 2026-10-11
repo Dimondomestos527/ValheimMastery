@@ -6,49 +6,44 @@ namespace ValheimMastery
 {
     internal sealed class MasterIdolLight:MonoBehaviour
     {
-        internal Fireplace Fire;internal ZNetView View;internal float Next;internal LinkedListNode<MasterIdolLight> Node;
+        internal Fireplace Fire;internal ZNetView View;internal float Next;internal LinkedListNode<MasterIdolLight> Node;internal MasterIdolLighting.Order Pending;private ZNetView Registered;
         private void Awake(){Fire=GetComponent<Fireplace>();View=GetComponent<ZNetView>();}
         private void OnEnable(){MasterIdolLighting.Register(this);}
+        internal void RegisterRpc(){if(View?.IsValid()==true&&Registered!=View){View.Register<ZPackage>(MasterIdolLighting.CommitRpc,(sender,packet)=>MasterIdolLighting.Commit(this,sender,packet));Registered=View;}}
         private void OnDisable(){MasterIdolLighting.Remove(this);}
         private void OnDestroy(){MasterIdolLighting.Remove(this);}
     }
     internal static class MasterIdolLighting
     {
-        private static readonly LinkedList<MasterIdolLight> Loaded=new LinkedList<MasterIdolLight>();private static float Next;
-        private static long Checks,Writes;
+        internal const string CommitRpc="VM_Idol_LightCommit_v1";
+        private static readonly LinkedList<MasterIdolLight> Loaded=new LinkedList<MasterIdolLight>();private static float Next,WriteReset;private static int WriteCount;private static long Checks,Writes;
         internal static void Register(MasterIdolLight light){if(light.Node==null&&Loaded.Count<4096)light.Node=Loaded.AddLast(light);}
-        internal static void Remove(MasterIdolLight light){if(light.Node!=null){Loaded.Remove(light.Node);light.Node=null;}}
-        internal static string Describe()=>"lighting loaded="+Loaded.Count+" checks="+Checks+" writes="+Writes+" budget=8checks/2writes per0.5s";
-        internal static void Tick()
+        internal static void Remove(MasterIdolLight light){if(light.Node!=null){Loaded.Remove(light.Node);light.Node=null;}light.Pending=null;}
+        internal sealed class Order{internal string Nonce,Home;internal ZDO Fire,Actor;internal long ActorOwner,FireOwner;internal ushort ActorRevision,FireRevision;internal ZNet Session;internal ZDOMan Manager;internal ulong Generation;internal double Until,Started;}
+        internal static bool Eligible(MasterIdolLight light,Character actor,string home)
         {
-            if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.5f;if(!MasterIdolEffectZones.Ready)return;
-            int budget=Math.Min(8,Loaded.Count),written=0;
-            for(int n=0;n<budget;n++)
-            {
-                var light=Loaded.First.Value;Loaded.RemoveFirst();light.Node=Loaded.AddLast(light);
-                if(light==null||light.Fire==null||light.View?.IsValid()!=true||!light.View.IsOwner()||Time.unscaledTime<light.Next)continue;
-                light.Next=Time.unscaledTime+5;Checks++;
-                var fire=light.Fire;var zdo=light.View.GetZDO();var zone=MasterIdolEffectZones.At("BlackForest",light.transform.position);
-                if(zone==null||!MasterIdolActivity.Near(light.transform.position)||fire.m_infiniteFuel||!fire.m_canRefill||fire.m_fuelItem==null||zdo.GetInt(ZDOVars.s_state,1)==2)continue;
-                float fuel=zdo.GetFloat(ZDOVars.s_fuel,0),max=fire.m_maxFuel;
-                if(!MasterIdolResidentCycleRules.Refill(fuel,max))continue;
-                if(!MasterIdolNetworkQuota.TryUid(zone.Id.Split('/')[0],out long user,out uint id))continue;
-                var idol=ZDOMan.instance?.GetZDO(new ZDOID(user,id));long creator=idol?.GetLong(ZDOVars.s_creator,0)??0;
-                if(creator==0||!MasterIdolEffectZones.Allows(creator,light.transform.position))continue;
-                bool resin=Utils.GetPrefabName(fire.m_fuelItem.gameObject)=="Resin",worker=false;
-                foreach(var member in zone.Residents)
-                {
-                    if(!MasterIdolResidentCycleRules.Role(member.Value,resin)||!MasterIdolNetworkQuota.TryUid(member.Key,out long npcUser,out uint npcId))continue;
-                    var instance=ZNetScene.instance?.FindInstance(new ZDOID(npcUser,npcId));var ai=instance?.GetComponent<BaseAI>();var actor=instance?.GetComponent<Character>();
-                    if(actor==null||ai==null||ai.IsSleeping()||!zone.Contains(actor.transform.position)||MasterIdolSocialSeats.Battle(ai,actor))continue;
-                    worker=true;break;
-                }
-                // Commit only on the current Fireplace owner; no amount RPC or inventory path.
-                if(!worker||!light.View.IsOwner()||MasterIdolEffectZones.Find(zone.Id)!=zone)continue;
-                zdo.Set(ZDOVars.s_fuel,max);fire.UpdateState();Writes++;MasterIdolNativePresentation.Refilled(fire,fuel,max);
-                if(++written>=2)break;
-            }
+            if(light==null||light.Fire==null||light.View?.IsValid()!=true||actor?.m_nview?.IsValid()!=true||!ReferenceEquals(ZDOMan.instance?.GetZDO(light.View.GetZDO().m_uid),light.View.GetZDO())||!MasterIdolResidentPolicy.TryHome(actor,out var zone)||zone.Id!=home||!zone.Contains(light.transform.position)||!zone.Contains(actor.transform.position)||!MasterIdolActivity.Near(light.transform.position)||!MasterIdolActivity.Near(actor.transform.position)||MasterIdolSocialSeats.Battle(actor.GetComponent<BaseAI>(),actor)||actor.GetComponent<BaseAI>()?.IsSleeping()!=false)return false;
+            var fire=light.Fire;var data=light.View.GetZDO();if(fire.m_infiniteFuel||!fire.m_canRefill||fire.m_fuelItem==null||data.GetInt(ZDOVars.s_state,1)==2||!MasterIdolResidentCycleRules.Refill(data.GetFloat(ZDOVars.s_fuel,0),fire.m_maxFuel))return false;bool resin=Utils.GetPrefabName(fire.m_fuelItem.gameObject)=="Resin";if(!MasterIdolResidentCycleRules.Role(Utils.GetPrefabName(actor.gameObject),resin))return false;
+            long creator=HomeCreator(home,zone);return creator!=0&&MasterIdolEffectZones.Allows(creator,light.transform.position)&&MasterIdolEffectZones.Allows(creator,actor.transform.position);
         }
+        private static long HomeCreator(string home,MasterIdolEffectZone zone)
+        {
+            if(!MasterIdolEffectZones.Ready||zone?.Type!="BlackForest"||zone.Id!=home||home==null||home.Length>128)return 0;
+            int slash=home.IndexOf('/');if(slash<=0||home.IndexOf('/',slash+1)>=0||!MasterIdolNetworkQuota.TryUid(home.Substring(0,slash),out long user,out uint id))return 0;
+            var source=ZDOMan.instance?.GetZDO(new ZDOID(user,id));if(source==null)return 0;string token=home.Substring(slash+1);
+            if(source.GetPrefab()=="piece_workbench".GetStableHashCode())
+            {
+                // Station marker contract owned by WorkbenchEnchantmentRuntime; zone authority comes from the existing authenticated projection.
+                if(!Guid.TryParseExact(token,"N",out _)||source.GetString("vm.enchant.station.v1","")!=token)return 0;
+            }
+            else if(MasterIdolWorldRegistry.Profile(source.GetPrefab())?.Id!="BlackForest"||source.GetString(MasterIdolWorldRegistry.TokenKey,"")!=token||
+                !source.GetBool(MasterIdolWorldRegistry.ActiveKey,false)||!source.GetBool(MasterIdolWorldRegistry.BoundKey,false)||!MasterIdolToggleRules.On(source.GetInt(MasterIdolWorldRegistry.SwitchKey,0)))return 0;
+            return source.GetLong(ZDOVars.s_creator,0);
+        }
+        internal static string Describe()=>"lighting loaded="+Loaded.Count+" checks="+Checks+" writes="+Writes+" budget=8checks/2commits per0.5s; work=reachable walk/shaman safe ignition";
+        internal static void Tick(){if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.5f;if(!MasterIdolEffectZones.Ready)return;int budget=Math.Min(8,Loaded.Count);for(int n=0;n<budget;n++){var light=Loaded.First.Value;Loaded.RemoveFirst();light.Node=Loaded.AddLast(light);if(light==null||light.Fire==null||light.View?.IsValid()!=true||!light.View.IsOwner())continue;light.RegisterRpc();if(light.Pending!=null){var order=light.Pending;if(order.Session!=ZNet.instance||order.Manager!=ZDOMan.instance||order.Generation!=MasterIdolLoadIdentity.Generation||ZNet.instance.GetTimeSeconds()>order.Until||!ReferenceEquals(light.View.GetZDO(),order.Fire)||order.Fire.GetOwner()!=order.FireOwner||order.Fire.OwnerRevision!=order.FireRevision)light.Pending=null;else continue;}if(Time.unscaledTime<light.Next)continue;light.Next=Time.unscaledTime+5;Checks++;var zone=MasterIdolEffectZones.At("BlackForest",light.transform.position);if(zone==null)continue;Character best=null;float score=float.MaxValue;foreach(var member in zone.Residents){if(!MasterIdolNetworkQuota.TryUid(member.Key,out long user,out uint id))continue;var actor=ZNetScene.instance?.FindInstance(new ZDOID(user,id))?.GetComponent<Character>();if(!Eligible(light,actor,zone.Id)||MasterIdolResidentWork.Busy(actor)||(actor.transform.position-light.transform.position).sqrMagnitude>4096)continue;float priority=(actor.transform.position-light.transform.position).sqrMagnitude+(member.Value=="Greydwarf_Shaman"?0:10000);if(priority<score){best=actor;score=priority;}}if(best==null)continue;var data=best.m_nview.GetZDO();var fire=light.View.GetZDO();var orderNew=new Order{Nonce=Guid.NewGuid().ToString("N"),Home=zone.Id,Actor=data,Fire=fire,ActorOwner=data.GetOwner(),FireOwner=fire.GetOwner(),ActorRevision=data.OwnerRevision,FireRevision=fire.OwnerRevision,Session=ZNet.instance,Manager=ZDOMan.instance,Generation=MasterIdolLoadIdentity.Generation,Started=ZNet.instance.GetTimeSeconds(),Until=ZNet.instance.GetTimeSeconds()+30};light.Pending=orderNew;var worker=best.GetComponent<MasterIdolResidentWork>();if(worker==null||!worker.Request(light,orderNew.Nonce,zone.Id))light.Pending=null;else MasterIdolResidentMetrics.Count("work.order-issued");}}
+        private static bool WritePermit(){if(Time.unscaledTime>=WriteReset){WriteReset=Time.unscaledTime+.5f;WriteCount=0;}if(WriteCount>=2)return false;WriteCount++;return true;}
+        internal static void Commit(MasterIdolLight light,long sender,ZPackage packet){try{var order=light.Pending;if(order==null||packet==null||packet.Size()>384||light.View?.IsOwner()!=true||order.Session!=ZNet.instance||order.Manager!=ZDOMan.instance||order.Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(light.View.GetZDO(),order.Fire)||order.Fire.GetOwner()!=order.FireOwner||order.Fire.OwnerRevision!=order.FireRevision)return;long world=packet.ReadLong();var uid=MasterIdolResidentWork.ReadUid(packet);int epoch=packet.ReadInt();string home=packet.ReadString(),nonce=packet.ReadString();bool noPath=packet.ReadBool();long started=packet.ReadLong(),now=ZNet.instance.GetTime().Ticks;if(packet.GetPos()!=packet.Size()||world!=ZNet.instance.GetWorldUID()||uid!=order.Actor.m_uid||nonce!=order.Nonce||home!=order.Home||sender!=order.ActorOwner||epoch!=order.ActorRevision||order.Actor.GetOwner()!=sender||order.Actor.OwnerRevision!=epoch||!ReferenceEquals(ZDOMan.instance.GetZDO(uid),order.Actor)||ZNet.instance.GetTimeSeconds()>order.Until||started>now+TimeSpan.TicksPerSecond||now-started>5*TimeSpan.TicksPerSecond)return;var actor=ZNetScene.instance?.FindInstance(uid)?.GetComponent<Character>();bool valid=Eligible(light,actor,home)&&(!noPath?(actor.transform.position-light.transform.position).sqrMagnitude<=16:MasterIdolResidentPolicy.Shaman(actor,out _)&&ZNet.instance.GetTimeSeconds()-order.Started>=1.264334&&MasterIdolResidentPresentation.ResourcesReady(actor,true));if(!valid){light.Pending=null;if(actor!=null)MasterIdolResidentWork.Result(actor,order.FireOwner,nonce,false);return;}if(!WritePermit())return;float before=order.Fire.GetFloat(ZDOVars.s_fuel,0),after=light.Fire.m_maxFuel;order.Fire.Set(ZDOVars.s_fuel,after);light.Pending=null;Writes++;MasterIdolResidentMetrics.Count("work.refill-committed");try{light.Fire.UpdateState();}catch(Exception){MasterIdolResidentMetrics.Count("work.state-display-failed");}try{MasterIdolResidentPresentation.Refuelled(light.Fire,before,after);}catch(Exception){MasterIdolResidentMetrics.Count("work.refill-fx-failed");}MasterIdolResidentWork.Result(actor,order.FireOwner,nonce,true);}catch(Exception){MasterIdolResidentMetrics.Count("work.commit-rejected");}}
     }
     [HarmonyPatch(typeof(Fireplace),"Awake")]
     internal static class MasterIdolLightAttach

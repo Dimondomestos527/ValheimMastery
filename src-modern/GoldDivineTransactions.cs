@@ -150,6 +150,7 @@ namespace ValheimMastery
                 MasterworkContextValid(intent, gui, player));
         }
         internal static bool Outstanding => ReadReceipt(Player.m_localPlayer, out _, out _);
+        internal static bool IsReceiptQuarantined(Player player) => player != null && QuarantinedPlayer == player.GetPlayerID();
         internal static bool Eligible(ItemDrop.ItemData item) => item?.m_shared != null && item.IsEquipable() &&
             item.m_shared.m_maxQuality > 1 && item.m_shared.m_maxStackSize == 1;
         private static Recipe FindRecipe(string name)
@@ -329,47 +330,13 @@ namespace ValheimMastery
                 int phase = p.ReadInt(); string encoded = p.ReadString(); GoldAction a = GoldAction.Decode(encoded);
                 if (ledger?.IsAvailable != true) { Reply(rpc, 4, encoded, "storage"); return; }
                 long id = actor.GetPlayerID(); var state = ledger.Get(id);
-                if (state.SettledTokens.Contains(a.Token)) { Reply(rpc, 2, encoded); GoldCraftingService.NotifyFavor(id); return; }
-                if (state.Pending != null)
+                if (state.SettledTokens.Contains(a.Token))
                 {
-                    if (state.Pending.GuidToken != a.Token || state.Pending.StationString != encoded) { Reply(rpc, 0, encoded, "busy"); return; }
-                    if (phase == Applied)
-                    {
-                        if (ledger.Commit(id, a.Token, Utc))
-                        { GoldCraftingService.ClearArm(id); Reply(rpc, 2, encoded); GoldCraftingService.NotifyFavor(id); }
-                    }
-                    else if (phase == Rejected)
-                    { if (ledger.Reject(id, a.Token)) Reply(rpc, 2, encoded); }
-                    else if (phase == Requested && GoldCraftingService.CraftingEnabled) Reply(rpc, 1, state.Pending.StationString);
-                    return;
+                    if (phase == Applied || phase == Rejected) { Reply(rpc, 2, encoded); GoldCraftingService.NotifyFavor(id); }
+                    else Crafting100PermitService.HandleLegacy(rpc, actor, a, encoded, phase);
+                    return; // Requested versus already-settled is contradictory, never erase it.
                 }
-                if (phase == Rejected) { Reply(rpc, 2, encoded); return; }
-                if (phase != Requested) { Reply(rpc, 0, encoded, "missing-receipt"); return; }
-                if (!GoldCraftingService.CraftingEnabled) return;
-                Recipe recipe = FindRecipe(a.Recipe);
-                if (!ServerActionAllowed(actor, a) || state.Unlocked != true ||
-                    !ledger.CanStart(id, GoldCooldownPolicy.LegacyPatronId, a.Cost) || !ServerValid(actor, a, recipe, false))
-                { Reply(rpc, 0, encoded, "conditions"); return; }
-                if (!Validating.Add(id)) return;
-                ZNet admittedSession = ZNet.instance;
-                WorkshopStationProof.Acquire(actor, a.Token, a.Station, () =>
-                {
-                    if (!GoldCraftingService.IsServerLedgerCurrent(admittedSession, requestWorld, ledger)) return;
-                    Validating.Remove(id);
-                    var currentActor = WorkshopActor.Resolve(rpc);
-                    if (!GoldCraftingService.Enabled || ledger.IsAvailable != true || currentActor?.Available != true ||
-                        currentActor.GetPlayerID() != id || currentActor.CharacterId != actor.CharacterId ||
-                        !ServerActionAllowed(currentActor, a) || !ServerValid(currentActor, a, recipe, true) ||
-                        !ledger.Reserve(id, new GoldCraftingLedger.PendingGrant { GuidToken = a.Token, Kind = a.Kind,
-                            Prefab = a.Prefab, OldQuality = a.OldQuality, NewQuality = a.NewQuality, Variant = a.Variant,
-                            Cost = a.Cost, StationString = encoded, ExpiresAt = Utc + 30 }, Utc))
-                    { Reply(rpc, 0, encoded, "conditions"); return; }
-                    Reply(rpc, 1, encoded);
-                }, error =>
-                {
-                    if (!GoldCraftingService.IsServerLedgerCurrent(admittedSession, requestWorld, ledger)) return;
-                    Validating.Remove(id); Reply(rpc, 0, encoded, "station");
-                });
+                Crafting100PermitService.HandleLegacy(rpc, actor, a, encoded, phase);
             }
             catch (Exception error) { MasteryPlugin.Log.LogWarning("[Gold100] Invalid divine request: " + error.Message); }
         }
@@ -397,6 +364,7 @@ namespace ValheimMastery
                     if (decision == GoldReceiptDecision.StorageUnavailable) { GoldCraftingService.SetServerReady(false); return; }
                     if (decision == GoldReceiptDecision.ClearSettled)
                     {
+                        if (phase != Applied && phase != Rejected) return;
                         string old = player.m_customData[JournalKey]; player.m_customData.Remove(JournalKey);
                         if (!Save(player)) player.m_customData[JournalKey] = old;
                         return;
@@ -502,7 +470,7 @@ namespace ValheimMastery
             NextRecovery = Time.unscaledTime + 2;
             if (QuarantinedPlayer != 0) return;
             if (ReadReceipt(Player.m_localPlayer, out GoldAction saved, out int phase) && saved != null && phase > 0 &&
-                (phase != Requested || GoldCraftingService.CraftingEnabled) && (Session.IsServer() || NetworkSync.HasServerSettings))
+                (Session.IsServer() || NetworkSync.HasServerSettings))
             { OwnerSkillAuthority.SendNow(); Send(saved, phase); }
         }
         internal static void UpdateButton(InventoryGui gui, Player player) { }

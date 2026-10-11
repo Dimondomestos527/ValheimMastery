@@ -8,38 +8,19 @@ namespace ValheimMastery
 {
     internal static class CookingLegacyMigrationService
     {
-        private const string MigrationKey = "valheim_mastery.cooking35.inventory_migration.v2";
-        private static float _nextAt;
 
         internal static void Tick()
         {
-            if (Time.time < _nextAt) return;
-            _nextAt = Time.time + 2f;
-            Player player = Player.m_localPlayer;
-            if (player == null || player.m_customData.ContainsKey(MigrationKey) ||
-                !PerkRuntimeService.HasPerk(player, Skills.SkillType.Cooking, 35)) return;
-            int tier = PerkRuntimeService.HasPerk(player, Skills.SkillType.Cooking, 70) ? 70 : 35;
-            foreach (ItemDrop.ItemData item in player.GetInventory().GetAllItems())
-            {
-                if (item?.m_shared == null) continue;
-                bool timedMead = item.m_shared.m_isDrink && item.m_shared.m_consumeStatusEffect != null && item.m_shared.m_consumeStatusEffect.m_ttl > 0f;
-                if (Cooking35Service.IsPreparedMeal(item) || timedMead)
-                    item.m_customData[Cooking35Service.CookMasteryKey] = tier.ToString();
-            }
-            player.m_customData[MigrationKey] = "1";
-            player.GetInventory().Changed();
-            MasteryPlugin.Log.LogInfo("Cooking35 migrated existing prepared food and timed meads in the local inventory.");
+            // Historical unknown products remain unknown. Existing tags are retained;
+            // new products are stamped only at a confirmed production boundary.
+            return;
         }
     }
 
     internal sealed class MeadDurationState
     {
+        internal CookingMeadTiming.Plan Plan;
         internal StatusEffect Effect;
-        internal float Ttl;
-        internal bool Mastery;
-        internal bool Swamp;
-        internal bool MountainsCooldown;
-        internal bool Mountains;
     }
 
     [HarmonyPatch(typeof(Player), nameof(Player.ConsumeItem))]
@@ -50,11 +31,8 @@ namespace ValheimMastery
             __state = null;
             StatusEffect effect = item?.m_shared?.m_consumeStatusEffect;
             if (__instance == null || effect == null || effect.m_ttl <= 0f || !item.m_shared.m_isDrink) return;
-            __state = new MeadDurationState { Effect = effect, Ttl = effect.m_ttl,
-                Mastery = Cooking35Service.HasCookMastery(__instance, item, 35),
-                Swamp = MasterFeastThemeService.GetTheme(__instance) == FeastTheme.Swamp,
-                Mountains = MasterFeastThemeService.GetTheme(__instance) == FeastTheme.Mountains,
-                MountainsCooldown = MasterFeastThemeService.GetTheme(__instance) == FeastTheme.Mountains && FeastMeadStrength.IsRecoveryCooldown(effect) };
+            var plan = CookingMeadTiming.Prepare(item, MasterFeastThemeService.GetTheme(__instance));
+            if (plan != null) __state = new MeadDurationState { Effect = effect, Plan = plan };
         }
         private static void Postfix(Player __instance, bool __result, MeadDurationState __state)
         {
@@ -64,10 +42,10 @@ namespace ValheimMastery
             var active = __instance.GetSEMan().GetStatusEffect(__state.Effect.NameHash());
             if (active != null)
             {
-                active.m_ttl = __state.Ttl *
-                    (1f + (__state.Mastery ? .40f : 0f) + (__state.Swamp ? .30f : 0f)) *
-                    (__state.MountainsCooldown ? .5f : 1f);
-                FeastMeadRetaliation.Register(active, __state.Effect, __state.Mountains);
+                // Vanilla clones the template. Do not write through an unexpected
+                // shared instance returned by another status-effect implementation.
+                if (ReferenceEquals(active, __state.Effect)) return;
+                __state.Plan.Apply(active);
             }
         }
     }
@@ -78,9 +56,8 @@ namespace ValheimMastery
         internal int Amount;
         internal bool Applied;
         internal bool PreviousBonusSoundContext;
-        internal ItemDrop.ItemData TaggedTemplate;
-        internal bool HadTag;
-        internal string OldTag;
+
+
     }
 
     [HarmonyPatch(typeof(InventoryGui), nameof(InventoryGui.DoCrafting))]
@@ -97,21 +74,12 @@ namespace ValheimMastery
             ActiveBonusSoundContext = true;
             CraftingStation station = player.GetCurrentCraftingStation();
             Skills.SkillType skill = station != null ? station.m_craftingSkill : Skills.SkillType.Crafting;
-            ItemDrop.ItemData output = __instance.m_craftRecipe.m_item?.m_itemData;
-            bool masteryFood = skill == Skills.SkillType.Cooking && PerkRuntimeService.HasPerk(player, Skills.SkillType.Cooking, 35) &&
-                (Cooking35Service.IsPreparedMeal(output) || (output?.m_shared?.m_isDrink == true && output.m_shared.m_consumeStatusEffect?.m_ttl > 0f));
-            if (masteryFood)
-            {
-                __state.TaggedTemplate = output;
-                __state.HadTag = output.m_customData.TryGetValue(Cooking35Service.CookMasteryKey, out __state.OldTag);
-                output.m_customData[Cooking35Service.CookMasteryKey] =
-                    (PerkRuntimeService.HasPerk(player, Skills.SkillType.Cooking, 70) ? 70 : 35).ToString();
-            }
+
             __state.Chance = __instance.m_craftBonusChance;
             __state.Amount = __instance.m_craftBonusAmount;
             __state.Applied = true;
             __instance.m_craftBonusAmount = Mathf.Max(1, __instance.m_craftRecipe.m_amount);
-            if (skill == Skills.SkillType.Cooking) __instance.m_craftBonusChance = 0.50f;
+            if (skill == Skills.SkillType.Cooking) __instance.m_craftBonusChance = CookingRecipeProgression.BonusChanceCoefficient(__instance.m_craftRecipe);
         }
         [HarmonyPostfix]
         private static void Postfix(InventoryGui __instance, CraftBonusState __state) => Restore(__instance, __state);
@@ -123,11 +91,7 @@ namespace ValheimMastery
             ActiveBonusSoundContext = state.PreviousBonusSoundContext;
             if (gui == null || !state.Applied) return;
             gui.m_craftBonusChance = state.Chance; gui.m_craftBonusAmount = state.Amount; state.Applied = false;
-            if (state.TaggedTemplate != null)
-            {
-                if (state.HadTag) state.TaggedTemplate.m_customData[Cooking35Service.CookMasteryKey] = state.OldTag;
-                else state.TaggedTemplate.m_customData.Remove(Cooking35Service.CookMasteryKey);
-            }
+
         }
     }
 
@@ -181,17 +145,22 @@ namespace ValheimMastery
         internal static void RecordCook(Fermenter fermenter, long sender)
         {
             if (fermenter?.m_nview?.IsOwner() != true) return;
-            long author = ProcessingStationProgressionService.ResolveSender(sender);
-            int tier = CookingAuthorNetwork.Tier(fermenter.m_nview, author);
+            CookingProductRecord product = CookingFermenterProtocol.ActiveProduct;
+            if (product == null) return;
+            int tier = 0;
+            if (product.Data.TryGetValue(Cooking35Service.CookMasteryKey, out string raw)) int.TryParse(raw, out tier);
             fermenter.m_nview.GetZDO().Set(CookingTierKey, tier);
-            fermenter.m_nview.GetZDO().Set(AuthorKey, author);
+            fermenter.m_nview.GetZDO().Set(AuthorKey, product.Author);
         }
+        internal static bool PendingBonus(Fermenter fermenter) => States.GetOrCreateValue(fermenter).Bonus;
+        internal static void RestorePendingBonus(Fermenter fermenter, bool bonus) => States.GetOrCreateValue(fermenter).Bonus = bonus;
         internal static void Roll(Fermenter fermenter, long sender)
         {
             if (fermenter == null) return;
             ZNetPeer peer = ZNet.instance?.GetPeer(sender);
             Player player = peer != null ? OwnerSkillAuthority.ResolvePlayer(peer) : Player.m_localPlayer;
-            float chance = player != null ? Mathf.Clamp01(player.GetSkillFactor(Skills.SkillType.Cooking) * 0.50f) : 0f;
+            float factor = CookingFermenterProtocol.TapFactor >= 0f ? CookingFermenterProtocol.TapFactor : (player != null ? player.GetSkillFactor(Skills.SkillType.Cooking) : 0f);
+            float chance = Mathf.Clamp01(factor * 0.50f);
             FermenterBonusState state = States.GetOrCreateValue(fermenter);
             state.Player = player;
             state.Bonus = UnityEngine.Random.value < chance;
@@ -221,7 +190,7 @@ namespace ValheimMastery
         }
         internal static void End(FermenterBonusState state, bool completed)
         {
-            if (completed && state?.Output != null && state.CookingTier >= 35)
+            if (completed && state?.Output != null && state.CookingTier >= 35 && !CookingFermenterOutput.NativeSourceActive)
                 CookingAuthorNetwork.StampNew(state.InstanceCountBefore, state.Output.gameObject.name,
                     state.BonusPosition, state.Author, state.CookingTier);
             if (completed && state?.BonusApplied == true && !state.FeedbackPlayed)
@@ -262,3 +231,6 @@ namespace ValheimMastery
         private static Exception Finalizer(FermenterBonusState __state, Exception __exception) { FermenterBonusService.End(__state, false); return __exception; }
     }
 }
+
+
+

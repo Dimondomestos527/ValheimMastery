@@ -145,7 +145,7 @@ namespace ValheimMastery
                 if (manifest.Length == 0) throw new InvalidOperationException("Missing escrow manifest.");
                 record.Set(SettlementKey, (commit ? "C|" : "R|") + manifest);
             }
-            foreach (ZDO record in records) record.Set(WorkshopRemoteCraft.EscrowKey, "");
+            foreach (ZDO record in records) { record.Set(WorkshopRemoteCraft.EscrowKey, ""); record.Set(CookingFeastProvenance.EscrowSourceKey, ""); }
             foreach (ZDO record in records)
             {
                 string[] fields = record.GetString(SettlementKey, "").Split('|');
@@ -225,7 +225,7 @@ namespace ValheimMastery
                 if (expected == null || !live.GetArray().SequenceEqual(expected))
                     throw new InvalidOperationException("Loaded chest did not reconcile to its world snapshot.");
             }
-            foreach (var zdo in records) zdo.Set(WorkshopRemoteCraft.EscrowKey, "");
+            foreach (var zdo in records) { zdo.Set(WorkshopRemoteCraft.EscrowKey, ""); zdo.Set(CookingFeastProvenance.EscrowSourceKey, ""); }
             foreach (var zdo in records)
             {
                 WorkshopAtomicDebit.ReleaseRecovered(ZNetScene.instance?.FindInstance(zdo.m_uid)?.GetComponent<Container>()?.GetInventory());

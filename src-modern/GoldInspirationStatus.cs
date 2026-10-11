@@ -37,7 +37,7 @@ namespace ValheimMastery
             marker.name = MarkerName;
             marker.m_name = GoldUiLocalization.Text("Divine Inspiration", "Божественне натхнення");
             marker.m_tooltip = tooltip;
-            marker.m_icon = player.GetSkills()?.GetSkillDef(Skills.SkillType.Crafting)?.m_icon ?? player.m_textIcon;
+            marker.m_icon = MasteryHudArtwork.Icon("crafting_100", player.GetSkills()?.GetSkillDef(Skills.SkillType.Crafting)?.m_icon ?? player.m_textIcon);
             marker.m_ttl = exhausted ? Mathf.Max(.2f, (float)remaining) : 0f;
             marker.m_flashIcon = false;
             player.m_seman.AddStatusEffect(marker, false, 0, 0f, 0);

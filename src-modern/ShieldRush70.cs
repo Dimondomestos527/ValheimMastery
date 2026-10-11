@@ -65,7 +65,7 @@ namespace ValheimMastery
             var marker = ScriptableObject.CreateInstance<SE_Stats>();
             marker.name = "VM_ShieldRushCooldown"; marker.m_name = "Натиск щита";
             marker.m_tooltip = "Щит відновлює силу для наступного ривка. Блокуй і натисни ухил, коли відновиться.";
-            marker.m_ttl = 20f; marker.m_icon = shield.GetIcon();
+            marker.m_ttl = 20f; marker.m_icon = MasteryHudArtwork.Icon("blocking_70", shield.GetIcon());
             player.GetSEMan().AddStatusEffect(marker, true);
             Object.Destroy(marker); // SEMan owns a clone, not this template.
             return true;

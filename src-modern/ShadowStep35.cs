@@ -10,11 +10,18 @@ namespace ValheimMastery
         internal Collider EnemyCollider;
     }
 
+    internal sealed class ShadowStepColliderBuffer
+    {
+        internal readonly List<Collider> PlayerColliders = new List<Collider>();
+        internal readonly List<Collider> EnemyColliders = new List<Collider>();
+    }
+
     internal sealed class ShadowStepState
     {
         internal float ReadyUntil;
         internal bool SpecialDodgeActive;
         internal readonly List<ShadowStepCollisionPair> Ignored = new List<ShadowStepCollisionPair>();
+        internal ShadowStepColliderBuffer ColliderBuffer;
     }
 
     internal static class ShadowStep35Service
@@ -79,19 +86,37 @@ namespace ValheimMastery
 
         private static void RefreshEnemyCollisionPass(Player player, ShadowStepState state)
         {
-            Collider[] playerColliders = player.GetComponentsInChildren<Collider>();
-            foreach (Character target in Character.GetAllCharacters())
+            ShadowStepColliderBuffer buffer = state.ColliderBuffer ?? new ShadowStepColliderBuffer();
+            state.ColliderBuffer = null; // Trigger callbacks may re-enter with their own scratch.
+            List<Collider> playerColliders = buffer.PlayerColliders;
+            List<Collider> enemyColliders = buffer.EnemyColliders;
+            try
             {
-                if (target == null || target == player || target.IsDead() || !BaseAI.IsEnemy(player, target) ||
-                    MasteryClassificationService.GetCreatureClass(target) != CreatureClass.SmallNormal ||
-                    (target.GetCenterPoint() - player.GetCenterPoint()).sqrMagnitude > 9f) continue;
-                foreach (Collider playerCollider in playerColliders)
-                foreach (Collider enemyCollider in target.GetComponentsInChildren<Collider>())
+                player.GetComponentsInChildren<Collider>(false, playerColliders);
+                foreach (Character target in Character.GetAllCharacters())
                 {
-                    if (playerCollider == null || enemyCollider == null || AlreadyIgnored(state, playerCollider, enemyCollider)) continue;
-                    Physics.IgnoreCollision(playerCollider, enemyCollider, true);
-                    state.Ignored.Add(new ShadowStepCollisionPair { PlayerCollider = playerCollider, EnemyCollider = enemyCollider });
+                    if (target == null || target == player || target.IsDead() || !BaseAI.IsEnemy(player, target) ||
+                        MasteryClassificationService.GetCreatureClass(target) != CreatureClass.SmallNormal ||
+                        (target.GetCenterPoint() - player.GetCenterPoint()).sqrMagnitude > 9f) continue;
+                    foreach (Collider playerCollider in playerColliders)
+                    {
+                    // Keep the original per-player-collider query boundary: IgnoreCollision
+                    // may trigger callbacks that change the enemy hierarchy.
+                    target.GetComponentsInChildren<Collider>(false, enemyColliders);
+                    foreach (Collider enemyCollider in enemyColliders)
+                    {
+                        if (playerCollider == null || enemyCollider == null || AlreadyIgnored(state, playerCollider, enemyCollider)) continue;
+                        Physics.IgnoreCollision(playerCollider, enemyCollider, true);
+                        state.Ignored.Add(new ShadowStepCollisionPair { PlayerCollider = playerCollider, EnemyCollider = enemyCollider });
+                    }
+                    enemyColliders.Clear();
+                    }
                 }
+            }
+            finally
+            {
+                playerColliders.Clear(); enemyColliders.Clear();
+                if (state.ColliderBuffer == null) state.ColliderBuffer = buffer;
             }
         }
 

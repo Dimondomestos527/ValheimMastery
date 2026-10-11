@@ -42,7 +42,7 @@ namespace ValheimMastery
             if(!Session.IsServer()){if(!Ready)Request();return;}using var aggregate=new MasterIdolPerf.Scope("projection.tick");
             try
             {
-                var zones=MasterIdolWorldRegistry.EffectZones();var wards=MasterIdolWorldIndex.EffectWards();
+                var zones=WorkbenchEnchantmentRuntime.ProjectCommittedZones();var wards=MasterIdolWorldIndex.EffectWards();
                 var assigned=new HashSet<string>(StringComparer.Ordinal);
                 var activeHomes=new HashSet<string>(zones.Where(z=>z.Type=="BlackForest").Select(z=>z.Id),StringComparer.Ordinal);
                 var previousHomes=new Dictionary<string,string>(StringComparer.Ordinal);
@@ -58,7 +58,7 @@ namespace ValheimMastery
                     var geometry=Parse(body);foreach(var zone in zones)geometry.ById[zone.Id].Circles=zone.Circles;Body=body;Geometry=geometry;using(var hash=SHA256.Create())Digest=Convert.ToBase64String(hash.ComputeHash(body));
                     Pages=new byte[(body.Length+MasterIdolProjectionCodec.ChunkBytes-1)/MasterIdolProjectionCodec.ChunkBytes][];
                     for(int page=0;page<Pages.Length;page++){int start=page*MasterIdolProjectionCodec.ChunkBytes;Pages[page]=new byte[Math.Min(MasterIdolProjectionCodec.ChunkBytes,body.Length-start)];Buffer.BlockCopy(body,start,Pages[page],0,Pages[page].Length);}
-                    MasterIdolPerf.Count("projection.encode");Revision++;Available=true;if(MasteryPlugin.Settings.UIDebugLogging.Value)MasteryPlugin.Log.LogInfo("[IdolTest] projection revision="+Revision+" topology="+MasterIdolWorldIndex.TopologyRevision+" zones="+zones.Count+" circles="+zones.Sum(z=>z.Circles.Length)+" residents="+zones.Sum(z=>z.Residents.Count));}
+                    MasterIdolPerf.Count("projection.encode");Revision++;Available=true;MasterIdolSeatRosterGuard.ObserveProjection(Geometry);if(MasteryPlugin.Settings.UIDebugLogging.Value)MasteryPlugin.Log.LogInfo("[IdolTest] projection revision="+Revision+" topology="+MasterIdolWorldIndex.TopologyRevision+" zones="+zones.Count+" circles="+zones.Sum(z=>z.Circles.Length)+" residents="+zones.Sum(z=>z.Residents.Count));}
                 LastVerified=Time.unscaledTime;
                 var peers=Session.GetPeers();var active=new HashSet<ZRpc>();foreach(var peer in peers)
                 {
@@ -113,7 +113,7 @@ namespace ValheimMastery
                 if(!full){if(packet.GetPos()!=packet.Size()||!Available||CommittedEpoch!=epoch||revision!=Revision||digest!=Digest){Request();return;}LastVerified=Time.unscaledTime;return;}
                 int length=packet.ReadInt(),index=packet.ReadInt(),count=packet.ReadInt();int bytesAt=packet.GetPos(),declared=packet.ReadInt();if(declared<0||declared>MasterIdolProjectionCodec.ChunkBytes||declared!=packet.Size()-packet.GetPos())throw new FormatException();packet.SetPos(bytesAt);var bytes=packet.ReadByteArray();if(packet.GetPos()!=packet.Size())throw new FormatException();
                 var body=Assembly.Add(epoch,revision,digest,length,index,count,bytes,Time.unscaledTime);if(body==null)return;
-                var geometry=Parse(body);Geometry=geometry;Revision=revision;Digest=digest;CommittedEpoch=epoch;Available=true;LastVerified=Time.unscaledTime;
+                var geometry=Parse(body);Geometry=geometry;Revision=revision;Digest=digest;CommittedEpoch=epoch;Available=true;MasterIdolSeatRosterGuard.ObserveProjection(Geometry);LastVerified=Time.unscaledTime;
             }catch{Available=false;Assembly.Reset();Request();}
         }
         private static bool Finite(float value)=>!float.IsNaN(value)&&!float.IsInfinity(value);
@@ -151,6 +151,7 @@ namespace ValheimMastery
         }
     }
 }
+
 
 
 

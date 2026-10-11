@@ -1,4 +1,4 @@
-using HarmonyLib;
+﻿using HarmonyLib;
 using UnityEngine;
 
 namespace ValheimMastery
@@ -12,8 +12,12 @@ namespace ValheimMastery
             AppendMagicStaffMastery(__instance, ref __result);
             if (Cooking35Service.IsTimedMead(__instance))
             {
-                if (Cooking35Service.HasCookMastery(Player.m_localPlayer, __instance, 35))
-                    __result += "\n<color=#8FD6A3>" + PerkLocalization.Localize("$vm_item_master_mead") + "</color>";
+                string key = CookingMeadTiming.MasteredTooltipKey(__instance);
+                if (key != null)
+                {
+                    string line = "<color=#8FD6A3>" + PerkLocalization.Localize(key) + "</color>";
+                    if (!__result.Contains(line)) __result += "\n" + line;
+                }
                 return;
             }
             if (Cooking35Service.IsPreparedMeal(__instance))

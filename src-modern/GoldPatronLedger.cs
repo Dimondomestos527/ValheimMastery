@@ -138,7 +138,6 @@ namespace ValheimMastery
         {
             if (!ValidPatronId(patron) || !Finite(cost) || cost < 0 || cost > 1000 ||
                 !GoldCooldownPolicy.CanStart(patron, cost, p.ExhaustedPatron, p.ExhaustionRemaining)) return false;
-            if (p.CoordinatorPins.ContainsKey(patron)) return false;
             if (p.Pending != null && Conflict(patron, cost, GoldCooldownPolicy.LegacyPatronId, p.Pending.Cost)) return false;
             foreach (var claim in p.Claims.Values)
                 if (Conflict(patron, cost, claim.Patron, claim.Cost)) return false;
@@ -154,15 +153,13 @@ namespace ValheimMastery
 
         // Manual grants can await authority. Prepared grants are ONLY accounting
         // and conflict fences; this method does not authorize native lethal protection.
-        internal bool ReserveAction(long playerId, GoldPatronGrant grant, bool requireCoordinatorAck = false)
+        internal bool ReserveAction(long playerId, GoldPatronGrant grant)
         {
             lock (_gate)
             {
                 if (!CanMutate() || playerId == 0 || !ValidAction(grant) || !_players.TryGetValue(playerId, out var p)) return false;
-                if (requireCoordinatorAck && grant.Prepared) return false;
                 if (FindIdolToken(grant.Token) != null) return false;
-                if (p.Claims.TryGetValue(grant.Patron, out var pending))
-                    return pending.Same(grant) && (!requireCoordinatorAck || PinAction(playerId, grant));
+                if (p.Claims.TryGetValue(grant.Patron, out var pending)) return pending.Same(grant);
                 if (p.Results.TryGetValue(grant.Patron, out var result) && result.Grant.Same(grant)) return false; // terminal, not a new grant
                 if (p.Generation == long.MaxValue || grant.Generation != p.Generation + 1 || !CanAdmit(p, grant.Patron, grant.Cost)) return false;
                 // GUID identity is independent of sequence; never reuse retained legacy/current evidence.
@@ -171,7 +168,6 @@ namespace ValheimMastery
                 foreach (var other in p.Results.Values) if (other.Grant.Token == grant.Token) return false;
                 p.Generation = grant.Generation;
                 p.Claims.Add(grant.Patron, grant.Copy());
-                if (requireCoordinatorAck) p.CoordinatorPins.Add(grant.Patron, grant.Copy());
                 return PersistOrRollback();
             }
         }
@@ -185,7 +181,6 @@ namespace ValheimMastery
                     (outcome != GoldPatronOutcome.Committed && outcome != GoldPatronOutcome.Unused) ||
                     !_players.TryGetValue(playerId, out var p)) return false;
                 if (p.Results.TryGetValue(grant.Patron, out var result) && result.Grant.Same(grant)) return result.Outcome == outcome;
-                if (p.CoordinatorPins.TryGetValue(grant.Patron, out var pin) && !pin.Same(grant)) return false;
                 if (!p.Claims.TryGetValue(grant.Patron, out var pending) || !pending.Same(grant)) return false;
                 if (pending.Prepared)
                 {
@@ -208,64 +203,6 @@ namespace ValheimMastery
                 p.Results[pending.Patron] = new GoldPatronResult { Grant = pending.Copy(), Outcome = outcome };
                 return PersistOrRollback();
             }
-        }
-
-        // Recovery upgrade for an EXACT already admitted manual claim/result only.
-        // Cannot recover an overwritten result or authorize a new grant.
-        internal bool PinAction(long playerId, GoldPatronGrant grant)
-        {
-            lock (_gate)
-            {
-                if (!CanMutate() || playerId == 0 || !ValidAction(grant) || grant.Prepared ||
-                    !_players.TryGetValue(playerId, out var p)) return false;
-                if (p.CoordinatorPins.TryGetValue(grant.Patron, out var pin)) return pin.Same(grant);
-                bool exactClaim = p.Claims.TryGetValue(grant.Patron, out var claim) && claim.Same(grant);
-                bool exactResult = p.Results.TryGetValue(grant.Patron, out var result) && result.Grant.Same(grant);
-                if (!exactClaim && (!exactResult || p.Claims.ContainsKey(grant.Patron))) return false;
-                if (grant.Patron == GoldCooldownPolicy.LegacyPatronId && p.Pending != null) return false;
-                p.CoordinatorPins.Add(grant.Patron, grant.Copy());
-                return PersistOrRollback();
-            }
-        }
-
-        // Trusted coordinator calls ONLY AFTER its own durable financial outcome.
-        // This is NOT recipient/effect-applied ACK and does not itself prove that save.
-        internal bool AcknowledgeAction(long playerId, GoldPatronGrant grant, GoldPatronOutcome outcome)
-        {
-            lock (_gate)
-            {
-                if (!CanMutate() || playerId == 0 || !ValidAction(grant) || grant.Prepared ||
-                    (outcome != GoldPatronOutcome.Committed && outcome != GoldPatronOutcome.Unused) ||
-                    !_players.TryGetValue(playerId, out var p) ||
-                    !p.Results.TryGetValue(grant.Patron, out var result) || !result.Grant.Same(grant) || result.Outcome != outcome) return false;
-                if (!p.CoordinatorPins.TryGetValue(grant.Patron, out var pin)) return true; // exact terminal duplicate, no mutation
-                if (!pin.Same(grant) || p.Claims.ContainsKey(grant.Patron)) return false;
-                p.CoordinatorPins.Remove(grant.Patron);
-                return PersistOrRollback();
-            }
-        }
-
-        private static void WriteCoordinatorPins(BinaryWriter w, PlayerState p)
-        {
-            w.Write(p.CoordinatorPins.Count);
-            foreach (var pin in p.CoordinatorPins.Values) WriteGrant(w, pin);
-        }
-
-        private static bool ReadCoordinatorPins(BinaryReader r, PlayerState p)
-        {
-            int count = r.ReadInt32();
-            if (count < 0 || count > MaxPatrons) return false;
-            for (int i = 0; i < count; i++)
-            {
-                var pin = ReadGrant(r);
-                if (!ValidAction(pin) || pin.Prepared || p.CoordinatorPins.ContainsKey(pin.Patron)) return false;
-                bool exactClaim = p.Claims.TryGetValue(pin.Patron, out var claim) && claim.Same(pin);
-                bool exactResult = p.Results.TryGetValue(pin.Patron, out var result) && result.Grant.Same(pin);
-                if (!exactClaim && (!exactResult || p.Claims.ContainsKey(pin.Patron))) return false;
-                if (pin.Patron == GoldCooldownPolicy.LegacyPatronId && p.Pending != null) return false;
-                p.CoordinatorPins.Add(pin.Patron, pin);
-            }
-            return true;
         }
 
         private static void WriteGrant(BinaryWriter w, GoldPatronGrant g)

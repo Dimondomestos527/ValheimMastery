@@ -91,6 +91,9 @@ namespace ValheimMastery
             RegisterEffect(ObjectDB.instance);
             // Ignore the zones until all local status definitions are ready.
             if (ObjectDB.instance?.GetStatusEffect(EffectHash) == null) return;
+            if (Visual == null && MasteryPlugin.Settings.EnablePerkProcVFX.Value) Visual = IceTrailVisual.Create();
+            float tickDamage = .5f * (2f + .04f * Mathf.Clamp(
+                PerkRuntimeService.GetActualSkillLevel(player, Skills.SkillType.ElementalMagic), 0f, 100f));
             Seen.Clear();
             for (int z = Zones.Count - 1; z >= 0; z--)
             {
@@ -109,8 +112,7 @@ namespace ValheimMastery
                     HitData tick = new HitData { m_point = enemy.GetCenterPoint(), m_dir = Vector3.zero,
                         m_blockable = false, m_dodgeable = false, m_staggerMultiplier = 0f,
                         m_skillRaiseAmount = 0f, m_variant = 1270 };
-                    tick.m_damage.m_frost = .5f * (2f + .04f * Mathf.Clamp(
-                        PerkRuntimeService.GetActualSkillLevel(player, Skills.SkillType.ElementalMagic), 0f, 100f));
+                    tick.m_damage.m_frost = tickDamage;
                     tick.SetAttacker(player);
                     enemy.Damage(tick);
                 }

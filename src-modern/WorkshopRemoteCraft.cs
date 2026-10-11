@@ -18,6 +18,7 @@ namespace ValheimMastery
             internal WorkshopAtomicDebit Debit;
             internal List<ZDO> Chests;
             internal Dictionary<string, int> Credit;
+            internal CookingProductRecord CookingSource;
             internal bool? Decision;
             internal bool Failed;
         }
@@ -35,6 +36,7 @@ namespace ValheimMastery
             internal ItemDrop.ItemData Upgrade;
             internal int Quality, Amount, Variant;
             internal Dictionary<string, int> Costs, Credit;
+            internal CookingProductRecord CookingSource;
             internal WorkshopInventorySnapshot Before;
             internal CraftingOutcomeSnapshot Outcome;
             internal bool Paid, Preserve, ReplayPermit;
@@ -69,14 +71,16 @@ namespace ValheimMastery
         private static WorkshopDurableRequests _durableRequests;
         private static ZRpc _protocolRpc;
         private static int _protocol, _helloAttempts;
-        private static bool _legacyHello;
+        private static int _sourceHelloFallback;
+        private static readonly HashSet<ZRpc> ProductPeers = new HashSet<ZRpc>();
         private static readonly HashSet<ZRpc> PreparationPeers = new HashSet<ZRpc>();
         internal static bool SupportsPreparation(ZRpc rpc) => rpc != null && PreparationPeers.Contains(rpc);
         internal static bool ServerBusy(long playerId) => Pending.ContainsKey(playerId);
-        internal static bool PreparationReady => Ready && (ZNet.instance.IsServer() || _protocol == 4);
+        internal static bool PreparationReady => Ready && (ZNet.instance.IsServer() || _protocol >= 4);
         private static float _nextHello;
         internal static bool Ready => Enabled && ZNet.instance != null &&
-            (ZNet.instance.IsServer() || ((_protocol == 3 || _protocol == 4) && _protocolRpc == ZNet.instance.GetServerRPC()));
+            (ZNet.instance.IsServer() || ((_protocol == 3 || _protocol == 4 || _protocol == 5) && _protocolRpc == ZNet.instance.GetServerRPC()));
+        internal static bool ProductReady => Ready && (ZNet.instance.IsServer() || _protocol == 5);
         internal static bool ClientBusy => _client != null || _executing != null;
         internal static string DescribeStatus() => "Майстерня: сервер " + (Ready ? "готовий" : "не підтвердив підтримку") +
             "; операція " + (ClientBusy ? "очікується" : "не виконується") +
@@ -93,7 +97,7 @@ namespace ValheimMastery
                 Pending.Clear(); Used.Clear(); _client = null; _executing = null; _validatingBuild = null; _durableRequests = null; _session = net;
                 LocalReplies.Clear(); _protocolRpc = null; _protocol = _helloAttempts = 0; _nextHello = 0f;
                 RemoteReplies.Clear();
-                PreparationPeers.Clear(); _legacyHello = false;
+                PreparationPeers.Clear(); ProductPeers.Clear(); _sourceHelloFallback = 0;
             }
             // Loopback is deferred: vanilla must finish unwinding its craft timer
             // before a listen-host executes the granted action.
@@ -111,12 +115,12 @@ namespace ValheimMastery
             if (net != null && !net.IsServer() && NetworkSync.HasServerSettings)
             {
                 ZRpc server = net.GetServerRPC();
-                if (_protocolRpc != server) { _protocolRpc = server; _protocol = _helloAttempts = 0; _nextHello = 0f; _legacyHello = false; }
+                if (_protocolRpc != server) { _protocolRpc = server; _protocol = _helloAttempts = 0; _nextHello = 0f; _sourceHelloFallback = 0; }
                 // An unready peer can legitimately ignore the initial requests.
                 // Keep retrying slowly until acknowledged; explicit incompatibility
                 // (-1) still fails closed and never authorizes inventory access.
                 if (server != null && _protocol == 0 && Time.time >= _nextHello)
-                { _helloAttempts = Math.Min(3, _helloAttempts + 1); _nextHello = Time.time + (_helloAttempts < 3 ? 3f : 15f); server.Invoke("VM_WS_Protocol", _legacyHello ? 3 : 4); }
+                { _helloAttempts = Math.Min(3, _helloAttempts + 1); _nextHello = Time.time + (_helloAttempts < 3 ? 3f : 15f); server.Invoke("VM_WS_Protocol", _sourceHelloFallback == 0 ? 5 : _sourceHelloFallback == 1 ? 4 : 3); }
             }
             if (_client != null && net != null && (net.GetServerRPC() != _client.ServerRpc || Time.time - _client.StartedAt > 15f))
             {
@@ -160,15 +164,16 @@ namespace ValheimMastery
             {
                 if (net.GetPeer(rpc)?.IsReady() == true)
                 {
-                    if (Enabled && version == 4) PreparationPeers.Add(rpc); else PreparationPeers.Remove(rpc);
-                    rpc.Invoke("VM_WS_Protocol", Enabled && (version == 3 || version == 4) ? version : -1);
+                    if (Enabled && (version == 4 || version == 5)) PreparationPeers.Add(rpc); else PreparationPeers.Remove(rpc);
+                    if (Enabled && version == 5) ProductPeers.Add(rpc); else ProductPeers.Remove(rpc);
+                    rpc.Invoke("VM_WS_Protocol", Enabled && (version == 3 || version == 4 || version == 5) ? version : -1);
                 }
             }
             else if (rpc == net.GetServerRPC())
             {
                 _protocolRpc = rpc;
-                if (version == -1 && !_legacyHello) { _legacyHello = true; _protocol = 0; _nextHello = 0f; }
-                else _protocol = version == 3 || version == 4 ? version : -1;
+                if (version == -1 && _sourceHelloFallback < 2) { _sourceHelloFallback++; _protocol = 0; _nextHello = 0f; }
+                else _protocol = version == 3 || version == 4 || version == 5 ? version : -1;
             }
         }
 
@@ -362,7 +367,7 @@ namespace ValheimMastery
                     {
                         if (pending.Rpc != rpc && net.GetPeer(pending.Rpc) != null) return;
                         pending.Rpc = rpc;
-                        SendGrant(rpc, pending.Id, pending.Credit);
+                        SendGrant(rpc, pending.Id, pending.Credit, pending.CookingSource);
                     }
                     else Deny(rpc, id, "Попередня транзакція ще очікує на завершення.");
                     return;
@@ -488,17 +493,30 @@ namespace ValheimMastery
                 var before = new Dictionary<ZDO, byte[]>();
                 foreach (var chest in chests)
                     before.Add(chest, (byte[])chest.GetByteArray(ZDOVars.s_items, null).Clone());
+                string feastMaterial = CookingFeastProvenance.Material(buildPiece);
+                if (feastMaterial != null && rpc != null && !ProductPeers.Contains(rpc))
+                { Deny(rpc, id, "Сервер не підтвердив передачу автора бенкету."); return; }
                 WorkshopTiming.Mark(id, true, "T6.removalStart");
-                debit = WorkshopAtomicDebit.Begin(lines, () => player.HasCrafting70 && !player.IsDead() && !player.IsTeleporting());
+                CookingProductRecord cookingSource = null;
+                if (feastMaterial != null) foreach (var line in lines)
+                    if (line.Store is WorkshopRecordStore store) CookingDebitProvenance.Preflight(store.Inventory, line.Item);
+                using (var sourceTrace = feastMaterial != null ? CookingDebitProvenance.Begin() : null)
+                {
+                    debit = WorkshopAtomicDebit.Begin(lines, () => player.HasCrafting70 && !player.IsDead() && !player.IsTeleporting());
+                    if (debit != null && feastMaterial != null && credit.TryGetValue(buildPiece.m_resources[0].m_resItem.m_itemData.m_shared.m_name, out int paidMaterial) && paidMaterial == 1)
+                        cookingSource = sourceTrace.Single(feastMaterial);
+                }
                 if (debit == null) { Deny(rpc, id, "Запаси скрині змінилися або скриню заблоковано."); return; }
                 WorkshopTiming.Mark(id, true, "T7.removalPersisted");
                 WorkshopRecovery.MarkRecords(chests, before, player.GetPlayerID(), id);
+                if (cookingSource != null) foreach (var chest in chests)
+                    chest.Set(CookingFeastProvenance.EscrowSourceKey, cookingSource.Encode());
                 WorkshopTiming.Mark(id, true, "Sescrow.persisted");
                 WorkshopChestLease.KeepWarm(chests, player, actionPoint);
-                Pending.Add(playerId, new ServerAction { Rpc = rpc, Id = id, PlayerId = playerId, Debit = debit, Chests = chests, Credit = credit });
+                Pending.Add(playerId, new ServerAction { Rpc = rpc, Id = id, PlayerId = playerId, Debit = debit, Chests = chests, Credit = credit, CookingSource = cookingSource });
                 ownsPending = true;
                 debit = null; // The pending server action owns the rollback from here.
-                SendGrant(rpc, id, credit);
+                SendGrant(rpc, id, credit, cookingSource);
             }
             catch (Exception error)
             {
@@ -519,12 +537,16 @@ namespace ValheimMastery
             if (rpc == null) LocalReplies.Enqueue(new ZPackage(reply.GetArray()));
             else rpc.Invoke("VM_WS_CraftReply", reply);
         }
-        private static void SendGrant(ZRpc rpc, string id, Dictionary<string, int> credit)
+        private static void SendGrant(ZRpc rpc, string id, Dictionary<string, int> credit, CookingProductRecord source)
         {
+            // Preserve a paid source-bearing transaction until the peer supports its receipt.
+            if (source != null && rpc != null && !ProductPeers.Contains(rpc)) return;
+
             WorkshopTiming.Mark(id, true, "Sgrant.sent");
             WorkshopTiming.Report(id, true, "grant");
             var reply = new ZPackage(); reply.Write(id); reply.Write(true); reply.Write(credit.Count);
             foreach (var item in credit) { reply.Write(item.Key); reply.Write(item.Value); }
+            if (rpc == null || ProductPeers.Contains(rpc)) { reply.Write(source != null); if (source != null) reply.Write(source.Encode()); }
             SendReply(rpc, reply);
         }
 
@@ -590,6 +612,8 @@ namespace ValheimMastery
                         throw new InvalidOperationException("Malformed credit.");
                     state.Credit.Add(name, paid);
                 }
+                if (net.IsServer() || _protocol == 5)
+                    state.CookingSource = package.ReadBool() ? CookingProductRecord.Decode(package.ReadString()) : null;
                 if (state.BuildPiece != null)
                 {
                     _validatingBuild = state;
@@ -663,7 +687,9 @@ namespace ValheimMastery
         private static void ExecuteBuild(ClientAction state, Player player)
         {
             PayPersonal(state, player);
-            state.BuildCompleted = player.TryPlacePiece(state.BuildPiece);
+            var producerScope = CookingFeastProvenance.Begin();
+            try { state.BuildCompleted = player.TryPlacePiece(state.BuildPiece); }
+            finally { CookingFeastProvenance.End(producerScope); }
             if (!state.BuildCompleted) return;
             player.m_lastToolUseTime = Time.time;
             player.UseStamina(player.GetBuildStamina());
@@ -741,11 +767,14 @@ namespace ValheimMastery
             {
                 if (chest == null || chest.GetOwner() != ZNet.GetUID()) throw new InvalidOperationException("Escrow chest unavailable.");
                 chest.Set(EscrowKey, ""); chest.Set(WorkshopRecovery.BeforeKey, Array.Empty<byte>());
+                chest.Set(CookingFeastProvenance.EscrowSourceKey, "");
             }
         }
         internal static bool HasCredit(Player player, Recipe recipe, int quality, int amount) =>
             Enabled && _executing != null && player == Player.m_localPlayer && _executing.Recipe == recipe &&
             _executing.Quality == quality && _executing.Amount == amount;
+        internal static CookingProductRecord BuildCookingSource(Player player, Piece piece) =>
+            _executing?.BuildPiece == piece && _executing.Paid && player == Player.m_localPlayer ? _executing.CookingSource : null;
         internal static bool HasBuildCredit(Player player, Piece piece) => Enabled && _executing?.BuildPiece != null &&
             _executing.BuildPiece == piece && _executing.Paid && player == Player.m_localPlayer && !_executing.BuildEntered;
         internal static bool Preview(Player player, Recipe recipe, int quality, int amount)
@@ -797,6 +826,11 @@ namespace ValheimMastery
         private static void PayPersonal(ClientAction state, Player player)
         {
             if (state.Paid) throw new InvalidOperationException("Repeated Workshop payment.");
+            string material = CookingFeastProvenance.Material(state.BuildPiece);
+            if (material != null) foreach (var cost in state.Costs)
+                if (cost.Value - state.Credit[cost.Key] > 0) CookingDebitProvenance.Preflight(player.GetInventory(), cost.Key);
+            using (var productTrace = material != null ? CookingDebitProvenance.Begin() : null)
+            {
             foreach (var cost in state.Costs)
                 {
                     int debit = cost.Value - state.Credit[cost.Key];
@@ -806,6 +840,8 @@ namespace ValheimMastery
                     if (player.GetInventory().CountItems(cost.Key, -1, false) != before - debit)
                         throw new InvalidOperationException("Personal debit was not exact.");
                 }
+                if (material != null && state.CookingSource == null) state.CookingSource = productTrace.Single(material);
+            }
             state.Paid = true;
         }
     }

@@ -20,7 +20,7 @@ namespace ValheimMastery
             {
                 if(!MasterIdolNetworkQuota.TryUid(member.Key,out long user,out uint id))continue;
                 var zdo=ZDOMan.instance?.GetZDO(new ZDOID(user,id));
-                if(zdo==null||zdo.GetPrefab()!=member.Value.GetStableHashCode()||zdo.GetFloat(ZDOVars.s_health,1)<=0||zdo.GetBool(ZDOVars.s_tamed,false)){arrivals.Remove(member.Key);continue;}
+                if(zdo==null||zdo.GetPrefab()!=member.Value.GetStableHashCode()||zdo.GetFloat(ZDOVars.s_health,1)<=0||zdo.GetBool(ZDOVars.s_tamed,false)&&!MasterIdolNativeTaming.SameHome(zdo.GetString("vm.idol.home.v1",""),zone.Id)){arrivals.Remove(member.Key);continue;}
                 yield return new MasterIdolResidentCandidate(member.Key,member.Value,true,zone.Id);
             }
         }
@@ -30,7 +30,7 @@ namespace ValheimMastery
             if(Session!=net||World!=net.GetWorldUID()){Session=net;World=net.GetWorldUID();Vacancies.Clear();Arrivals.Clear();PreviousMembers.Clear();Next=NextSave=0;Cursor=0;Store=new MasterIdolRecruitmentStore(System.IO.Path.Combine(BepInEx.Paths.ConfigPath,"ValheimMastery","Idols",World+".residents.vmi"),World);foreach(var saved in Store.Load().OrderBy(x=>x.Key,StringComparer.Ordinal)){string group=saved.Key.Substring(0,saved.Key.LastIndexOf('|'));if(!Vacancies.TryGetValue(group,out var entry)){entry=new Vacancy();Vacancies[group]=entry;}entry.Times.Enqueue(saved.Value);}foreach(var saved in Store.Members)PreviousMembers[saved.Key]=new HashSet<string>(saved.Value,StringComparer.Ordinal);Dirty=false;}
             Store.Poll();
             var forest=zones.Where(x=>x.Type=="BlackForest").OrderBy(x=>x.Id,StringComparer.Ordinal).ToArray();
-            if(forest.Length>4096){return;}
+            if(forest.Length>128){return;}
             var active=new HashSet<string>(forest.Select(x=>x.Id),StringComparer.Ordinal);
             foreach(string id in Arrivals.Keys.Where(x=>!active.Contains(x)).ToArray())Arrivals.Remove(id);
             foreach(string stale in PreviousMembers.Keys.Where(x=>!active.Contains(x.Substring(0,x.LastIndexOf('|')))).ToArray()){PreviousMembers.Remove(stale);Dirty=true;}

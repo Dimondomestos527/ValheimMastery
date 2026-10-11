@@ -8,6 +8,9 @@ namespace ValheimMastery
 {
     internal static class NetworkSync
     {
+        // The semantic mod version is intentionally stable across compatible releases.
+        // WireIdentity changes whenever the RPC/build cohort is not safe to mix.
+        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261011-free-enchantments-ashlands35-test";
         private static readonly HashSet<ZRpc> Registered = new HashSet<ZRpc>();
         private static readonly Dictionary<ZNetPeer, float> PendingHello = new Dictionary<ZNetPeer, float>();
         private static readonly Dictionary<ZNetPeer, float> PendingConfirmation = new Dictionary<ZNetPeer, float>();
@@ -30,10 +33,12 @@ namespace ValheimMastery
             Spear70HookService.Register(peer.m_rpc);
 #endif
             peer.m_rpc.Register<float, string>("ValheimMastery_StationXp", OnStationXp);
+            MeadXpTransport.Register(peer);
             OwnerSkillAuthority.Register(peer.m_rpc);
             CrossbowTurretHandoff.Register(peer.m_rpc);
             CrossbowTurretCommands.Register(peer.m_rpc);
             GoldCraftingService.Register(peer.m_rpc);
+            WorkbenchEnchantmentRuntime.RegisterPeer(peer);
             Fists70HitRelay.Register(peer.m_rpc);
             Skeleton35Travel.Register(peer.m_rpc);
             SummonRosterCommands.Register(peer.m_rpc);
@@ -117,6 +122,8 @@ namespace ValheimMastery
             ZNet net = ZNet.instance;
             if (net == null || !net.IsServer())
                 return;
+            if (PendingHello.Count == 0 && PendingConfirmation.Count == 0)
+                return;
             List<ZNetPeer> peers = new List<ZNetPeer>(net.GetPeers());
             float now = Time.time;
             foreach (ZNetPeer peer in peers)
@@ -125,7 +132,7 @@ namespace ValheimMastery
                 {
                     PendingHello.Remove(peer);
                     PendingConfirmation[peer] = now + Mathf.Max(2f, MasteryPlugin.Settings.HandshakeTimeoutSeconds.Value);
-                    peer.m_rpc.Invoke("ValheimMastery_Hello", MasteryPlugin.Version, MasteryRuntime.Manifest());
+                    peer.m_rpc.Invoke("ValheimMastery_Hello", WireIdentity, MasteryRuntime.Manifest());
                     if (MasteryPlugin.Settings.VerboseLogging.Value)
                         MasteryPlugin.Log.LogInfo("Mastery hello sent to " + peer.m_socket.GetHostName());
                 }
@@ -167,9 +174,16 @@ namespace ValheimMastery
                 MasteryPlugin.Log.LogError("Rejected malformed Mastery config received from server.");
                 return;
             }
+            if (serverVersion != WireIdentity)
+            {
+                MasteryPlugin.Log.LogError("Rejected incompatible Mastery network build from server: " + serverVersion);
+                // Keep the existing RPC shape so an older server can actively reject this client.
+                rpc.Invoke("ValheimMastery_Ready", WireIdentity, "protocol-mismatch");
+                return;
+            }
             MasteryRuntime.ApplyServerSettings(tierStep, firstMultiplier, dodgeXpCoefficient, worldScaling, earlyBonus, lateBonus, legacyCatchUpEnabled, legacyCatchUpScale, combatDefault, combatBow, combatClub, clubStaggerPerLevel);
             HasServerSettings = true;
-            rpc.Invoke("ValheimMastery_Ready", MasteryPlugin.Version, MasteryRuntime.ManifestHash());
+            rpc.Invoke("ValheimMastery_Ready", WireIdentity, MasteryRuntime.ManifestHash());
         }
 
         private static void OnReady(ZRpc rpc, string clientVersion, string manifestHash)
@@ -182,7 +196,7 @@ namespace ValheimMastery
                 return;
             MasteryPlugin.Log.LogInfo("Mastery ready received from client.");
             PendingConfirmation.Remove(peer);
-            if (clientVersion == MasteryPlugin.Version && manifestHash == MasteryRuntime.ManifestHash())
+            if (clientVersion == WireIdentity && manifestHash == MasteryRuntime.ManifestHash())
             {
                 if (MasteryPlugin.Settings.VerboseLogging.Value)
                     MasteryPlugin.Log.LogInfo("Mastery handshake accepted: " + peer.m_socket.GetHostName());
@@ -355,3 +369,4 @@ namespace ValheimMastery
         private static void Postfix(ZNet __instance, ZRpc __0) => NetworkSync.Begin(__instance, __0);
     }
 }
+

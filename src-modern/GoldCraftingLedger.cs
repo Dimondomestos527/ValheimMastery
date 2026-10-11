@@ -9,7 +9,7 @@ namespace ValheimMastery
     internal sealed partial class GoldCraftingLedger
     {
         private const uint Magic = 0x47434C31; // GCL1
-        private const int Version = 10; // Canonical pins + idol receipts; deployed fork9 remains separate.
+        private const int Version = 9; // Isolated deployed-v4 purchase fork; canonical v5 pins are incompatible.
         private const int MaxFileBytes = 8 * 1024 * 1024;
         private const int MaxPlayers = 50000;
         private const int MaxReceipts = 64;
@@ -70,8 +70,6 @@ namespace ValheimMastery
             internal Dictionary<string, GoldPatronGrant> Claims = new Dictionary<string, GoldPatronGrant>(StringComparer.Ordinal);
             internal Dictionary<string, GoldIdolPurchase> IdolPurchases = new Dictionary<string, GoldIdolPurchase>(StringComparer.Ordinal);
             internal Dictionary<string, GoldPatronResult> Results = new Dictionary<string, GoldPatronResult>(StringComparer.Ordinal);
-            // Manual coordinator financial-outcome retention only; never additional held funds.
-            internal Dictionary<string, GoldPatronGrant> CoordinatorPins = new Dictionary<string, GoldPatronGrant>(StringComparer.Ordinal);
             internal double BackgroundWindowStartUtc;
             internal float BackgroundFavorThisHour;
             internal Dictionary<string, BackgroundSequence> BackgroundStationSequences = new Dictionary<string, BackgroundSequence>(StringComparer.Ordinal);
@@ -92,8 +90,6 @@ namespace ValheimMastery
                 foreach (var pair in Claims) p.Claims.Add(pair.Key, pair.Value.Copy());
                 p.Results = new Dictionary<string, GoldPatronResult>(StringComparer.Ordinal);
                 foreach (var pair in Results) p.Results.Add(pair.Key, pair.Value.Copy());
-                p.CoordinatorPins = new Dictionary<string, GoldPatronGrant>(StringComparer.Ordinal);
-                foreach (var pair in CoordinatorPins) p.CoordinatorPins.Add(pair.Key, pair.Value.Copy());
                 p.Pending = Pending == null ? null : Pending.Copy();
                 p.SettledTokens = new List<string>(SettledTokens);
                 p.BackgroundStationSequences = new Dictionary<string, BackgroundSequence>(StringComparer.Ordinal);
@@ -128,7 +124,7 @@ namespace ValheimMastery
                     {
                         if (reader.ReadUInt32() != Magic) return Fault();
                         int version = reader.ReadInt32();
-                        if (version < 1 || version > Version || (version > 5 && version != 9 && version != 10)) return Fault();
+                        if (version < 1 || version > Version || (version > 4 && version != 9)) return Fault();
                         int length = reader.ReadInt32();
                         if (length < 0 || length > MaxFileBytes - 16 || input.Length - input.Position != length + 4L) return Fault();
                         byte[] payload = reader.ReadBytes(length);
@@ -386,8 +382,7 @@ namespace ValheimMastery
                     foreach (string token in p.SettledTokens) WriteString(writer, token, 32);
                     writer.Write(p.Pending != null);
                     if (p.Pending != null) WritePending(writer, p.Pending);
-                    WritePatrons(writer, p);
-                    WriteCoordinatorPins(writer, p); WriteIdolPurchases(writer, p);
+                    WritePatrons(writer, p); WriteIdolPurchases(writer, p);
                 }
                 writer.Flush(); payload = body.ToArray();
             }
@@ -448,8 +443,7 @@ namespace ValheimMastery
                     }
                     p.ExhaustedPatron = p.ExhaustionRemaining > 0 ? GoldCooldownPolicy.LegacyPatronId : string.Empty;
                     if (version >= 4 && !ReadPatrons(reader, p)) return null;
-                    if ((version == 5 || version == 10) && !ReadCoordinatorPins(reader, p)) return null;
-                    if ((version == 9 || version == 10) && !ReadIdolPurchases(reader, p)) return null;
+                    if (version == 9 && !ReadIdolPurchases(reader, p)) return null;
                     result.Add(p.PlayerId, p);
                 }
                 if (input.Position != input.Length) return null;

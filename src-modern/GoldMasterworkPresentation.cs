@@ -5,12 +5,13 @@ namespace ValheimMastery
 {
     internal static class GoldMasterworkPresentation
     {
-        // Native manifest: Player/fx/fx_forge_hammer and fx_invupgrade.
+        // Native manifest: fx_forge_hammer; potential-forge success uses fx_UpgradeStation_Success and sfx_forgeofpotential_success.
         internal static void Begin(InventoryGui gui, Player player, Recipe recipe, Func<bool> currentIntent)
         {
             try
             {
                 if (!Local(player) || gui == null || currentIntent?.Invoke() != true) return;
+                GoldMasterworkSuccessSound.Prewarm();
                 PlayAudio(player.GetCurrentCraftingStation()?.m_craftItemEffects ?? gui.m_craftItemEffects,
                     "crafting100_working", "sfx_gui_craftitem", player.transform.position);
                 var cue = gui.GetComponent<GoldMasterworkWorkingCue>() ?? gui.gameObject.AddComponent<GoldMasterworkWorkingCue>();
@@ -24,24 +25,22 @@ namespace ValheimMastery
             try
             {
                 if (!Local(player)) return;
-                var station = player.GetCurrentCraftingStation();
-                EffectList effects = recipe?.GetRequiredStation(1) != null
-                    ? station?.m_craftItemDoneEffects : InventoryGui.instance?.m_craftItemDoneEffects;
-                PlayAudio(effects, "crafting100_created", "sfx_gui_craftitem_end", player.transform.position);
+                if (MasteryPlugin.Settings.EnablePerkSFX.Value)
+                    GoldMasterworkSuccessSound.Request(player);
                 if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value) return;
                 ZNet session = ZNet.instance;
-                Vector3 position = Anchor(player);
-                GameObject prefab = NativePerkAssetResolver.Resolve("fx_invupgrade");
-                if (prefab != null) SpawnVisual(prefab, position, .7f, 1.2f, 96);
-                else NativeVfxSafeFrame.Request("fx_invupgrade", loaded =>
+                Vector3 position = player.transform.position;
+                GameObject prefab = NativePerkAssetResolver.Resolve("fx_UpgradeStation_Success");
+                if (prefab != null) SpawnSuccessVisual(prefab, position);
+                else NativeVfxSafeFrame.Request("fx_UpgradeStation_Success", loaded =>
                 {
                     if (!Local(player) || ZNet.instance != session) return true;
-                    return SpawnVisual(loaded, position, .7f, 1.2f, 96);
+                    return SpawnSuccessVisual(loaded, position);
                 });
             }
             catch (Exception error) { Warn(error); }
         }
-        internal static bool Local(Player player) => GoldCraftingService.Enabled && !Application.isBatchMode && player != null &&
+        internal static bool Local(Player player) => MasteryPlugin.Settings.Enabled.Value && !Application.isBatchMode && player != null &&
             player == Player.m_localPlayer && ZNet.instance != null && !player.IsDead() && !player.IsTeleporting();
         internal static Vector3 Anchor(Player player) => player.transform.position + Vector3.up * .95f + player.transform.forward * .35f;
         internal static bool WorkingPulse(Player player)
@@ -49,6 +48,16 @@ namespace ValheimMastery
             if (!Local(player) || !MasteryPlugin.Settings.EnablePerkProcVFX.Value) return true;
             GameObject prefab = NativePerkAssetResolver.Resolve("fx_forge_hammer");
             return prefab != null && SpawnVisual(prefab, Anchor(player), .65f, .65f, 48);
+        }
+        private static bool SpawnSuccessVisual(GameObject prefab, Vector3 position)
+        {
+            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value) return true;
+            // Preserve the native success particle/scale parameters; pool owns instance lifetime.
+            GameObject visual = VfxPool.Spawn(prefab, position, Quaternion.identity, 4f);
+            if (visual == null) return false;
+            visual.SetActive(true);
+            visual.GetComponent<VfxPoolBaseline>()?.RestartParticles();
+            return true;
         }
         private static bool SpawnVisual(GameObject prefab, Vector3 position, float scale, float lifetime, int particleCap)
         {
@@ -115,3 +124,7 @@ namespace ValheimMastery
         private void OnDisable() { _currentIntent = null; _player = null; }
     }
 }
+
+
+
+

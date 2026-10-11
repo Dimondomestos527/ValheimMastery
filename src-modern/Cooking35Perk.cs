@@ -7,6 +7,8 @@ namespace ValheimMastery
 {
     internal static class Cooking35Service
     {
+        // Restored35 uses confirmed physical products and per-consumption snapshots.
+        internal static bool EffectsEnabled => MasteryPlugin.Settings.Enabled.Value;
         // Only 40% of normal elapsed decay is applied: stats fall 60% slower.
         internal const float DecayRateMultiplier = 0.40f;
         internal const float PreparedMealStatBonus = 0f;
@@ -39,23 +41,20 @@ namespace ValheimMastery
         // follow the meal to another player without trusting the eater's local config.
         internal static bool HasCookMastery(Player eater, ItemDrop.ItemData item, int milestone)
         {
-            if (item?.m_customData != null && item.m_customData.TryGetValue(CookMasteryKey, out string stored) && int.TryParse(stored, out int storedTier) && storedTier >= milestone) return true;
-            // Placed feasts carry the creator's confirmed tier on the serving.
-            // The eater's level must not promote an unmarked feast to Master Feast.
-            if (Cooking70Service.IsFeast(item)) return false;
-            if (eater != null && PerkRuntimeService.HasPerk(eater, Skills.SkillType.Cooking, milestone)) return true;
-            long crafterId = item?.m_crafterID ?? 0L;
-            if (crafterId == 0L) return false;
-            foreach (Player candidate in Player.GetAllPlayers())
-                if (candidate != null && candidate.GetPlayerID() == crafterId && PerkRuntimeService.HasPerk(candidate, Skills.SkillType.Cooking, milestone))
-                    return true;
-            return false;
+            if (milestone == 35 && !EffectsEnabled) return false;
+            if (CookingProductIdentity.Fresh(item))
+                return CookingProductIdentity.TryTier(item, out int tier) && tier >= milestone;
+            // Preserve existing historical stored grants without guessing an unknown
+            // item's old producer skill from the eater or an online player's current skill.
+            return item?.m_customData != null && item.m_customData.TryGetValue(CookMasteryKey, out string stored) &&
+                int.TryParse(stored, out int oldTier) && oldTier >= milestone;
         }
 
         internal static void RecomputeSlowDecay(Player player, Player.Food food)
         {
-            if (player == null || food?.m_item?.m_shared == null || !IsPreparedMeal(food.m_item) ||
-                (!HasCookMastery(player, food.m_item, 35) && !CookingFoodPersistence.Has(player, food.m_name))) return;
+            if (!EffectsEnabled || player == null || food?.m_item?.m_shared == null || !IsPreparedMeal(food.m_item) ||
+                (Cooking70Service.IsFeast(food.m_item) && HasCookMastery(player, food.m_item, 70)) ||
+                !CookingConsumedFood.Qualified(player, food)) return;
             float burn = food.m_item.m_shared.m_foodBurnTime;
             if (burn <= 0f) return;
             float remaining01 = Mathf.Clamp01(food.m_time / burn);
@@ -80,6 +79,7 @@ namespace ValheimMastery
         {
             if (__instance?.m_foods == null) return;
             foreach (Player.Food food in __instance.m_foods) Cooking35Service.RecomputeSlowDecay(__instance, food);
+            CookingConsumedFood.Prune(__instance);
         }
     }
 
@@ -88,10 +88,20 @@ namespace ValheimMastery
     {
         private static void Postfix(Player __instance, ItemDrop.ItemData item, bool __result)
         {
-            if (__result)
+            if (__result && Cooking35Service.EffectsEnabled)
             {
-                CookingFoodPersistence.Record(__instance, item);
-                Cooking35Service.TryPlayMealFeedback(__instance, item);
+                // EatFood's caller still owns the native inventory debit. A failed
+                // metadata observer must never turn an accepted meal into a throw.
+                try
+                {
+                    CookingConsumedFood.Record(__instance, item);
+                    Cooking35Service.TryPlayMealFeedback(__instance, item);
+                }
+                catch (Exception error)
+                {
+                    try { CookingConsumedFood.DenyFailedRecord(__instance, item); } catch (Exception) { }
+                    try { MasteryPlugin.Log?.LogWarning("[Cooking35Consumption] " + error.Message); } catch (Exception) { }
+                }
             }
         }
     }
@@ -108,17 +118,4 @@ namespace ValheimMastery
         }
     }
 
-    [HarmonyPatch(typeof(CookingStation), "SpawnItem")]
-    internal static class CookingMasteryFoodStampPatch
-    {
-        private static void Prefix(out int __state) => __state = ItemDrop.s_instances.Count;
-        private static void Postfix(CookingStation __instance, string name, int slot, Vector3 userPoint, int __state)
-        {
-            ZDO zdo = __instance?.m_nview?.GetZDO();
-            if (zdo == null || !__instance.m_nview.IsOwner()) return;
-            long author = zdo.GetLong("vm.cook.slot.author." + slot, 0);
-            int tier = zdo.GetInt("vm.cook.slot.tier." + slot, 0);
-            Vector3 point = __instance.m_spawnPoint != null ? __instance.m_spawnPoint.position : __instance.m_slots[slot].position;
-            CookingAuthorNetwork.StampNew(__state, name, point, author, tier);
-        }
-    }}
+}

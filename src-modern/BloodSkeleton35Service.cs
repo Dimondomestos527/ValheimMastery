@@ -15,6 +15,7 @@ namespace ValheimMastery
         private static float PendingUntil;
         private static int PendingCount;
         private static SpawnAbility PendingSpawner;
+        private static float NextPendingCheck;
         private static float NextMarker;
 
         private static void ResetFor(Player player)
@@ -27,6 +28,7 @@ namespace ValheimMastery
             NextCatchUp = Time.time + 2f;
             WarnedMissingSpawner = false;
             PendingSpawner = null;
+            NextPendingCheck = 0f;
             NextMarker = 0f;
         }
 
@@ -90,7 +92,7 @@ namespace ValheimMastery
             SE_Stats marker = ScriptableObject.CreateInstance<SE_Stats>();
             marker.name = name; marker.m_name = name;
             marker.m_tooltip = "Безкоштовний виклик скелета відновлюється. Посох має бути в хотбарі; потрібен вільний слот.";
-            marker.m_icon = GetHotbarStaff(player)?.GetIcon() ?? player.m_textIcon;
+            marker.m_icon = MasteryHudArtwork.Icon("bloodmagic_35", GetHotbarStaff(player)?.GetIcon() ?? player.m_textIcon);
             marker.m_ttl = Mathf.Max(.1f, seconds); marker.m_flashIcon = false;
             player.m_seman.AddStatusEffect(marker, false, 0, 0f, 0);
         }
@@ -150,8 +152,9 @@ namespace ValheimMastery
             // Travel is handled once by Skeleton35Travel, including portal recovery.
             ItemDrop.ItemData staff = GetHotbarStaff(player);
             if (staff == null) { NextSummon = Time.time + SummonInterval; return; }
-            if (PendingSpawner != null)
+            if (PendingSpawner != null && Time.time >= NextPendingCheck)
             {
+                NextPendingCheck = Time.time + .25f;
                 if (OwnedCount(player, PendingSpawner) > PendingCount)
                 {
                     PerkVisualService.PlayProc(player, "bloodmagic_35", player.GetCenterPoint(), true, false);
@@ -196,7 +199,7 @@ namespace ValheimMastery
             autoSpawner.m_maxToSpawn = 2; // Unity int Random.Range uses an exclusive upper bound.
             autoSpawner.m_commandOnSpawn = true;
             PendingCount = OwnedCount(player, spawner);
-            PendingSpawner = spawner; PendingUntil = Time.time + 8f;
+            PendingSpawner = spawner; PendingUntil = Time.time + 8f; NextPendingCheck = Time.time + .25f;
             ability.Setup(player, player.transform.forward, -1f, null, staff, null);
         }
     }

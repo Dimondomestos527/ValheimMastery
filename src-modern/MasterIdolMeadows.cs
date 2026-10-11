@@ -5,7 +5,7 @@ namespace ValheimMastery
 {
     internal static class MasterIdolMeadows
     {
-        internal static bool Animal(Character creature)=>creature?.m_nview?.IsValid()==true&&creature.m_nview.IsOwner()&&creature.IsTamed()&&MasterIdolEffectZones.At("Meadows",creature.transform.position)!=null;
+        internal static bool Animal(Character creature)=>creature?.m_nview?.IsValid()==true&&creature.m_nview.IsOwner()&&creature.IsTamed()&&!MasterIdolResidents.Family(creature)&&MasterIdolEffectZones.At("Meadows",creature.transform.position)!=null;
         internal static bool Crop(Plant plant)
         {if(plant?.m_grownPrefabs==null)return false;foreach(var grown in plant.m_grownPrefabs)if(grown?.GetComponent<Pickable>()!=null&&grown.GetComponent<TreeBase>()==null)return true;return false;}
     }

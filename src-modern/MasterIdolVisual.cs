@@ -10,6 +10,9 @@ namespace ValheimMastery
         public GameObject NativeGlow;
         public EffectList ActivateSound;
         private Light _light;
+        private MasterIdolArtwork _artwork;
+        private int _artworkAttempts;
+        private float _artworkRetryAt;
         private int _switch;
         private Material[] _original;
         private readonly List<Material> _owned = new List<Material>();
@@ -36,6 +39,24 @@ namespace ValheimMastery
         {
             if (SystemInfo.graphicsDeviceType == GraphicsDeviceType.Null) return;
             if (_view == null) _view = GetComponent<ZNetView>();
+            // Render placement ghosts as inactive artwork too; they never start ambient effects.
+            if (_artwork == null && Time.unscaledTime >= _artworkRetryAt)
+            {
+                var profile = MasterIdolProfiles.FromPrefab(Utils.GetPrefabName(gameObject));
+                if (profile != null)
+                {
+                    // Frequent startup attempts are capped; pending assets may recover later at bounded cadence.
+                    if (_artworkAttempts < 81) _artworkAttempts++;
+                    _artworkRetryAt = Time.unscaledTime + (_artworkAttempts < 80 ? .5f : 15f);
+                    _artwork = MasterIdolArtwork.TryCreate(this, profile.Id, Palette(profile.Id));
+                    if (_artwork != null && _original != null)
+                    {
+                        NativeModel.sharedMaterials = _original; _original = null;
+                        foreach (var material in _owned) if (material != null) Destroy(material); _owned.Clear();
+                    }
+                    if (_artwork == null && _artworkAttempts == 80) MasteryPlugin.Log?.LogWarning("[MasterIdols] Native artwork dependencies pending; native model retained, retrying every15s: " + profile.Id);
+                }
+            }
             var zdo = _view?.GetZDO();
             if (zdo == null || MasterIdolWorldRegistry.Profile(zdo.GetPrefab()) == null) return; // templates/placement ghosts
             int state = zdo.GetInt(MasterIdolWorldRegistry.SwitchKey, 0);
@@ -55,6 +76,8 @@ namespace ValheimMastery
                 var halo = new GameObject("VM_IdolBiomeLight"); halo.transform.SetParent(transform, false); halo.transform.localPosition = Vector3.up * .8f;
                 _light = halo.AddComponent<Light>(); _light.type = LightType.Point; _light.color = _color; _light.range = 2f; _light.shadows = LightShadows.None;
                 if (NativeModel == null) return;
+                if (_artwork == null)
+                {
                 _original = NativeModel.sharedMaterials; var copies = (Material[])_original.Clone();
                 for (int i = 0; i < copies.Length; i++)
                 {
@@ -65,6 +88,7 @@ namespace ValheimMastery
                 }
                 NativeModel.sharedMaterials = copies;
                 if (_owned.Count == 0) MasteryPlugin.Log.LogWarning("[MasterIdols] Native emission mask/color unavailable; no visual substitute applied.");
+                }
             }
             if (_switch != state)
             {
@@ -76,16 +100,18 @@ namespace ValheimMastery
             }
             if(!on){_welcomeOwner=null;_welcomeAt=-10f;}
             bool visible = MasteryPlugin.Settings.EnablePerkProcVFX.Value;
-            if (NativeGlow != null && NativeGlow.activeSelf != (on && visible)) NativeGlow.SetActive(on && visible);
+            if (NativeGlow != null && NativeGlow.activeSelf != (_artwork == null && on && visible)) NativeGlow.SetActive(_artwork == null && on && visible);
             if (_on != on) { _from = _brightness; _on = on; _started = Time.time; }
             _brightness = MasterIdolToggleRules.Brightness(_from, _on, Time.time - _started);
             float pulse=on&&visible&&_welcomeOwner!=null&&_welcomeOwner.IsPresenting?Mathf.Sin(Mathf.Clamp01((Time.unscaledTime-_welcomeAt)/MasterIdolWelcomeRules.Duration)*Mathf.PI)*.45f:0f;
+            _artwork?.Tick(visible ? _brightness + pulse : 0f, on && visible);
             var finalEmission=_color*(visible?(_brightness+pulse)*1.5f:0f);
             if(!_emissionWritten||finalEmission!=_lastEmission){foreach(var material in _owned)material.SetColor("_EmissionColor",finalEmission);_lastEmission=finalEmission;_emissionWritten=true;MasterIdolPerf.Count("visual.material-writes",_owned.Count);}
             float intensity=visible?(_brightness+pulse)*.35f:0f;if(_light!=null&&intensity!=_lastIntensity){_light.intensity=intensity;_lastIntensity=intensity;}
         }
         private void OnDestroy()
         {
+            _artwork?.Dispose(); _artwork = null;
             if (NativeModel != null && _original != null) NativeModel.sharedMaterials = _original;
             foreach (var material in _owned) if (material != null) Destroy(material);
             _owned.Clear();

@@ -30,11 +30,15 @@ namespace ValheimMastery
             ui._last = id; ui._shownAt = Time.unscaledTime;
             ui._panel.anchoredPosition = id == "sneak_70" ? new Vector2(0, 230) : new Vector2(0, -95);
             var accent = level >= 70 ? new Color(.8f, .87f, .93f) : new Color(.78f, .46f, .24f);
-            ui._icon.sprite = player.GetSkills().GetSkillDef(skill)?.m_icon;
+            ui._icon.sprite = MasteryHudArtwork.Icon(id, player.GetSkills().GetSkillDef(skill)?.m_icon);
             ui._icon.enabled = ui._icon.sprite != null;
-            ui._frame.color = accent;
+            ui._frame.color = ui._frame.sprite != null ? Color.white : accent;
             ui._label.text = PerkLocalization.Localize("$vm_perk_" + id + "_name");
             ui._label.color = accent;
+            float width = Mathf.Max(300f, ui._label.preferredWidth + 60f);
+            ui._panel.sizeDelta = new Vector2(width, 44f);
+            ui._frame.rectTransform.anchoredPosition = new Vector2(-width * .5f + 23f, 0f);
+            ui._label.rectTransform.sizeDelta = new Vector2(width - 52f, 46f);
         }
         private static RectTransform Rect(string name, Transform parent, Vector2 size, Vector2 pos)
         {
@@ -52,6 +56,7 @@ namespace ValheimMastery
             _label = Rect("Name", _panel, new Vector2(260, 46), new Vector2(30, 0)).gameObject.AddComponent<TextMeshProUGUI>();
             _label.fontSize = 21; _label.alignment = TextAlignmentOptions.MidlineLeft;
             if (MessageHud.instance?.m_messageCenterText?.font != null) _label.font = MessageHud.instance.m_messageCenterText.font;
+            MasteryHudArtwork.Proc(_panel, _frame, back);
             foreach (var graphic in GetComponentsInChildren<Graphic>()) graphic.raycastTarget = false;
         }
         private void Update()

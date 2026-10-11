@@ -24,8 +24,7 @@ namespace ValheimMastery
             state.NextHeal = Time.time + 10f;
             if (MasteryPlugin.Settings.VerboseLogging.Value)
                 MasteryPlugin.Log.LogInfo("[Shield35] level=" + level + " skill=" + shield.m_levelUpSkillOnBreak + " master=" + state.MasterCast);
-            if (state.MasterCast && shield.m_character != null && shield.m_character.GetComponent<Shield35HealingVisual>() == null)
-                shield.m_character.gameObject.AddComponent<Shield35HealingVisual>();
+            if (state.MasterCast) Shield35HealingVisual.Ensure(shield.m_character);
             // Renewal never marks an exhausted barrier as intact.
             state.Broken = shield.m_damage > shield.m_totalAbsorbDamage;
         }

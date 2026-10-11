@@ -1,46 +1,95 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using System.Runtime.CompilerServices;
 using UnityEngine;
 namespace ValheimMastery
 {
+    // Compatibility name, now a bounded one-actor idle rotation. No pairs, props, paths or pause ZDOs.
     internal static class MasterIdolSocialScenes
     {
-        private sealed class Lease
+        private sealed class Slot
+        { internal MasterIdolSocial Actor; internal ZDO Data; internal long Owner; internal ushort Revision; internal float Until, Next, Keep; internal int Cursor = -1, Turn; }
+        private static readonly Dictionary<string, Slot> Homes = new Dictionary<string, Slot>(StringComparer.Ordinal);
+        private static readonly List<MasterIdolSocial> Candidates = new List<MasterIdolSocial>(8);
+        private static readonly List<string> Stale = new List<string>(64);
+        private static ZNet Session; private static ZDOMan Manager; private static ulong Generation; private static long World; private static float PruneAt;
+        private static void Context()
         {
-            internal MasterIdolSocial A,B;internal string Home,Kind;internal float End;internal Vector3 Look,GoalA,GoalB;internal List<Vector3> RouteA,RouteB;internal int StepA,StepB;internal ZNet Session;internal ulong Generation;internal long OwnerA,OwnerB;internal ushort EpochA,EpochB;
+            long world = ZNet.instance?.GetWorld() != null ? ZNet.instance.GetWorldUID() : 0;
+            if (Session == ZNet.instance && Manager == ZDOMan.instance && Generation == MasterIdolLoadIdentity.Generation && World == world) return;
+            foreach (var slot in Homes.Values) End(slot, false);
+            Homes.Clear(); Candidates.Clear(); Session = ZNet.instance; Manager = ZDOMan.instance; Generation = MasterIdolLoadIdentity.Generation; World = world; PruneAt = 0;
         }
-        private sealed class Cooldown{internal float Next;}
-        private static readonly ConditionalWeakTable<MasterIdolSocial,Cooldown> Times=new ConditionalWeakTable<MasterIdolSocial,Cooldown>();
-        private static readonly Dictionary<MasterIdolSocial,Lease> Actors=new Dictionary<MasterIdolSocial,Lease>();private static readonly Dictionary<string,Lease> Homes=new Dictionary<string,Lease>(StringComparer.Ordinal);
-        private static readonly List<Lease> Ending=new List<Lease>();private static readonly List<MasterIdolProp> Props=new List<MasterIdolProp>();private static readonly List<MasterIdolSocialRoutes.Interval> Ranges=new List<MasterIdolSocialRoutes.Interval>();
-        internal static bool Active(MasterIdolSocial actor)=>actor!=null&&Actors.ContainsKey(actor);
-        private static bool Valid(Lease lease)
+        private static bool Valid(string home, Slot slot)
         {
-            if(lease.A==null||lease.B==null||lease.Session!=ZNet.instance||lease.Generation!=MasterIdolLoadIdentity.Generation||!MasterIdolEffectZones.Ready||!lease.A.SceneAvailable||!lease.B.SceneAvailable)return false;
-            var a=lease.A.SceneView?.GetZDO();var b=lease.B.SceneView?.GetZDO();var zone=MasterIdolEffectZones.Find(lease.Home);
-            return a!=null&&b!=null&&a.GetOwner()==lease.OwnerA&&b.GetOwner()==lease.OwnerB&&a.OwnerRevision==lease.EpochA&&b.OwnerRevision==lease.EpochB&&zone!=null&&lease.A.SceneHome?.Id==lease.Home&&lease.B.SceneHome?.Id==lease.Home&&zone.Contains(lease.A.transform.position)&&zone.Contains(lease.B.transform.position);
+            var actor = slot.Actor; var data = actor?.SceneView?.GetZDO();
+            return MasterIdolLoadIdentity.LoadReady && data != null && actor != null && actor.SceneAvailable && ReferenceEquals(data, slot.Data) && ReferenceEquals(Manager?.GetZDO(data.m_uid), data) &&
+                data.GetOwner() == slot.Owner && data.OwnerRevision == slot.Revision && MasterIdolResidentIdleRules.Current(Time.unscaledTime, slot.Until) &&
+                MasterIdolResidentPolicy.TryHome(actor.SceneCreature, out var zone) && zone.Id == home && MasterIdolResidentVisibility.Observed(actor.SceneCreature);
         }
-        private static void End(Lease lease){Actors.Remove(lease.A);Actors.Remove(lease.B);Homes.Remove(lease.Home);if(lease.A!=null&&lease.A.SceneAvailable)lease.A.SceneAi.StopMoving();if(lease.B!=null&&lease.B.SceneAvailable)lease.B.SceneAi.StopMoving();}
-        internal static void Tick(){if(Homes.Count==0)return;Ending.Clear();foreach(var lease in Homes.Values)if(Time.unscaledTime>=lease.End||!Valid(lease))Ending.Add(lease);foreach(var lease in Ending)End(lease);}
-        internal static void Cancel(MasterIdolSocial actor){if(actor!=null&&Actors.TryGetValue(actor,out var lease))End(lease);}
-        internal static bool Idle(MasterIdolSocial actor,MasterIdolEffectZone zone,float dt,bool mayStart)
+        private static void End(Slot slot, bool gap)
         {
-            if(Actors.TryGetValue(actor,out var lease)){if(!Valid(lease)||Time.unscaledTime>=lease.End){End(lease);return false;}if(lease.Kind=="mimic"){bool first=ReferenceEquals(actor,lease.A);var route=first?lease.RouteA:lease.RouteB;int step=first?lease.StepA:lease.StepB;while(step<route.Count&&(actor.transform.position-route[step]).sqrMagnitude<.36f)step++;if(first)lease.StepA=step;else lease.StepB=step;if(step<route.Count){var current=MasterIdolEffectZones.Find(lease.Home);if(current==null||!MasterIdolSocialRoutes.Inside(current,actor.transform.position,route[step],Array.Empty<Vector3>(),Ranges)){End(lease);return false;}actor.SceneAi.MoveTo(dt,route[step],.5f,false);}else actor.SceneAi.StopMoving();actor.SceneAi.LookAt(first?lease.B.transform.position:lease.GoalB+lease.B.transform.forward);}else{actor.SceneAi.StopMoving();actor.SceneAi.LookAt(lease.Kind=="admire"?lease.Look:ReferenceEquals(actor,lease.A)?lease.B.transform.position:lease.A.transform.position);}return true;}
-            if(!mayStart||!actor.SceneAvailable||Homes.Count>=8||Homes.ContainsKey(zone.Id)||!MasterIdolActivity.Near(actor.transform.position))return false;
-            var cooldown=Times.GetValue(actor,_=>new Cooldown());if(cooldown.Next==0){cooldown.Next=Time.unscaledTime+UnityEngine.Random.Range(90f,180f);return false;}if(Time.unscaledTime<cooldown.Next)return false;cooldown.Next=Time.unscaledTime+UnityEngine.Random.Range(120f,240f);
-            string uid=actor.SceneView.GetZDO().m_uid.ToString();foreach(var member in zone.Residents)if((member.Value=="Greyling"||member.Value=="Greydwarf")&&string.CompareOrdinal(member.Key,uid)<0)return false;
-            MasterIdolSocial partner=null;foreach(var member in zone.Residents){if(member.Key==uid||member.Value!="Greyling"&&member.Value!="Greydwarf"||!MasterIdolNetworkQuota.TryUid(member.Key,out long user,out uint id))continue;var other=ZNetScene.instance?.FindInstance(new ZDOID(user,id))?.GetComponent<MasterIdolSocial>();if(other==null||!other.SceneAvailable||Active(other)||other.SceneHome?.Id!=zone.Id)continue;float distance=(other.transform.position-actor.transform.position).sqrMagnitude;if(distance>=4&&distance<=49&&Mathf.Abs(other.transform.position.y-actor.transform.position.y)<=1.5f){partner=other;break;}}
-            if(partner==null)return false;int choice=UnityEngine.Random.Range(0,3);var scene=new Lease{A=actor,B=partner,Home=zone.Id,Kind=choice==0?"exchange":choice==1?"mimic":"admire",End=Time.unscaledTime+UnityEngine.Random.Range(3f,5f),Session=ZNet.instance,Generation=MasterIdolLoadIdentity.Generation};
-            if(choice==1){bool aSmall=Utils.GetPrefabName(actor.gameObject)=="Greyling",bSmall=Utils.GetPrefabName(partner.gameObject)=="Greyling";if(aSmall==bSmall)return false;if(!aSmall){scene.A=partner;scene.B=actor;}var direction=scene.B.transform.forward;direction.y=0;direction=direction.normalized;scene.GoalB=scene.B.transform.position+direction*1.5f;scene.GoalA=scene.B.transform.position+direction*.25f;if(!Route(scene.A,scene.GoalA,zone,out scene.RouteA)||!Route(scene.B,scene.GoalB,zone,out scene.RouteB))return false;scene.End=Time.unscaledTime+5;}
-            if(choice==2){MasterIdolProps.Nearby(actor.transform.position,10,Props);bool found=false;foreach(var prop in Props)if(zone.Contains(prop.transform.position)&&(prop.transform.position-partner.transform.position).sqrMagnitude<100){scene.Look=prop.transform.position;found=true;break;}if(!found)return false;}
-            var za=scene.A.SceneView.GetZDO();var zb=scene.B.SceneView.GetZDO();scene.OwnerA=za.GetOwner();scene.OwnerB=zb.GetOwner();scene.EpochA=za.OwnerRevision;scene.EpochB=zb.OwnerRevision;
-            Actors[scene.A]=scene;Actors[scene.B]=scene;Homes[zone.Id]=scene;Times.GetValue(partner,_=>new Cooldown()).Next=cooldown.Next;MasterIdolPerf.Count("social.scene."+scene.Kind);return Idle(actor,zone,dt,false);
+            var actor = slot.Actor; slot.Actor = null; slot.Data = null;
+            if (gap) slot.Next = Time.unscaledTime + MasterIdolResidentIdleRules.GapSeconds;
+            if (actor != null) { try { MasterIdolVisibleGesture.Cancel(actor.SceneCreature); } catch (Exception) { MasterIdolResidentMetrics.Count("idle.cleanup-failed"); } }
         }
-        private static bool Route(MasterIdolSocial actor,Vector3 goal,MasterIdolEffectZone zone,out List<Vector3> route)
-        {route=new List<Vector3>();if(!zone.Contains(goal)||Pathfinding.instance==null||!MasterIdolWorkBudget.Path()||Physics.CheckSphere(goal+Vector3.up,.6f,LayerMask.GetMask("piece","static_solid"),QueryTriggerInteraction.Ignore))return false;return Pathfinding.instance.GetPath(actor.transform.position,goal,route,actor.SceneAi.m_pathAgentType,true,false,false)&&MasterIdolSocialRoutes.Inside(zone,actor.transform.position,goal,route,Ranges);}
+        internal static void Tick()
+        {
+            Context(); if (Homes.Count == 0) return;
+            Stale.Clear();
+            foreach (var pair in Homes)
+            {
+                if (pair.Value.Actor != null && !Valid(pair.Key, pair.Value)) End(pair.Value, true);
+                if (Time.unscaledTime >= PruneAt && pair.Value.Actor == null && pair.Value.Keep <= Time.unscaledTime) Stale.Add(pair.Key);
+            }
+            foreach (string key in Stale) Homes.Remove(key);
+            if (Time.unscaledTime >= PruneAt) PruneAt = Time.unscaledTime + 5;
+        }
+        internal static bool Active(MasterIdolSocial actor)
+        { Context(); if (actor == null || !MasterIdolResidentPolicy.TryHome(actor.SceneCreature, out var home)) return false; return Homes.TryGetValue(home.Id, out var slot) && ReferenceEquals(slot.Actor, actor) && Valid(home.Id, slot); }
+        internal static void Cancel(MasterIdolSocial actor)
+        { Context(); if (actor == null) return; foreach (var slot in Homes.Values) if (ReferenceEquals(slot.Actor, actor)) { End(slot, true); return; } }
+        internal static void CancelHome(string home)
+        { Context(); if (home != null && Homes.TryGetValue(home, out var slot) && slot.Actor != null) End(slot, true); }
+        internal static bool Idle(MasterIdolSocial actor, MasterIdolEffectZone zone, float dt, bool mayStart)
+        {
+            Context(); if (actor == null || zone == null || World == 0 || !MasterIdolLoadIdentity.LoadReady) return false;
+            if (!Homes.TryGetValue(zone.Id, out var slot))
+            { if (Homes.Count >= MasterIdolResidentIdleRules.MaxHomeRecords) return false; Homes.Add(zone.Id, slot = new Slot()); }
+            slot.Keep = Time.unscaledTime + 30;
+            if (slot.Actor != null && !Valid(zone.Id, slot)) End(slot, true);
+            if (slot.Actor == null && mayStart && MasterIdolResidentIdleRules.Due(Time.unscaledTime, slot.Next))
+            {
+                slot.Next = Time.unscaledTime + MasterIdolResidentIdleRules.ElectionCadence;
+                int active = 0; foreach (var value in Homes.Values) if (value.Actor != null) active++;
+                if (!MasterIdolResidentSceneAnimation.HomeActive(zone) && active < MasterIdolResidentIdleRules.MaxActiveHomes && zone.Residents.Count <= MasterIdolResidentIdleRules.MaxResidents)
+                {
+                    Candidates.Clear();
+                    foreach (var member in zone.Residents)
+                    {
+                        if (!MasterIdolNetworkQuota.TryUid(member.Key, out long user, out uint id)) continue;
+                        var candidate = ZNetScene.instance?.FindInstance(new ZDOID(user, id))?.GetComponent<MasterIdolSocial>();
+                        if (candidate != null && candidate.SceneAvailable && MasterIdolResidentPolicy.TryHome(candidate.SceneCreature, out var home) && home.Id == zone.Id && MasterIdolResidentVisibility.Observed(candidate.SceneCreature)) Candidates.Add(candidate);
+                    }
+                    Candidates.Sort((left, right) => string.CompareOrdinal(left.SceneView.GetZDO().m_uid.ToString(), right.SceneView.GetZDO().m_uid.ToString()));
+                    slot.Cursor = MasterIdolResidentIdleRules.Next(slot.Cursor, Candidates.Count);
+                    if (slot.Cursor >= 0)
+                    {
+                        slot.Actor = Candidates[slot.Cursor]; slot.Data = slot.Actor.SceneView.GetZDO(); slot.Owner = slot.Data.GetOwner(); slot.Revision = slot.Data.OwnerRevision;
+                        slot.Until = Time.unscaledTime + MasterIdolResidentIdleRules.SlotSeconds;
+                        try
+                        {
+                            MasterIdolVisibleGesture.Start(slot.Actor.SceneCreature, MasterIdolResidentIdleRules.Vibe(Utils.GetPrefabName(slot.Actor.gameObject), slot.Turn++), MasterIdolResidentIdleRules.SlotSeconds);
+                            MasterIdolResidentMetrics.Count("idle.rotation-start");
+                        }
+                        catch (Exception) { End(slot, true); MasterIdolResidentMetrics.Count("idle.start-failed"); }
+                    }
+                }
+            }
+            if (!ReferenceEquals(slot.Actor, actor) || !Valid(zone.Id, slot)) return false;
+            actor.SceneAi.StopMoving(); return true;
+        }
     }
-    [HarmonyPatch(typeof(MasteryPlugin),"Update")]
-    internal static class MasterIdolSocialScenesTickPatch{private static void Postfix()=>MasterIdolSocialScenes.Tick();}
+    [HarmonyPatch(typeof(MasteryPlugin), "Update")]
+    internal static class MasterIdolSocialScenesTickPatch { private static void Postfix() => MasterIdolSocialScenes.Tick(); }
 }

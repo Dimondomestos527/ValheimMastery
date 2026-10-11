@@ -11,6 +11,11 @@ namespace ValheimMastery
             =>resident&&!battle&&!double.IsNaN(now)&&end>now&&end-now<=45;
         internal static bool AssignedSeat(uint seat,int rank,int count)
             =>count>0&&rank>=0&&rank<count&&seat%(uint)count==(uint)rank;
+        internal const double SeatTurnSeconds=45;
+        internal static long SeatTurn(double now)=>!double.IsNaN(now)&&!double.IsInfinity(now)&&now>=0?(long)Math.Floor(now/SeatTurnSeconds):-1;
+        internal static bool AssignedSeatAt(uint seat,int rank,int count,double now){long turn=SeatTurn(now);return turn>=0&&count>0&&rank>=0&&rank<count&&((seat%(uint)count)+(uint)(turn%count))%(uint)count==(uint)rank;}
+        internal static bool SeatStartWindow(double now){long turn=SeatTurn(now);return turn>=0&&now-turn*SeatTurnSeconds>=2&&(turn+1)*SeatTurnSeconds-now>=14;}
+        internal static double SeatEnd(double now,double duration){return SeatStartWindow(now)?Math.Min(now+Math.Max(12,Math.Min(25,duration)),(SeatTurn(now)+1)*SeatTurnSeconds-2):0;}
     }
     internal static class MasterIdolRecruitmentRules
     {

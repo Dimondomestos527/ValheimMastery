@@ -122,22 +122,25 @@ namespace ValheimMastery
             Vector3 side = Vector3.Cross(axis, reference).normalized, normal = Vector3.Cross(axis, side);
             float charge = MagicPresentationRules.FireCharge(held);
             int count = MagicPresentationRules.FireParticles(held);
+            float time = Time.time;
+            float orbitRadius = MagicPresentationRules.FireOrbitRadius(held);
+            float size = MagicPresentationRules.FireOrbitSize(held);
+            Color color = new Color(1f, .4f + charge * .5f, .08f + charge * .28f,
+                MagicPresentationRules.FireParticleAlpha(held));
             for (int i = 0; i < count; i++)
             {
-                float along = MagicPresentationRules.FireOrbitPosition(i, Time.time, held);
+                float along = MagicPresentationRules.FireOrbitPosition(i, time, held);
                 float direction = (i & 1) == 0 ? 1f : -1f;
-                float angle = i * 2.39996f + direction * Time.time * (.8f + charge * 4f) +
-                    along * Mathf.PI * (2.5f + charge * 2f) + Mathf.Sin(Time.time * 1.3f + i) * .3f;
-                float radius = MagicPresentationRules.FireOrbitRadius(held) *
-                    (.85f + .15f * Mathf.Sin(Time.time * 1.7f + i * .91f));
+                float angle = i * 2.39996f + direction * time * (.8f + charge * 4f) +
+                    along * Mathf.PI * (2.5f + charge * 2f) + Mathf.Sin(time * 1.3f + i) * .3f;
+                float radius = orbitRadius * (.85f + .15f * Mathf.Sin(time * 1.7f + i * .91f));
                 // Two irregular counter-turning streams along the whole body.
                 // Small separated embers keep the charge readable beside the core.
                 Particles[i].position = Vector3.Lerp(ShaftStart, ShaftEnd, along) +
                     (side * Mathf.Cos(angle) + normal * Mathf.Sin(angle)) * radius;
                 Particles[i].velocity = Vector3.zero;
-                Particles[i].startSize = MagicPresentationRules.FireOrbitSize(held);
-                Particles[i].startColor = new Color(1f, .4f + charge * .5f, .08f + charge * .28f,
-                    MagicPresentationRules.FireParticleAlpha(held));
+                Particles[i].startSize = size;
+                Particles[i].startColor = color;
                 Particles[i].startLifetime = Particles[i].remainingLifetime = .25f;
             }
             Effect.SetParticles(Particles, count);

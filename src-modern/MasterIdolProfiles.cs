@@ -25,17 +25,17 @@ namespace ValheimMastery
         // Compact recipes; native-weight budget may lower these ceilings, never raise them.
         internal static readonly IReadOnlyList<MasterIdolProfile> All = Array.AsReadOnly(new[] {
             new MasterIdolProfile("Meadows", "Ідол Лугів", "Meadows Idol",
-                R("Wood",8), R("Stone",6), R("Flint",3), R("LeatherScraps",2), R("DeerHide",2), R("Resin",4), R("FineWood",4)),
+                R("Wood",8), R("Stone",6), R("FineWood",4), R("DeerHide",2), R("Resin",4), R("TrophyDeer",1), R("Dandelion",3)),
             new MasterIdolProfile("BlackForest", "Ідол Чорного лісу", "Black Forest Idol",
-                R("RoundLog",8), R("Copper",2), R("Tin",2), R("Bronze",2), R("GreydwarfEye",4), R("Resin",4), R("Blueberries",4), R("Carrot",4)),
+                R("RoundLog",8), R("Bronze",2), R("GreydwarfEye",2), R("SurtlingCore",1), R("MushroomYellow",3)),
             new MasterIdolProfile("Swamp", "Ідол Боліт", "Swamp Idol",
-                R("Iron",4), R("ElderBark",8), R("Guck",3), R("Entrails",4), R("Bloodbag",3), R("Turnip",4), R("Ooze",3)),
+                R("Wood",8), R("Stone",6), R("ElderBark",8), R("Iron",4), R("Guck",3)),
             new MasterIdolProfile("Mountain", "Ідол Гір", "Mountain Idol",
-                R("Silver",4), R("Obsidian",6), R("WolfPelt",3), R("WolfFang",3), R("FreezeGland",3), R("Crystal",4), R("Stone",8)),
+                R("Wood",8), R("Stone",8), R("Obsidian",6), R("Silver",2)),
             new MasterIdolProfile("Plains", "Ідол Рівнин", "Plains Idol",
-                R("BlackMetal",4), R("FineWood",8), R("Flax",6), R("Barley",6), R("Cloudberry",4), R("LoxPelt",2), R("Needle",3), R("Tar",3)),
+                R("FineWood",8), R("BlackMetal",4), R("Flax",6), R("Barley",6), R("LoxPelt",2), R("Tar",3)),
             new MasterIdolProfile("Mistlands", "Ідол Імлистих земель", "Mistlands Idol",
-                R("BlackMarble",8), R("YggdrasilWood",8), R("Softtissue",3), R("Sap",4), R("Eitr",3), R("HareMeat",3), R("ScaleHide",2), R("Mandible",2), R("Carapace",3))
+                R("BlackMarble",8), R("YggdrasilWood",8), R("Eitr",3), R("Bronze",2), R("MushroomMagecap",3), R("MushroomJotunPuffs",3))
         });
         private static MasterIdolResource R(string prefab, int amount) => new MasterIdolResource(prefab, amount);
         internal static MasterIdolProfile Find(string id)

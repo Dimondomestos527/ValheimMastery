@@ -1,105 +1,360 @@
-<Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <LangVersion>latest</LangVersion>
-    <Nullable>disable</Nullable>
-    <AssemblyName>ValheimMastery</AssemblyName>
-    <RootNamespace>ValheimMastery</RootNamespace>
-    <Version>1.4.123</Version>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-    <GameManaged Condition="'$(GameManaged)' == ''">$(MSBuildThisFileDirectory)lib/server-managed</GameManaged>
-  </PropertyGroup>
-
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>disable</Nullable>
+    <AssemblyName>ValheimMastery</AssemblyName>
+    <RootNamespace>ValheimMastery</RootNamespace>
+    <Version>1.4.123</Version>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <GameManaged Condition="'$(GameManaged)' == ''">$(MSBuildThisFileDirectory)lib/server-managed</GameManaged>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
+    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
+    <PackageReference Include="HarmonyX" Version="2.10.2" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="src-modern\**\*.cs" />
+    <!-- Disposable combat validation commands must never ship in a production DLL. -->
+    <Compile Remove="src-modern\Combat100PassiveTestCommands.cs" />
+    <Compile Remove="src-modern\Magic70IceStorm.cs;src-modern\Magic70Surtling.cs;src-modern\Magic70BloodDome.cs" Condition="!$(DefineConstants.Contains('MASTERY_MAGIC70_EXPERIMENT'))" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="Splatform">
+      <HintPath>$(GameManaged)/Splatform.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="SoftReferenceableAssets">
+      <HintPath>$(GameManaged)/SoftReferenceableAssets.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_valheim" Publicize="true">
+      <HintPath>$(GameManaged)/assembly_valheim.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_utils" Publicize="true">
+      <HintPath>$(GameManaged)/assembly_utils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="assembly_guiutils">
+      <HintPath>$(GameManaged)/assembly_guiutils.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine">
+      <HintPath>$(GameManaged)/UnityEngine.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.PhysicsModule">
+      <HintPath>$(GameManaged)/UnityEngine.PhysicsModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(GameManaged)/UnityEngine.UI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(GameManaged)/UnityEngine.UIModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(GameManaged)/Unity.TextMeshPro.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(GameManaged)/UnityEngine.CoreModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule">
+      <HintPath>$(GameManaged)/UnityEngine.ParticleSystemModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>$(GameManaged)/UnityEngine.AudioModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="UnityEngine.AnimationModule">
+      <HintPath>$(GameManaged)/UnityEngine.AnimationModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <PropertyGroup>
+    <MasteryMilestoneAssetRoot Condition="'$(MasteryMilestoneAssetRoot)' == ''">$(MSBuildThisFileDirectory)..\runtime-assets</MasteryMilestoneAssetRoot>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(GameManaged)/UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="RuntimeResources/resource000.bin">
+      <LogicalName>ValheimMastery.Milestones.frame_bronze.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource001.bin">
+      <LogicalName>ValheimMastery.Milestones.frame_gold.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource002.bin">
+      <LogicalName>ValheimMastery.Milestones.frame_silver.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource003.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_axes_gold_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource004.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_axes_silver_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource005.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_axes_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource006.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_blocking_gold_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource007.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_blocking_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource008.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_blocking_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource009.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bloodmagic_deepnorth_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource010.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bloodmagic_gold_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource011.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bloodmagic_v006.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource012.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bows_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource013.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bows_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource014.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_bows_v006.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource015.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_clubs_gold_v005.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource016.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_clubs_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource017.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_clubs_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource018.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_cooking_gold_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource019.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_cooking_silver_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource020.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_cooking_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource021.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_crafting_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource022.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_crossbows_deepnorth_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource023.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_crossbows_gold_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource024.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_crossbows_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource025.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_dodge_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource026.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_elementalmagic_deepnorth_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource027.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_elementalmagic_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource028.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_elementalmagic_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource029.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_farming_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource030.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_farming_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource031.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_farming_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource032.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_fishing_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource033.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_fists_gold_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource034.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_fists_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource035.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_fists_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource036.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_jump_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource037.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_knives_gold_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource038.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_knives_silver_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource039.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_knives_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource040.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_pickaxes_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource041.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_pickaxes_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource042.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_pickaxes_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource043.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_polearms_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource044.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_polearms_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource045.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_polearms_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource046.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_ride_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource047.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_run_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource048.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_sneak_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource049.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_spears_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource050.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_spears_silver_v003.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource051.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_spears_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource052.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_swim_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource053.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_swords_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource054.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_swords_silver_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource055.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_swords_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource056.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_woodcutting_silver_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource057.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_woodcutting_v001.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource058.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_woodcutting_v002.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource059.bin">
+      <LogicalName>ValheimMastery.Hud.fill.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource060.bin">
+      <LogicalName>ValheimMastery.Hud.mastery_window_wood.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource061.bin">
+      <LogicalName>ValheimMastery.Hud.patron.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource062.bin">
+      <LogicalName>ValheimMastery.Hud.proc.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource063.bin">
+      <LogicalName>ValheimMastery.Hud.slot.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource064.bin">
+      <LogicalName>ValheimMastery.Hud.tooltip.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource065.bin">
+      <LogicalName>ValheimMastery.Hud.track.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource066.bin">
+      <LogicalName>ValheimMastery.Milestones.vm_icon_skill_cooking_silver_v004.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource067.bin">
+      <LogicalName>ValheimMastery.Totems.BlackForest.vmt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource068.bin">
+      <LogicalName>ValheimMastery.Totems.Meadows.vmt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource069.bin">
+      <LogicalName>ValheimMastery.Totems.Mistlands.vmt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource070.bin">
+      <LogicalName>ValheimMastery.Totems.Mountain.vmt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource071.bin">
+      <LogicalName>ValheimMastery.Totems.Plains.vmt</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="RuntimeResources/resource072.bin">
+      <LogicalName>ValheimMastery.Totems.Swamp.vmt</LogicalName>
+    </EmbeddedResource>
+  </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
-    <PackageReference Include="BepInEx.Core" Version="5.4.21" PrivateAssets="all" />
-    <PackageReference Include="HarmonyX" Version="2.10.2" PrivateAssets="all" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Include="src-modern\**\*.cs" />
-    <Compile Remove="src-modern\Magic70IceStorm.cs;src-modern\Magic70Surtling.cs;src-modern\Magic70BloodDome.cs" Condition="!$(DefineConstants.Contains('MASTERY_MAGIC70_EXPERIMENT'))" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="SoftReferenceableAssets">
-      <HintPath>$(GameManaged)/SoftReferenceableAssets.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="assembly_valheim" Publicize="true">
-      <HintPath>$(GameManaged)/assembly_valheim.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="assembly_utils" Publicize="true">
-      <HintPath>$(GameManaged)/assembly_utils.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="assembly_guiutils">
-      <HintPath>$(GameManaged)/assembly_guiutils.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine">
-      <HintPath>$(GameManaged)/UnityEngine.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>$(GameManaged)/UnityEngine.PhysicsModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.UI">
-      <HintPath>$(GameManaged)/UnityEngine.UI.dll</HintPath>
-      <Private>false</Private>
-    </Reference>    <Reference Include="UnityEngine.UIModule">
-      <HintPath>$(GameManaged)/UnityEngine.UIModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>$(GameManaged)/Unity.TextMeshPro.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule">
-      <HintPath>$(GameManaged)/UnityEngine.CoreModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.ParticleSystemModule">
-      <HintPath>$(GameManaged)/UnityEngine.ParticleSystemModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AudioModule">
-      <HintPath>$(GameManaged)/UnityEngine.AudioModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
-      <HintPath>$(GameManaged)/UnityEngine.AnimationModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-  </ItemGroup>
-  <!-- Scoped custom milestone artwork: human-approved exception for chat 01a11669 only. -->
-  <PropertyGroup>
-    <MasteryMilestoneAssetRoot Condition="'$(MasteryMilestoneAssetRoot)' == ''">$(MSBuildThisFileDirectory)assets/milestones</MasteryMilestoneAssetRoot>
-  </PropertyGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MasteryMilestoneAssetRoot)\*.png">
-      <LogicalName>ValheimMastery.Milestones.%(Filename)%(Extension)</LogicalName>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/meadows.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.meadows.png</LogicalName>
     </EmbeddedResource>
-    <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>$(GameManaged)/UnityEngine.ImageConversionModule.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/blackforest.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.blackforest.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/swamp.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.swamp.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/mountains.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.mountains.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/plains.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.plains.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Enchantments/mistlands.png">
+      <LogicalName>ValheimMastery.Assets.Enchantments.mistlands.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/burial_chambers.png">
+      <LogicalName>ValheimMastery.Assets.Run70.burial_chambers.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/troll_cave.png">
+      <LogicalName>ValheimMastery.Assets.Run70.troll_cave.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/sunken_crypt.png">
+      <LogicalName>ValheimMastery.Assets.Run70.sunken_crypt.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/frost_cave.png">
+      <LogicalName>ValheimMastery.Assets.Run70.frost_cave.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/infested_mine.png">
+      <LogicalName>ValheimMastery.Assets.Run70.infested_mine.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/ashlands_fortress.png">
+      <LogicalName>ValheimMastery.Assets.Run70.ashlands_fortress.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/the_hole.png">
+      <LogicalName>ValheimMastery.Assets.Run70.the_hole.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/morkborg.png">
+      <LogicalName>ValheimMastery.Assets.Run70.morkborg.png</LogicalName>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ApprovedUiAssets/resources/Run70/bear_cave.png">
+      <LogicalName>ValheimMastery.Assets.Run70.bear_cave.png</LogicalName>
+    </EmbeddedResource>
   </ItemGroup>
 </Project>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

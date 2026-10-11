@@ -31,6 +31,7 @@ namespace ValheimMastery
         private static readonly Dictionary<string, float> ResultRefunds = new Dictionary<string, float>();
         private static readonly Dictionary<string, Recall> Recalls = new Dictionary<string, Recall>();
         private static readonly List<ZDO> Found = new List<ZDO>();
+        private static readonly HashSet<ZDOID> FoundIds = new HashSet<ZDOID>();
         private static readonly Dictionary<ZDOID, DeathReceipt> DeathReceipts = new Dictionary<ZDOID, DeathReceipt>();
         private static readonly Dictionary<ZDOID, LocalBinding> LocalBindings = new Dictionary<ZDOID, LocalBinding>();
         private static readonly List<ZDOID> ReceiptIds = new List<ZDOID>();
@@ -284,10 +285,8 @@ namespace ValheimMastery
                 casterData.GetInt(ZDOVars.s_rightItemQuality, 1) != request.Quality ||
                 (request.Rpc != null && !OwnerSkillAuthority.Has(request.Rpc, actor.CharacterId, request.Author, Skills.SkillType.ElementalMagic, 70)))
             { Reply(request, false); return; }
-            ZDO existing = null;
-            foreach (ZDO minion in Found)
-                if (minion.GetLong(AuthorKey, 0) == request.Author && minion.GetLong(LootAuthorKey, request.Author) == request.Author && minion.GetFloat("health", 1f) > 0f)
-                { if (existing != null) { Reply(request, false); return; } existing = minion; }
+            if (!TryFindSingleAuthored(request.Author, out ZDO existing))
+            { Reply(request, false); return; }
             Vector3 point = request.Point;
             if (Vector3.Distance(point, actor.Position) > 6f)
             { Reply(request, false); return; }
@@ -322,6 +321,21 @@ namespace ValheimMastery
                 ZDOMan.instance.ForceSendZDO(data.m_uid);
             }
             Reply(request, true);
+        }
+        private static bool TryFindSingleAuthored(long author, out ZDO existing)
+        {
+            FoundIds.Clear(); existing = null;
+            foreach (ZDO minion in Found)
+            {
+                // Native iterative scans can append the boundary sector again.
+                // Repeated records are one summon; two distinct living IDs are not.
+                if (minion == null || !FoundIds.Add(minion.m_uid) ||
+                    minion.GetLong(AuthorKey, 0) != author ||
+                    minion.GetLong(LootAuthorKey, author) != author || !(minion.GetFloat("health", 1f) > 0f)) continue;
+                if (existing != null) return false;
+                existing = minion;
+            }
+            return true;
         }
         private static void RecallExisting(Request request, ZDO data, Vector3 point)
         {
@@ -485,6 +499,7 @@ namespace ValheimMastery
         private MonsterAI _ai;
         private int _appliedQuality;
         private float _appliedSkill = -1f;
+        private float _nextSync;
         private readonly Collider[] _hits = new Collider[96];
         private readonly HashSet<Character> _seen = new HashSet<Character>();
         private void Awake()
@@ -496,8 +511,23 @@ namespace ValheimMastery
         private void Update()
         {
             if (_character.m_nview?.IsValid() != true || _character.IsDead()) return;
-            Magic70Surtling.RememberLocalAuthored(_character);
-            if (!_character.m_nview.IsOwner()) { SyncReplicaAppearance(); return; }
+            bool owner = _character.m_nview.IsOwner();
+            if (Time.unscaledTime >= _nextSync)
+            {
+                _nextSync = Time.unscaledTime + .25f;
+                Magic70Surtling.RememberLocalAuthored(_character);
+                if (!owner) SyncReplicaAppearance();
+                else SyncOwnerState();
+            }
+            if (!owner) return;
+            if (_character.GetHealthPercentage() > .2f) return;
+            Character enemy = _ai.m_targetCreature;
+            if (enemy == null || enemy.IsDead() || enemy.IsPlayer() || !BaseAI.IsEnemy(_character, enemy)) return;
+            if ((enemy.GetCenterPoint() - _character.GetCenterPoint()).sqrMagnitude <= 9f) _character.SetHealth(0f);
+            else _ai.MoveTo(Time.deltaTime, enemy.transform.position, 1f, true);
+        }
+        private void SyncOwnerState()
+        {
             ZDO data = _character.m_nview.GetZDO();
             if (Magic70Surtling.HasSummonAuthor(_character))
             {
@@ -528,13 +558,8 @@ namespace ValheimMastery
             if (_ai.GetFollowTarget() == null && summoner != null)
             {
                 _ai.SetFollowTarget(summoner.gameObject);
-                _character.m_nview.GetZDO().Set(ZDOVars.s_follow, summoner.GetPlayerName());
+                data.Set(ZDOVars.s_follow, summoner.GetPlayerName());
             }
-            if (_character.GetHealthPercentage() > .2f) return;
-            Character enemy = _ai.m_targetCreature;
-            if (enemy == null || enemy.IsDead() || enemy.IsPlayer() || !BaseAI.IsEnemy(_character, enemy)) return;
-            if ((enemy.GetCenterPoint() - _character.GetCenterPoint()).sqrMagnitude <= 9f) _character.SetHealth(0f);
-            else _ai.MoveTo(Time.deltaTime, enemy.transform.position, 1f, true);
         }
         private void SyncReplicaAppearance()
         {
@@ -659,6 +684,7 @@ namespace ValheimMastery
             if (!_running)
             {
                 if (age >= Duration) { Cleanup(); return; } // late loads never replay birth
+                if (Player.m_localPlayer == null || Application.isBatchMode) { Cleanup(); return; }
                 Begin(); _running = true;
             }
             if (age < Duration && !_soundPlayed && Time.time >= _nextSoundAttempt &&

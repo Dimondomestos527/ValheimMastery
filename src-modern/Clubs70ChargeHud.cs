@@ -64,6 +64,7 @@ namespace ValheimMastery
                 ? Hud.instance.m_staminaBar2Fast.GetComponentInChildren<Image>(true) : null;
             if (nativeFill?.sprite != null)
             { Fill.sprite = nativeFill.sprite; Fill.type = Image.Type.Sliced; Fill.material = nativeFill.material; }
+            MasteryHudArtwork.Frame(background, "track.png"); MasteryHudArtwork.Fill(Fill);
             var label = new GameObject("Label", typeof(RectTransform), typeof(TextMeshProUGUI)); label.transform.SetParent(bar.transform, false);
             var textRect = label.GetComponent<RectTransform>(); textRect.anchoredPosition = new Vector2(0f, 16f); textRect.sizeDelta = new Vector2(240f, 26f);
             Label = label.GetComponent<TextMeshProUGUI>(); Label.fontSize = 17f; Label.alignment = TextAlignmentOptions.Center;

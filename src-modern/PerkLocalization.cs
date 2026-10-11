@@ -20,6 +20,7 @@ namespace ValheimMastery
             AddUkrainianPerkWords(words);
             if (!string.Equals(language, "Ukrainian", StringComparison.OrdinalIgnoreCase))
             {
+                words["vm_perk_run_70_desc"] = "At full rhythm, slopes, rough ground and shallows hinder you less. In deep water you can briefly run over the waves before the gift needs rest. Running near important dungeons and fortresses marks them on your map.";
                 words["vm_perk_fists_100_name"] = "Tyr's Oath";
                 words["vm_perk_fists_100_desc"] = "Tyr honours a will that does not break under blows. His recognition lets you equip two compatible trinkets together: when the shared adrenaline bar fills, both activate at once.";
                 words["vm_perk_fists_100_flavor"] = "Two gifts. One unbroken oath.";
@@ -40,11 +41,14 @@ namespace ValheimMastery
                 words["vm_perk_crafting_35_desc"] = "Equipment upgrades have a 35% chance to consume no resources. Each interaction loads raw material or fuel up to one quarter of total station capacity, rounded up and including the first item; free space, player resources and valid input type limit the amount.";
                 words["vm_perk_crafting_35_flavor"] = "If the hammer struck true, why waste another piece of iron?";
                 words["vm_perk_crafting_100_name"] = "Völundr’s Recognition";
-                words["vm_perk_crafting_100_desc"] = "Völundr recognizes your mastery and grants Favor. Channel it through Divine Inspiration to create Masterwork equipment. Master Idols may yet have a place in your craft; the Forge of Potential hints at further possibilities.";
-                words["vm_perk_crafting_100_desc_pending"] = "Völundr recognizes your mastery. Gold Mastery is being prepared within Phase 100-A; divine actions and Idols are not available yet.";
+                words["vm_perk_crafting_100_desc"] = "Völundr recognizes your craft. His gift lets you create perfected equipment without recipe materials or strengthen a finished item once with the required idol. Each gift recovers separately while you play.";
+                words["vm_perk_crafting_100_desc_pending"] = "Völundr recognizes your craft. The availability of his gifts has not been confirmed yet.";
                 words["vm_perk_crafting_100_flavor"] = "Mastery is forged in more than iron.";
-                words["vm_item_master_cooked"] = "Jarl's stomach: this meal loses nourishment more slowly";
-                words["vm_item_master_mead"] = "Masterfully brewed: its effect lasts 40% longer";
+                words["vm_perk_cooking_35_desc"] = "A master's meals retain their nourishment longer without extending their food duration. Sustained meads last longer; recovery meads allow the next draught sooner.";
+                words["vm_item_master_cooked"] = "Master's meal: nourishment fades more slowly.";
+                words["vm_item_master_mead"] = "Masterfully brewed: sustained effects last 40% longer; recovery mead cooldowns are 40% shorter";
+                words["vm_item_master_mead_duration"] = "Mastered mead: longer lasting effect.";
+                words["vm_item_master_mead_recovery"] = "Mastered mead: shorter reuse cooldown.";
 #if MASTERY_CLUBS35_EXPERIMENT
                 words["vm_perk_clubs_35_desc"] = "A mace secondary that finishes a small foe hurls the body into the next enemy. A hammer strike leaves a weaker echo in the ground.";
 #endif
@@ -86,9 +90,6 @@ namespace ValheimMastery
 
         internal static string Localize(string token)
         {
-            if (string.Equals(token, "$vm_perk_crafting_100_desc", StringComparison.Ordinal) &&
-                !GoldCraftingService.DivineActionsReady)
-                token = "$vm_perk_crafting_100_desc_pending";
             return Localization.instance != null ? Localization.instance.Localize(token) : token;
         }
 
@@ -101,6 +102,15 @@ namespace ValheimMastery
             words["vm_mastery_rank_70"] = ukrainian ? "Адепт" : "Adept";
             words["vm_mastery_rank_100"] = ukrainian ? "Майстер" : "Master";
             words["vm_mastery_unlocked_message"] = "{0}: {1} — {2}";
+            words["vm_poi_burial_chambers"] = ukrainian ? "Поховальні кімнати" : "Burial Chambers";
+            words["vm_poi_troll_cave"] = ukrainian ? "Печера троля" : "Troll Cave";
+            words["vm_poi_sunken_crypt"] = ukrainian ? "Затоплена крипта" : "Sunken Crypt";
+            words["vm_poi_frost_cave"] = ukrainian ? "Морозна печера" : "Frost Cave";
+            words["vm_poi_infested_mine"] = ukrainian ? "Заражена шахта" : "Infested Mine";
+            words["vm_poi_ashlands_fortress"] = ukrainian ? "Фортеця Попелястих земель" : "Ashlands Fortress";
+            words["vm_poi_the_hole"] = ukrainian ? "Провалля" : "The Hole";
+            words["vm_poi_morkborg"] = ukrainian ? "Моркборг" : "Morkborg";
+            words["vm_poi_bear_cave"] = ukrainian ? "Ведмежа печера" : "Bear Cave";
         }
 
         static partial void AddUkrainianPerkWords(Dictionary<string, string> words);

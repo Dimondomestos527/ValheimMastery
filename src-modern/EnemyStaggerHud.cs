@@ -55,6 +55,7 @@ namespace ValheimMastery
             Fill = (RectTransform)fill.transform; Fill.SetParent(Root, false);
             Fill.anchorMin = Vector2.zero; Fill.anchorMax = Vector2.one; Fill.offsetMin = Fill.offsetMax = Vector2.zero;
             var image = fill.GetComponent<Image>(); image.color = new Color(1f, .76f, .12f, .95f); image.raycastTarget = false;
+            MasteryHudArtwork.Fill(image);
         }
         internal void Set(float fraction, bool enabled)
         {

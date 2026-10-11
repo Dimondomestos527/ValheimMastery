@@ -37,7 +37,8 @@ namespace ValheimMastery
             Skills.SkillType skill;
             if (!TryMap(perkId, out skill)) return fallback;
             Sprite sprite;
-            return Icons.TryGetValue(skill, out sprite) && sprite != null ? sprite : fallback;
+            Sprite native = Icons.TryGetValue(skill, out sprite) && sprite != null ? sprite : fallback;
+            return MasteryHudArtwork.Icon(perkId, native);
         }
 
         private static bool TryMap(string perkId, out Skills.SkillType skill)

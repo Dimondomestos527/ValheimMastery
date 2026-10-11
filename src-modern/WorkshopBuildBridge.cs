@@ -12,7 +12,7 @@ namespace ValheimMastery
         [ThreadStatic] internal static int PlacementDepth;
         internal static bool ClientEligible(Player player, Piece piece)
         {
-            if (!WorkshopRemoteCraft.Ready || ZNet.instance == null ||
+            if (!WorkshopRemoteCraft.Ready || (CookingFeastProvenance.Material(piece) != null && !WorkshopRemoteCraft.ProductReady) || ZNet.instance == null ||
                 player == null || player != Player.m_localPlayer || player.IsDead() || player.IsTeleporting() ||
                 !PerkRuntimeService.HasPerk(player, Skills.SkillType.Crafting, 70) || piece == null ||
                 !piece.m_enabled || piece.m_repairPiece || piece.m_removePiece || player.NoCostCheat() ||
