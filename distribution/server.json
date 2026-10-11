@@ -2,24 +2,28 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-startup-clock-hotfix-20261010",
-  "archive": "server-1.4.123-startup-clock-hotfix-20261010.zip",
-  "archive_sha256": "d7e8f4cd00d46adffc5421134c5780644f7f7d7576727353663e9cf748181516",
+  "version": "1.4.123-test-free-enchantments-ashlands35-20261011",
+  "archive": "server-1.4.123-test-free-enchantments-ashlands35-20261011.zip",
+  "archive_sha256": "f98b98989d6761008a355b38894516b9b748224e89830dbabaa2293897635fbd",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 24809472,
-      "sha256": "62bfd24fce663548ec237f036b542a2a76a9ab52d92acb723661a1231d87ea7c"
+      "size": 26213376,
+      "sha256": "66771da3feae538593222d4be2515c8502860bcd4a90ebd032e71dbf2f8f2fee"
     }
   ],
-  "validation": "FROZEN_NATIVE3_STATIC_PASS;BASEAI_ONENABLE_TEST_LIVE_STARTUP_PASS;CLOCK_STATIC_PASS;MANUAL_GRAPPLE_RELEASE_LIVE_FAIL_DEFERRED;SERVER_PUBLIC_LIVE_UNTESTED;HUMAN_AUTHORIZED_RELEASE_20261010",
+  "validation": "TEST_COHORT;ROOT_STATIC_GATE_PASS;THREE_NATIVE_BUILDS;735_CONTRACTS_PER_VARIANT;5973_METHODS_73_ORIGINAL_15_APPROVED_RESOURCES_PRESERVED;LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261009a",
+  "network_wire_identity": "1.4.123+rpc-20261011-free-enchantments-ashlands35-test",
   "known_issues": [
-    "Block/JoyBlock early grapple release does not award XP; successor deferred to next package."
+    "Völund causal routing diagnosis pending; accepted trace only",
+    "Bonus SeekerAspic identity needs human trace",
+    "Broad physical idol source cleanup unfinished",
+    "All-staff XP successor excluded",
+    "TEST cohort; full gameplay LIVE acceptance is UNTESTED."
   ]
 }
