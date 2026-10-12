@@ -2,28 +2,29 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-test-free-enchantments-ashlands35-20261011",
-  "archive": "server-1.4.123-test-free-enchantments-ashlands35-20261011.zip",
-  "archive_sha256": "f98b98989d6761008a355b38894516b9b748224e89830dbabaa2293897635fbd",
+  "version": "1.4.123-test-next-regressions-all-20261012",
+  "archive": "server-1.4.123-test-next-regressions-all-20261012.zip",
+  "archive_sha256": "ec4a74f87801621cb799bdd3c300d40ff23cd0a38611a82728d6de1e87e58d87",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26213376,
-      "sha256": "66771da3feae538593222d4be2515c8502860bcd4a90ebd032e71dbf2f8f2fee"
+      "size": 26280960,
+      "sha256": "1a53a1a84e948f33e20dd1b9c0768ed22e0b3711aa59ed53223a2948f02f5aea"
     }
   ],
-  "validation": "TEST_COHORT;ROOT_STATIC_GATE_PASS;THREE_NATIVE_BUILDS;735_CONTRACTS_PER_VARIANT;5973_METHODS_73_ORIGINAL_15_APPROVED_RESOURCES_PRESERVED;LIVE_UNTESTED",
+  "validation": "TEST_COHORT;ROOT_FINAL_STATIC_GATE_PASS;THREE_NATIVE_BUILDS;EXACT_ACCEPTED_SOURCE_RESOURCES;LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261011-free-enchantments-ashlands35-test",
+  "network_wire_identity": "1.4.123+rpc-20261012-resourceproc-r1-test",
   "known_issues": [
-    "Völund causal routing diagnosis pending; accepted trace only",
-    "Bonus SeekerAspic identity needs human trace",
-    "Broad physical idol source cleanup unfinished",
-    "All-staff XP successor excluded",
+    "Full Unity PatchAll and multiplayer delivery need actual game test; static gates are not LIVE.",
+    "Missing bonus on prior meads not proven fixed; readonly consumption observer included.",
+    "Legacy cooking-forge QC wiring assertions fail on both baseline and candidate identically; superseded helper assumptions, excluded from PASS.",
+    "Only full-proc same-attack confirmed resource episodes earn new XP; ordinary non-proc destruction excluded.",
+    "Full Unity PatchAll offline host cctor is LIMITED; no gameplay PASS is claimed.",
     "TEST cohort; full gameplay LIVE acceptance is UNTESTED."
   ]
 }
