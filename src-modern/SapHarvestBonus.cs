@@ -43,7 +43,7 @@ namespace ValheimMastery
                 if (collector.m_nview.GetZDO()?.GetOwner() != sender || playerId == 0 || count < 1 || count > 4096 ||
                     player == null || player.GetPlayerID() != playerId ||
                     (player.transform.position - collector.transform.position).sqrMagnitude > 900f) return;
-                PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + count, collector.transform.position);
+                PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + count + ":" + (int)Skills.SkillType.Farming, collector.transform.position);
             });
         }
         internal static void Send(SapCollector collector, Humanoid character, bool repeat)

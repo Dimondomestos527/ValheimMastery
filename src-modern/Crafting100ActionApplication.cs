@@ -12,6 +12,32 @@ namespace ValheimMastery
         internal const string GrantKey = "VM_Crafting100_Grant_v1";
         internal const string IdentityKey = "VM_Gold_ItemIdentity";
 
+        // Special forge needs ONE recipe-defined upgrader resource, independently of
+        // the normal recipe quantity. Preserve requirement/quality/inventory ordering,
+        // native world-level eligibility, and enforce exact prefab instead of shared name.
+        internal static ItemDrop.ItemData SelectRequiredIdol(Inventory inventory, Recipe recipe,
+            int nextQuality, ItemDrop.ItemData target)
+        {
+            if (inventory == null || recipe?.m_resources == null || nextQuality < 1) return null;
+            foreach (var requirement in recipe.m_resources)
+            {
+                if (requirement?.m_upgraderResource != true || requirement.m_resItem?.m_itemData?.m_shared == null ||
+                    requirement.GetAmount(nextQuality) <= 0) continue;
+                string prefab = requirement.m_resItem.gameObject.name;
+                int maxQuality = requirement.m_resItem.m_itemData.m_shared.m_maxQuality;
+                ItemDrop.ItemData first = null;
+                foreach (var item in inventory.m_inventory)
+                {
+                    if (item?.m_shared == null || ReferenceEquals(item, target) || item.m_stack < 1 ||
+                        item.m_quality < 0 || item.m_quality > maxQuality || item.m_worldLevel < Game.m_worldLevel ||
+                        TierDatabase.ItemKey(item) != prefab) continue;
+                    if (first == null || item.m_quality < first.m_quality) first = item;
+                }
+                if (first != null) return first;
+            }
+            return null;
+        }
+
         internal static Crafting100ApplicationResult Apply(Player player, Recipe recipe,
             ItemDrop.ItemData target, int kind, int variant, int expectedQuality, string token,
             Func<bool> currentPermit, Func<bool> persistApplied, Func<bool> persistRejected)
@@ -46,13 +72,14 @@ namespace ValheimMastery
                 }
                 else
                 {
-                    idol = player.GetFirstRequiredItem(inventory, recipe, expectedQuality + 1, out _, out _, 1);
+                    idol = SelectRequiredIdol(inventory, recipe, expectedQuality + 1, target);
                     if (!RequiredIdol(recipe, idol, expectedQuality + 1) || ReferenceEquals(idol, target))
                         return Reject(persistRejected);
                     oldStack = idol.m_stack; oldIndex = inventory.m_inventory.IndexOf(idol);
                     hadGrant = target.m_customData.TryGetValue(GrantKey, out oldGrant);
                     // Revalidate immediately before native debit and item mutation.
-                    if (!Valid(player, recipe, target, kind, variant, expectedQuality, token, currentPermit))
+                    if (!Valid(player, recipe, target, kind, variant, expectedQuality, token, currentPermit) ||
+                        !ReferenceEquals(SelectRequiredIdol(inventory, recipe, expectedQuality + 1, target), idol))
                         return Reject(persistRejected);
                     mutated = true;
                     if (!inventory.RemoveItem(idol, 1)) throw new InvalidOperationException("Crafting100 idol debit changed.");

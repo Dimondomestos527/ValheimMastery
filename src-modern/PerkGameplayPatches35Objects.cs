@@ -298,7 +298,7 @@ namespace ValheimMastery
             float health = __instance.m_nview.GetZDO().GetFloat(ZDOVars.s_health, __instance.m_health);
             if (WoodCutting35Service.ShouldProc(__instance.m_nview, health, __instance.m_health, hit, true))
             {
-                WoodCuttingChainService.RegisterTree(__instance.transform.position, hit.GetAttacker() as Player, hit.m_toolTier);
+                WoodCuttingChainService.RegisterTree(__instance, hit.GetAttacker() as Player, hit.m_toolTier);
                 WoodCutting35Service.MakeLethal(hit, health, __instance.m_damageModifiers);
             }
         }

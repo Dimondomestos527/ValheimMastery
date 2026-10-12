@@ -24,11 +24,15 @@ namespace ValheimMastery
                 foreach (var renderer in native.GetComponentsInChildren<ParticleSystemRenderer>(true))
                     if (renderer.renderMode != ParticleSystemRenderMode.Mesh && renderer.sharedMaterial != null)
                     {
-                        string label = (renderer.name + " " + renderer.sharedMaterial.name).ToLowerInvariant();
-                        if (label.Contains("smoke") || label.Contains("trail") || label.Contains("glow")) continue;
-                        if (source == null) source = renderer.GetComponent<ParticleSystem>();
-                        if (label.Contains("spark") || label.Contains("ember"))
-                        { source = renderer.GetComponent<ParticleSystem>(); break; }
+                        // The native root is pixel_unlit_red with no MainTex:
+                        // valid for impact pixels, but opaque squares in an orbit.
+                        // Keep the same cluster donor, use its textured fire layer.
+                        Material material = renderer.sharedMaterial;
+                        if (!material.name.StartsWith("flameball_flipbook_gradient", System.StringComparison.Ordinal) ||
+                            material.mainTexture == null || material.mainTexture == Texture2D.whiteTexture ||
+                            material.mainTexture == Texture2D.blackTexture) continue;
+                        source = renderer.GetComponent<ParticleSystem>();
+                        if (source != null) break;
                     }
                 if (source != null) break;
             }
@@ -54,6 +58,7 @@ namespace ValheimMastery
             var streams = new System.Collections.Generic.List<ParticleSystemVertexStream>();
             original.GetActiveVertexStreams(streams); particles.SetActiveVertexStreams(streams);
             NativeSnowVisualAssets.CopySheet(source, visual.Effect);
+            CopyNativeBindings(source, visual.Effect, original, particles);
             particles.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             particles.receiveShadows = false;
             visual.Effect.Play();
@@ -61,6 +66,29 @@ namespace ValheimMastery
                 MasteryPlugin.Log.LogInfo("[Ashlands35ClusterCore] native=" + source.name + " material=" + original.sharedMaterial.name +
                     " shaft=" + start + " -> " + end);
             return visual;
+        }
+        private static void CopyNativeBindings(ParticleSystem source, ParticleSystem target,
+            ParticleSystemRenderer original, ParticleSystemRenderer renderer)
+        {
+            // The gradient shader consumes Custom1 color. Copy its native module
+            // together with UV streams/flipbook rather than inventing shader data.
+            var from = source.customData; var to = target.customData;
+            to.enabled = from.enabled;
+            if (from.enabled)
+                foreach (ParticleSystemCustomData stream in new[] { ParticleSystemCustomData.Custom1, ParticleSystemCustomData.Custom2 })
+                {
+                    ParticleSystemCustomDataMode mode = from.GetMode(stream);
+                    to.SetMode(stream, mode);
+                    if (mode == ParticleSystemCustomDataMode.Color) to.SetColor(stream, from.GetColor(stream));
+                    else if (mode == ParticleSystemCustomDataMode.Vector)
+                    {
+                        int count = from.GetVectorComponentCount(stream); to.SetVectorComponentCount(stream, count);
+                        for (int i = 0; i < count; i++) to.SetVector(stream, i, from.GetVector(stream, i));
+                    }
+                }
+            var block = new MaterialPropertyBlock();
+            original.GetPropertyBlock(block); renderer.SetPropertyBlock(block);
+            block.Clear(); original.GetPropertyBlock(block, 0); renderer.SetPropertyBlock(block, 0);
         }
         private static bool ResolveShaft(Transform weapon, out Vector3 start, out Vector3 end)
         {

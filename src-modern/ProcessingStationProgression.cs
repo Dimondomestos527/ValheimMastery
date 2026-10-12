@@ -178,11 +178,11 @@ namespace ValheimMastery
             {
                 var player = Player.GetPlayer(author.Key);
                 if (ProcessingStationProgressionService.CanDeliver(player))
-                    NetworkSync.SendStationXp(player, .25f * tier * author.Value, "processing." + __state.Ore);
+                    NetworkSync.SendStationXp(player, CraftingProgressionXpPolicy.ProcessingUnitXp * tier * author.Value, "processing." + __state.Ore);
             }
             if (MasteryPlugin.Settings.VerboseLogging.Value)
                 MasteryPlugin.Log.LogInfo("[ProcessingXP] ore=" + __state.Ore + " output=" + __state.Original + " bonus=" + delivered + " authors=" + authors.Count + " craftingXP=" +
-                    (0.25f * Mathf.Max(1, tier) * __state.Original).ToString("0.###"));
+                    (CraftingProgressionXpPolicy.ProcessingUnitXp * Mathf.Max(1, tier) * __state.Original).ToString("0.###"));
         }
     }
 }

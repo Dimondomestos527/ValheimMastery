@@ -21,12 +21,26 @@ namespace ValheimMastery
         internal Pickaxes70Strike Strike;
     }
 
-    // Same native RPC only: a later unrelated hit never inherits proc attribution.
+    // Eligibility survives only within the XP-owned exact attack/source group.
+    internal sealed class Pickaxes70ProcEvidence
+    {
+        internal bool Activated;
+        internal bool TallyProven = true;
+    }
+
+    // Native support deaths are captured within this one owner RPC.
     internal sealed class Pickaxes70DamageScope
     {
         [ThreadStatic] internal static Pickaxes70DamageScope Current;
         internal Pickaxes70DamageScope Previous;
         internal MineRock5 Rock;
+        internal ResourceProcXpTicket Ticket;
+        internal MineRock5.HitArea[] Snapshot;
+        internal float[] Before;
+        internal ZDOID SourceUid;
+        internal string Prefab;
+        internal int ResourceTier;
+        internal Pickaxes70ProcEvidence Proc;
         internal MineRock5.HitArea[] Areas;
         internal Player Player;
         internal Vector3 Point;
@@ -35,13 +49,32 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(MineRock5), "RPC_Damage")]
     internal static class Pickaxes70DamageScopePatch
     {
-        private static void Prefix(MineRock5 __instance, HitData hit, out Pickaxes70DamageScope __state)
+        private static readonly ConditionalWeakTable<object, Pickaxes70ProcEvidence> ProcGroups =
+            new ConditionalWeakTable<object, Pickaxes70ProcEvidence>();
+        private static void Prefix(MineRock5 __instance, HitData hit, int __2, out Pickaxes70DamageScope __state)
         {
             __state = null;
             if (__instance?.m_nview?.IsOwner() != true || !(hit?.GetAttacker() is Player player) ||
                 !PerkRuntimeService.HasPerk(player, Skills.SkillType.Pickaxes, 70)) return;
             __state = new Pickaxes70DamageScope { Previous = Pickaxes70DamageScope.Current, Rock = __instance };
             Pickaxes70DamageScope.Current = __state;
+            if (__instance.m_nview.IsValid() && __instance.m_hitAreas != null && __instance.m_hitAreas.Count <= 4096 &&
+                UtilityResourceProcApi.TryGetCurrent(__instance, hit, __2, out var ticket))
+            {
+                // XP owns this identity: exact actor/attack/source state, never elapsed time or FIFO.
+                object group = ticket?.GroupIdentity;
+                if (group == null) return;
+                __instance.LoadHealth();
+                __state.Ticket = ticket;
+                __state.Proc = ProcGroups.GetValue(group, _ => new Pickaxes70ProcEvidence());
+                __state.Snapshot = __instance.m_hitAreas.ToArray();
+                __state.Before = new float[__state.Snapshot.Length];
+                for (int i = 0; i < __state.Snapshot.Length; ++i)
+                    __state.Before[i] = __state.Snapshot[i]?.m_health ?? 0f;
+                __state.SourceUid = __instance.m_nview.GetZDO().m_uid;
+                __state.Prefab = UtilityWoodLineage.PrefabKey(__instance.gameObject.name);
+                __state.ResourceTier = GatheringProgressionService.GetResourceTier(__instance, Skills.SkillType.Pickaxes);
+            }
         }
 
         private static Exception Finalizer(Exception __exception, Pickaxes70DamageScope __state)
@@ -49,6 +82,26 @@ namespace ValheimMastery
             if (__state == null) return __exception;
             // Restore before feedback as feedback may itself call into other services.
             Pickaxes70DamageScope.Current = __state.Previous;
+            if (__exception == null && __state.Ticket != null)
+            {
+                if (__state.Areas != null) __state.Proc.Activated = true;
+                bool tallyProven = true;
+                bool finiteCompletion = true;
+                for (int i = 0; i < __state.Snapshot.Length; ++i)
+                {
+                    float before = __state.Before[i];
+                    var area = __state.Snapshot[i];
+                    if (area != null && !UtilityWoodLineage.Dead(area.m_health)) finiteCompletion = false;
+                    if (UtilityWoodLineage.Positive(before) && area != null && UtilityWoodLineage.Dead(area.m_health))
+                        tallyProven &= UtilityResourceProcApi.ConfirmDestroyed(__state.Ticket, __state.SourceUid,
+                            i, __state.Prefab, __state.ResourceTier) != ResourceProcXpResult.NoOp;
+                }
+                // A later native RPC in the same swing may complete this rock.
+                // Intermediate !AllBroken must not terminally discard its tally.
+                __state.Proc.TallyProven &= tallyProven;
+                if (__state.Proc.Activated && finiteCompletion && Pickaxes70SuperHitPatch.AllBroken(__state.Snapshot))
+                    UtilityResourceProcApi.CloseEpisode(__state.Ticket, __state.Proc.TallyProven);
+            }
             if (__exception == null && __state.Areas != null)
                 Pickaxes70SuperHitPatch.ConfirmCollapse(__state.Rock, __state.Areas, __state.Player, __state.Point);
             return __exception;
@@ -189,3 +242,4 @@ namespace ValheimMastery
         }
     }
 }
+

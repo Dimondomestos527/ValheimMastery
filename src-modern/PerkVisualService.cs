@@ -94,11 +94,11 @@ namespace ValheimMastery
             PlayWoodResourceProcLocal(player, position, count);
         }
 
-        internal static void PlayGenericResourceBonus(Player player, Vector3 position, int count = 1)
+        internal static void PlayGenericResourceBonus(Player player, Vector3 position, int count = 1, Skills.SkillType skill = Skills.SkillType.None)
         {
             if (player == null || count <= 0) return;
-            if (ZNet.instance != null && ZNet.instance.IsServer() && player != Player.m_localPlayer) { NetworkSync.SendProcFeedback(player, "resource_bonus:" + count, position); return; }
-            PlayGenericResourceBonusLocal(player, position, count);
+            if (ZNet.instance != null && ZNet.instance.IsServer() && player != Player.m_localPlayer) { NetworkSync.SendProcFeedback(player, "resource_bonus:" + count + ":" + (int)skill, position); return; }
+            PlayGenericResourceBonusLocal(player, position, count, skill);
         }
 
         internal static void PlayVanillaCraftBonusCue(Player player, Vector3 position, bool playCraftEffect = true)
@@ -200,8 +200,8 @@ namespace ValheimMastery
             }
             if (procId.StartsWith("resource_bonus:"))
             {
-                if (int.TryParse(procId.Substring("resource_bonus:".Length), out int count))
-                    PlayGenericResourceBonusLocal(player, position, Mathf.Clamp(count, 1, 999));
+                if (TryDecodeResourceBonus(procId, out int count, out Skills.SkillType skill))
+                    PlayGenericResourceBonusLocal(player, position, Mathf.Clamp(count, 1, 999), skill);
                 return;
             }
             if (procId == "resource_bonus") { PlayGenericResourceBonusLocal(player, position, 1); return; }
@@ -233,7 +233,7 @@ namespace ValheimMastery
             if (player == null || player != Player.m_localPlayer) return;
             VanillaBonusFeedback.Show(player, 1);
             if (MasteryPlugin.Settings.EnablePerkProcMessages.Value)
-                player.Message(MessageHud.MessageType.TopLeft, "Кайло: +1 додатковий ресурс", 0, PerkUiIconService.ForPerk("pickaxes_35", player.m_textIcon));
+                player.Message(MessageHud.MessageType.TopLeft, "Кайло: +1 додатковий ресурс", 0, PerkUiIconService.ForResourceSkill(Skills.SkillType.Pickaxes));
         }
 
         private static void PlayWoodResourceProcLocal(Player player, Vector3 position, int count = 1)
@@ -242,15 +242,25 @@ namespace ValheimMastery
             VanillaBonusFeedback.Show(player, count);
             if (MasteryPlugin.Settings.EnablePerkProcMessages.Value)
                 player.Message(MessageHud.MessageType.TopLeft, "Рубання дерев: +" + count + " додаткової деревини", 0,
-                    PerkUiIconService.ForPerk("woodcutting_35", player.m_textIcon));
+                    PerkUiIconService.ForResourceSkill(Skills.SkillType.WoodCutting));
         }
 
-        private static void PlayGenericResourceBonusLocal(Player player, Vector3 position, int count)
+        internal static bool TryDecodeResourceBonus(string id, out int count, out Skills.SkillType skill)
+        {
+            count = 0; skill = Skills.SkillType.None;
+            if (id == null || !id.StartsWith("resource_bonus:")) return false;
+            var fields = id.Substring("resource_bonus:".Length).Split(':');
+            if (fields.Length < 1 || fields.Length > 2 || !int.TryParse(fields[0], out count)) return false;
+            if (fields.Length == 2 && int.TryParse(fields[1], out int origin)) skill = (Skills.SkillType)origin;
+            return true;
+        }
+
+        private static void PlayGenericResourceBonusLocal(Player player, Vector3 position, int count, Skills.SkillType skill = Skills.SkillType.None)
         {
             if (player == null || player != Player.m_localPlayer || count <= 0) return;
             VanillaBonusFeedback.Show(player, count);
             if (MasteryPlugin.Settings.EnablePerkProcMessages.Value)
-                player.Message(MessageHud.MessageType.TopLeft, "+" + count + " додатковий ресурс", 0, player.m_textIcon);
+                player.Message(MessageHud.MessageType.TopLeft, "+" + count + " додатковий ресурс", 0, PerkUiIconService.ForResourceSkill(skill));
         }
 
         // Every entry is a short, purpose-built proc cue. They never reuse the skill-level-up effect.
@@ -568,9 +578,3 @@ namespace ValheimMastery
             if (prefab != null) { GameObject vfx = Instantiate(prefab, transform.position, Quaternion.identity); if (vfx != null) vfx.transform.localScale *= 0.55f; }
         }
     }}
-
-
-
-
-
-

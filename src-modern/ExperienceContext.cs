@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using UnityEngine;
@@ -26,6 +26,7 @@ namespace ValheimMastery
 
         internal static void ObserveHit(Component target, HitData hit)
         {
+            if (StaffMagicXpContext.Observe(target, hit)) return;
             if (!MasteryPlugin.Settings.Enabled.Value || hit == null || !IsManaged(hit.m_skill)) return;
             Player player = Player.m_localPlayer;
             if (player == null || hit.GetAttacker() != player) return;
@@ -115,6 +116,17 @@ namespace ValheimMastery
             return scope;
         }
 
+        internal static IDisposable BeginStaffCombat(Player player, Skills.SkillType skill, string staff, float tier, string target, bool legacy = false)
+        {
+            var scope = new ActionScope { Skill = skill };
+            if (player == null || player != Player.m_localPlayer || !StaffMagicXpRules.Magic(skill) ||
+                StaffMagicXpRules.Index(staff) < 0 || !BloodMagicXpRules.Finite(tier) || tier < 1f || tier > 8f ||
+                !StaffMagicXpRules.Target(target)) return scope;
+            scope.Changed = true; scope.HadPrevious = Pending.TryGetValue(skill, out scope.Previous);
+            Set(skill, 1, 1, legacy ? "action" : staff, legacy ? "action" : target, 1f);
+            Pending[skill].ExplicitTierMultiplier = 1f + MasteryRuntime.TierStep * (tier - 1f + StaffMagicXpRules.Tier(staff) - 1f);
+            return scope;
+        }
         private sealed class CookingRecipeContext { internal float Coefficient; internal bool WorldResources; }
         [ThreadStatic] private static CookingRecipeContext ActiveCookingRecipe;
         private sealed class CookingRecipeScope : IDisposable
@@ -162,7 +174,7 @@ namespace ValheimMastery
                 : (UsesTierFormula(skill)
                     ? 1f + MasteryRuntime.TierStep * (context.TargetTier - 1) + MasteryRuntime.TierStep * (context.ItemTier - 1)
                     : 1f);
-            if (skill == Skills.SkillType.BloodMagic && context.ExplicitTierMultiplier > 0f)
+            if (StaffMagicXpRules.Magic(skill) && context.ExplicitTierMultiplier > 0f)
                 tierMultiplier = context.ExplicitTierMultiplier;
             if (skill == Skills.SkillType.Cooking && ActiveCookingRecipe != null) tierMultiplier *= ActiveCookingRecipe.Coefficient;
             float skillMultiplier = GetSmoothSkillMultiplier(player, skill);
@@ -178,10 +190,26 @@ namespace ValheimMastery
             // the approved exception is the three scoped mead stages, once and last.
             float resourceMultiplier = (UsesWorldResourceRate(skill) || (skill == Skills.SkillType.Cooking && ActiveCookingRecipe?.WorldResources == true)) && Game.m_resourceRate > 0f ? Game.m_resourceRate : 1f;
             float finalXp = baseXp * tierMultiplier * skillMultiplier * firstTimeMultiplier * bossModifier * resourceMultiplier;
+            finalXp = FullResourceProcExperience.ApplyCredit(skill, finalXp);
             return Log(skill, baseXp, bossModifier, tierMultiplier, skillMultiplier, firstTimeMultiplier, resourceMultiplier, finalXp);
         }
 
         internal static string ActionKey(Skills.SkillType skill) => GetContext(skill).ItemKey;
+
+        internal static string ResourceProcFirstKey(Skills.SkillType skill)
+        {
+            PendingContext context = GetContext(skill);
+            return !context.FixedHookTraversal && GatheringProgressionService.IsGatheringSkill(skill) && MasteryRuntime.FirstUniqueMultiplier > 1f
+                ? "valheim_mastery.first." + skill + "." + context.ItemKey + "." + context.TargetKey : null;
+        }
+        internal static IDisposable BeginResourceProc(Player player, Skills.SkillType skill, string tool, string resource, int resourceTier, int toolTier)
+        {
+            var scope = new ActionScope { Skill = skill };
+            if (player == null || player != Player.m_localPlayer || !GatheringProgressionService.IsGatheringSkill(skill) ||
+                string.IsNullOrEmpty(tool) || string.IsNullOrEmpty(resource)) return scope;
+            scope.HadPrevious = Pending.TryGetValue(skill, out scope.Previous); scope.Changed = true;
+            Set(skill, resourceTier, toolTier, tool, resource, 1f); return scope;
+        }
 
         private static PendingContext GetContext(Skills.SkillType skill)
         {

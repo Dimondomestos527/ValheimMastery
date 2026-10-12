@@ -58,7 +58,7 @@ namespace ValheimMastery
             var player = Player.m_localPlayer;
             if (player != null && player.GetPlayerID() == playerId &&
                 (player.transform.position - station.transform.position).sqrMagnitude <= 900f)
-                PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + amount, station.transform.position);
+                PerkVisualService.PlayRemoteProc(player, "resource_bonus:" + amount + ":" + (int)Skills.SkillType.Crafting, station.transform.position);
         }
     }
     [HarmonyPatch(typeof(Smelter), "Awake")]

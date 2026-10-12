@@ -1,48 +1,65 @@
 using UnityEngine;
-using System.Collections.Generic;
-
 namespace ValheimMastery
 {
-    // One native-textured, terrain-conforming surface for at most eight patches.
-    // Transparent vertex edges avoid billboard cards and a hard geometric rim.
+    // Cached cosmetic ground and one aggregate native-simulated snow layer.
     internal sealed class IceTrailVisual : MonoBehaviour
     {
-        private const int ZoneCapacity = 8, Spokes = 24;
+        private const int ZoneCapacity = MistlandsFrostVisualRules.Zones, Spokes = 24;
         private const int VerticesPerZone = 1 + Spokes * 2, IndicesPerZone = Spokes * 9;
-        private readonly Vector3[] Points = new Vector3[ZoneCapacity];
-        private readonly Vector3[] CachedCenters = new Vector3[ZoneCapacity];
-        private readonly Vector3[] Vertices = new Vector3[ZoneCapacity * VerticesPerZone];
-        private readonly Vector3[] Normals = new Vector3[ZoneCapacity * VerticesPerZone];
+        private readonly Vector3[] Points = new Vector3[ZoneCapacity], CachedCenters = new Vector3[ZoneCapacity];
+        private readonly Vector3[] Vertices = new Vector3[ZoneCapacity * VerticesPerZone], Normals = new Vector3[ZoneCapacity * VerticesPerZone];
         private readonly Color[] Colors = new Color[ZoneCapacity * VerticesPerZone];
         private readonly Vector2[] Uvs = new Vector2[ZoneCapacity * VerticesPerZone];
-        private readonly int[] Indices = new int[ZoneCapacity * IndicesPerZone];
+        private readonly int[] Indices = new int[ZoneCapacity * IndicesPerZone], Tiers = new int[ZoneCapacity];
+        private readonly bool[] VisibleZones = new bool[ZoneCapacity];
+        private readonly Plane[] Frustum = new Plane[6];
+        private readonly float[] EmitCredits = new float[ZoneCapacity];
+        private readonly int[] AirSerial = new int[ZoneCapacity];
+        private readonly Vector3[] AirOffsets = new Vector3[MistlandsFrostVisualRules.AirNear], AirVelocity = new Vector3[MistlandsFrostVisualRules.AirNear];
+        private readonly ParticleSystem.Particle[] GroundCache = new ParticleSystem.Particle[ZoneCapacity * MistlandsFrostVisualRules.GroundNear];
+        private readonly ParticleSystem.Particle[] SnowParticles = new ParticleSystem.Particle[ZoneCapacity * MistlandsFrostVisualRules.GroundNear];
         private Mesh Surface;
         private MeshRenderer Renderer;
         private Material OwnedMaterial;
-        private int CachedZones = -1;
-        private float NextAssetRetry;
-        private const int FlakesPerZone = 150, AirbornePerZone = 128;
-        private ParticleSystem Flakes;
-        private ParticleSystem AirborneSnow;
-        private readonly ParticleSystem.Particle[] SnowParticles = new ParticleSystem.Particle[ZoneCapacity * FlakesPerZone];
-        private readonly ParticleSystem.Particle[] AirborneParticles = new ParticleSystem.Particle[ZoneCapacity * AirbornePerZone];
-
+        private ParticleSystem Flakes, AirborneSnow;
+        private Camera Viewer;
+        private int CachedZones = -1, LastVisibilityZones = -1;
+        private float NextAssetRetry, NextVisibility, NextGroundRefresh, LastAirTick;
+        private bool Playing, GroundDirty = true;
 
         internal static IceTrailVisual Create()
         {
             if (Player.m_localPlayer == null || Application.isBatchMode || !MasteryPlugin.Settings.EnablePerkProcVFX.Value) return null;
-            GameObject root = new GameObject("ValheimMastery_NativeIceTrail");
-            IceTrailVisual visual = root.AddComponent<IceTrailVisual>();
-            visual.TryInitialize();
-            return visual;
+            return new GameObject("ValheimMastery_NativeIceTrail").AddComponent<IceTrailVisual>();
         }
-
+        private void Awake()
+        {
+            for (int i = 0; i < AirOffsets.Length; i++)
+            {
+                float angle = i * 2.39996f, radial = 1.75f * Mathf.Sqrt((i + .5f) / AirOffsets.Length);
+                AirOffsets[i] = new Vector3(Mathf.Cos(angle) * radial, 0f, Mathf.Sin(angle) * radial);
+                AirVelocity[i] = new Vector3(Mathf.Cos(angle + .9f) * .08f, -.38f - (i % 5) * .03f, Mathf.Sin(angle + .9f) * .08f);
+            }
+        }
         private bool TryInitialize()
         {
             if (Flakes == null && Time.time >= NextAssetRetry)
-                Flakes = NativeSnowVisualAssets.CreateSnow(transform, ZoneCapacity * FlakesPerZone);
+                Flakes = NativeSnowVisualAssets.CreateSnow(transform, SnowParticles.Length);
             if (AirborneSnow == null && Time.time >= NextAssetRetry)
-                AirborneSnow = NativeSnowVisualAssets.CreateSnow(transform, ZoneCapacity * AirbornePerZone);
+            {
+                AirborneSnow = NativeSnowVisualAssets.CreateSnow(transform, ZoneCapacity * MistlandsFrostVisualRules.AirNear);
+                if (AirborneSnow != null)
+                {
+                    var noise = AirborneSnow.noise; noise.enabled = true; noise.strength = .075f;
+                    noise.frequency = .22f; noise.scrollSpeed = .1f; noise.octaveCount = 1; noise.quality = ParticleSystemNoiseQuality.Low;
+                    var color = AirborneSnow.colorOverLifetime; color.enabled = true;
+                    var gradient = new Gradient();
+                    gradient.SetKeys(new[] { new GradientColorKey(Color.white, 0f), new GradientColorKey(Color.white, 1f) },
+                        new[] { new GradientAlphaKey(0f, 0f), new GradientAlphaKey(1f, .15f), new GradientAlphaKey(1f, .75f), new GradientAlphaKey(0f, 1f) });
+                    color.color = gradient;
+                    Playing = false;
+                }
+            }
             if (Surface == null)
             {
                 Surface = new Mesh { name = "VM_FeatheredCaveIce" };
@@ -51,37 +68,82 @@ namespace ValheimMastery
                 Renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
                 Renderer.receiveShadows = false; Renderer.enabled = false;
             }
-            if (OwnedMaterial != null || Time.time < NextAssetRetry) return true;
-            NextAssetRetry = Time.time + .25f;
-            Material material = NativeSnowVisualAssets.CreateIceSurfaceMaterial();
-            if (material == null) return true; // Native floor flakes must not wait for a separate cave material.
-            OwnedMaterial = material;
-            Renderer.sharedMaterial = material;
-            return true;
+            if (OwnedMaterial == null && Time.time >= NextAssetRetry)
+            {
+                NextAssetRetry = Time.time + .25f;
+                OwnedMaterial = NativeSnowVisualAssets.CreateIceSurfaceMaterial();
+                if (OwnedMaterial != null) Renderer.sharedMaterial = OwnedMaterial;
+            }
+            return Renderer != null;
         }
-
+        private void Suspend()
+        {
+            if (Renderer != null) Renderer.enabled = false;
+            if (!Playing) return;
+            if (Flakes != null) Flakes.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (AirborneSnow != null) AirborneSnow.Stop(false, ParticleSystemStopBehavior.StopEmittingAndClear);
+            Playing = false; GroundDirty = true; LastAirTick = Time.time;
+        }
+        private bool Visibility(int zones)
+        {
+            if (Time.time < NextVisibility && zones == LastVisibilityZones)
+            {
+                for (int z = 0; z < zones; z++) if (VisibleZones[z]) return true;
+                return false;
+            }
+            NextVisibility = Time.time + MistlandsFrostVisualRules.VisibilityInterval; LastVisibilityZones = zones;
+            if (Viewer == null) Viewer = Camera.main;
+            bool frustum = Viewer != null;
+            if (frustum) GeometryUtility.CalculateFrustumPlanes(Viewer, Frustum);
+            Vector3 eye = frustum ? Viewer.transform.position : Player.m_localPlayer.transform.position;
+            bool any = false;
+            for (int z = 0; z < zones; z++)
+            {
+                int tier = MistlandsFrostVisualRules.Tier((Points[z] - eye).sqrMagnitude, Tiers[z]);
+                bool visible = tier < 3 && (!frustum || GeometryUtility.TestPlanesAABB(Frustum, new Bounds(Points[z] + Vector3.up, new Vector3(5f, 5f, 5f))));
+                if (visible != VisibleZones[z] || tier != Tiers[z]) GroundDirty = true;
+                VisibleZones[z] = visible; Tiers[z] = tier; any |= visible;
+            }
+            return any;
+        }
         private void LateUpdate()
         {
-            // The first patch remains registered while asynchronous native assets
-            // load, so the player need not cast a second patch to see it.
-            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value)
-            {
-                if (Renderer != null) Renderer.enabled = false;
-                if (Flakes != null) Flakes.Clear(); if (AirborneSnow != null) AirborneSnow.Clear();
-                return;
-            }
-            if (!TryInitialize() || Renderer == null) return;
+            if (Application.isBatchMode || Player.m_localPlayer == null || !MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+            { Suspend(); return; }
             int zones = Mathf.Clamp(IceStaff35Trail.FillZonePoints(Points), 0, ZoneCapacity);
-            bool visible = zones > 0 && MasteryPlugin.Settings.EnablePerkProcVFX.Value;
-            Renderer.enabled = visible && OwnedMaterial != null;
-            if (!visible)
-            {
-                if (Flakes != null) Flakes.Clear(); if (AirborneSnow != null) AirborneSnow.Clear();
-                return;
-            }
+            if (zones == 0 || !Visibility(zones)) { Suspend(); return; }
+            if (!TryInitialize()) return;
+            Renderer.enabled = OwnedMaterial != null;
             bool changed = zones != CachedZones;
             for (int z = 0; z < zones; z++) if (Points[z] != CachedCenters[z]) changed = true;
-            if (!changed) { DrawFlakes(zones); DrawAirborneSnow(zones); return; }
+            if (changed)
+            {
+                BuildSurface(zones); CacheGround(zones); GroundDirty = true;
+                if (AirborneSnow != null) AirborneSnow.Clear(false);
+                for (int z = 0; z < ZoneCapacity; z++) EmitCredits[z] = 0f;
+                Playing = false;
+            }
+            if (!Playing)
+            {
+                if (Flakes != null) Flakes.Play(false);
+                if (AirborneSnow != null) { AirborneSnow.Play(false); PrimeAir(zones); }
+                Playing = true; GroundDirty = true; LastAirTick = Time.time;
+            }
+            if (GroundDirty || Time.time >= NextGroundRefresh) RefreshGround(zones);
+            if (Time.time - LastAirTick >= MistlandsFrostVisualRules.EmitInterval)
+            {
+                float elapsed = Time.time - LastAirTick; LastAirTick = Time.time;
+                if (AirborneSnow != null)
+                    for (int z = 0; z < zones; z++)
+                    {
+                        int population = VisibleZones[z] ? MistlandsFrostVisualRules.Air(Tiers[z]) : 0;
+                        int count = MistlandsFrostVisualRules.EmitCount(ref EmitCredits[z], population, elapsed);
+                        for (int i = 0; i < count; i++) EmitAir(z, MistlandsFrostVisualRules.AirLifetime);
+                    }
+            }
+        }
+        private void BuildSurface(int zones)
+        {
             int mask = LayerMask.GetMask("terrain", "static_solid", "piece", "Default");
             for (int z = 0; z < zones; z++)
             {
@@ -110,59 +172,55 @@ namespace ValheimMastery
             Surface.SetColors(Colors, 0, count); Surface.SetUVs(0, Uvs, 0, count);
             Surface.SetTriangles(Indices, 0, zones * IndicesPerZone, 0, true);
             CachedZones = zones;
-            DrawFlakes(zones);
-            DrawAirborneSnow(zones);
         }
-
-        private void DrawFlakes(int zones)
+        private void CacheGround(int zones)
         {
-            if (Flakes == null) return;
+            for (int z = 0; z < zones; z++)
+                for (int i = 0; i < MistlandsFrostVisualRules.GroundNear; i++)
+                {
+                    int index = z * MistlandsFrostVisualRules.GroundNear + i;
+                    float radial = Mathf.Sqrt((i + .5f) / MistlandsFrostVisualRules.GroundNear);
+                    GroundCache[index].position = Vector3.Lerp(Vertices[z * VerticesPerZone], Vertices[z * VerticesPerZone + 1 + Spokes + i % Spokes], radial) + Vector3.up * .05f;
+                    GroundCache[index].velocity = Vector3.zero;
+                    GroundCache[index].startSize = .035f + (i % 3) * .012f;
+                    GroundCache[index].startColor = new Color(.78f, .9f, 1f, .55f);
+                    GroundCache[index].startLifetime = GroundCache[index].remainingLifetime = 30f;
+                }
+        }
+        private void RefreshGround(int zones)
+        {
+            if (Flakes == null) return; // Keep dirty while the native material loads.
             int count = 0;
             for (int z = 0; z < zones; z++)
-                for (int i = 0; i < FlakesPerZone; i++)
-                {
-                    int sector = i % Spokes;
-                    float radial = Mathf.Sqrt((i + .5f) / FlakesPerZone);
-                    // Reuse projected ground vertices: no particle collision,
-                    // no per-frame terrain rays, no floating opaque ice cards.
-                    Vector3 ground = Vector3.Lerp(Vertices[z * VerticesPerZone],
-                        Vertices[z * VerticesPerZone + 1 + Spokes + sector], radial);
-                    SnowParticles[count].position = ground + Vector3.up * (.04f + .015f * Mathf.Sin(Time.time * .8f + i));
-                    SnowParticles[count].velocity = Vector3.zero;
-                    SnowParticles[count].startSize = .035f + (i % 3) * .012f;
-                    SnowParticles[count].startColor = new Color(.78f, .9f, 1f, .6f + .15f * Mathf.Sin(Time.time + i));
-                    SnowParticles[count].startLifetime = SnowParticles[count].remainingLifetime = 2f;
-                    count++;
-                }
+            {
+                int budget = VisibleZones[z] ? MistlandsFrostVisualRules.Ground(Tiers[z]) : 0;
+                for (int i = 0; i < budget; i++)
+                    SnowParticles[count++] = GroundCache[z * MistlandsFrostVisualRules.GroundNear + (budget == 32 ? i * 2 : i)];
+            }
             Flakes.SetParticles(SnowParticles, count);
+            GroundDirty = false; NextGroundRefresh = Time.time + 10f;
         }
-
-        private void DrawAirborneSnow(int zones)
+        private void PrimeAir(int zones)
         {
-            if (AirborneSnow == null) return;
-            int count = 0;
             for (int z = 0; z < zones; z++)
-                for (int i = 0; i < AirbornePerZone; i++)
-                {
-                    float age = Mathf.Repeat(Time.time * .19f + i * .618034f + z * .137f, 1f);
-                    float radial = 1.85f * Mathf.Sqrt((i + .5f) / AirbornePerZone);
-                    float angle = i * 2.39996f + Time.time * (.22f + (i % 5) * .025f);
-                    float drift = Mathf.Sin(Time.time * .55f + i * .71f + z) * .12f;
-                    AirborneParticles[count].position = Points[z] + new Vector3(
-                        Mathf.Cos(angle) * radial + drift,
-                        .24f + (1f - age) * 1.7f,
-                        Mathf.Sin(angle) * radial);
-                    AirborneParticles[count].velocity = new Vector3(-Mathf.Sin(angle) * .12f, .08f, Mathf.Cos(angle) * .12f);
-                    AirborneParticles[count].startSize = .044f + (i % 4) * .008f;
-                    AirborneParticles[count].startColor = new Color(.84f, .92f, 1f, .26f + .18f * Mathf.Sin(age * Mathf.PI));
-                    AirborneParticles[count].randomSeed = (uint)(i + 1 + z * AirbornePerZone);
-                    AirborneParticles[count].startLifetime = 5f;
-                    AirborneParticles[count].remainingLifetime = 5f * (1f - age);
-                    count++;
-                }
-            AirborneSnow.SetParticles(AirborneParticles, count);
+            {
+                int count = VisibleZones[z] ? MistlandsFrostVisualRules.Air(Tiers[z]) : 0;
+                for (int i = 0; i < count; i++) EmitAir(z, .25f + (i + .5f) / count * 3.75f);
+            }
         }
-
+        private void EmitAir(int zone, float life)
+        {
+            int sample = AirSerial[zone]++ % AirOffsets.Length;
+            // Deterministic cosmetic samples; never use gameplay UnityEngine.Random.
+            var emit = new ParticleSystem.EmitParams
+            {
+                position = Points[zone] + AirOffsets[sample] + Vector3.up * (.24f + life * .5f),
+                velocity = AirVelocity[sample], startLifetime = life,
+                startSize = .044f + (sample % 4) * .008f,
+                startColor = new Color(.84f, .92f, 1f, .38f), randomSeed = (uint)(sample + 1 + zone * AirOffsets.Length)
+            };
+            AirborneSnow.Emit(emit, 1);
+        }
         private void Project(int index, Vector3 point, float alpha, int mask)
         {
             Vector3 normal = Vector3.up;

@@ -18,8 +18,29 @@ namespace ValheimMastery
             internal CookingFermenterReceipts.Output Receipt;
             internal CookingProductRecord NativeSource;
             internal int Next;
+            internal bool Traced;
         }
         [ThreadStatic] private static Context Current;
+        private static int TraceRemaining=16;
+        private static void TraceProduct(Context context,ItemDrop.ItemData item)
+        {
+            if(context==null || context.Traced || TraceRemaining<=0)return;
+            context.Traced=true;TraceRemaining--;
+            try
+            {
+                var source=context.NativeSource ?? CookingProductRecord.Decode(context.Receipt.Source);
+                source.Data.TryGetValue(CookingProductIdentity.VersionKey,out string sourceVersion);
+                source.Data.TryGetValue(Cooking35Service.CookMasteryKey,out string sourceTier);
+                item.m_customData.TryGetValue(CookingProductIdentity.VersionKey,out string bottleVersion);
+                item.m_customData.TryGetValue(Cooking35Service.CookMasteryKey,out string bottleTier);
+                MasteryPlugin.Log.LogInfo("[CookingMeadTrace] source="+source.Prefab+" version="+(sourceVersion??"none")+
+                    " tier="+(sourceTier??"none")+" authorPresent="+(source.Author!=0)+
+                    " bottle="+TierDatabase.ItemKey(item)+" version="+(bottleVersion??"none")+
+                    " tier="+(bottleTier??"none")+" authorPresent="+(item.m_crafterID!=0)+
+                    " authoredMastery="+CookingMeadTiming.HasAuthoredMastery(item));
+            }
+            catch { } // Diagnostic failure cannot affect a physical result.
+        }
         private sealed class NativeBatch
         { internal int InputHash; internal CookingProductRecord Source; internal bool Accepted; }
         private static readonly ConditionalWeakTable<Fermenter,NativeBatch> NativeBatches=new ConditionalWeakTable<Fermenter,NativeBatch>();
@@ -78,7 +99,12 @@ namespace ValheimMastery
         }
         private static void SaveReleases(Fermenter f,Dictionary<string,ReleaseProof> rows)=>f.m_nview.GetZDO().Set(ReleasesKey,string.Join(";",rows.OrderBy(pair=>pair.Key,StringComparer.Ordinal).Select(pair=>pair.Key+":"+pair.Value.Count+":"+pair.Value.Mask)));
         internal static bool CleanupCapacity(Fermenter f)=>Releases(f).Count<128;
-        internal static bool Removable(Fermenter f)
+        internal static bool Removable(Fermenter f)=>ProtectedStateAllows(f,false);
+        // Reusing an empty station does not destroy its earned XP or cleanup
+        // history. The protocol separately reserves bounded XP/output capacity.
+        internal static bool CanAcceptInput(Fermenter f)=>f?.m_nview?.IsValid()==true &&
+            f.GetContent()==0 && ProtectedStateAllows(f,true);
+        private static bool ProtectedStateAllows(Fermenter f,bool input)
         {
             if(f?.m_nview?.IsValid()!=true)return true;
             try
@@ -86,14 +112,15 @@ namespace ValheimMastery
                 // Earned XP is stored on this physical station until exact ACK.
                 // Read native evidence directly: non-owner UI must also protect it.
                 var zdo=f.m_nview.GetZDO();
-                if(MeadXpOutbox.Read(zdo.GetString(MeadXpOutbox.Key,"")).Count>0 ||
+                if(MeadXpOutbox.Read(zdo.GetString(MeadXpOutbox.Key,"")).Count>0 && !input ||
                     MeadXpOutbox.ReadDeferred(zdo.GetString(MeadXpOutbox.DeferredLoadKey,""),2)!=null ||
                     MeadXpOutbox.ReadDeferred(zdo.GetString(MeadXpOutbox.DeferredCompletionKey,""),3)!=null)return false;
                 long serial=zdo.GetLong("valheim_mastery.mead_xp.serial",0),
                     pendingSerial=zdo.GetLong("valheim_mastery.mead_xp.tap_serial",0),
                     completed=zdo.GetLong("valheim_mastery.mead_xp.completed_serial",0);
                 if(serial<0 || pendingSerial<0 || completed<0 || pendingSerial>serial || completed>serial || pendingSerial>completed)return false;
-                var pending=Pending(f);if(pending!=null && !pending.Released || Releases(f).Count>0)return false;
+                var pending=Pending(f);if(pending!=null && !pending.Released ||
+                    (input?Releases(f).Count>=128:Releases(f).Count>0))return false;
                 foreach(string actor in f.m_nview.GetZDO().GetString("vm.cooking.fermenter.actors_v1","").Split(new[]{';'},StringSplitOptions.RemoveEmptyEntries))
                 {
                     var row=CookingFermenterReceipts.DecodeInput(f.m_nview.GetZDO().GetString(CookingFermenterReceipts.ActorPrefix+actor,""));
@@ -203,6 +230,7 @@ namespace ValheimMastery
                 Current.NativeSource.Apply(drop.m_itemData);
                 drop.Save();
             }
+            TraceProduct(Current,drop.m_itemData);
         }
         internal static bool Held(ItemDrop drop)
         {

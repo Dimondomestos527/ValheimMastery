@@ -13,7 +13,7 @@ namespace ValheimMastery
         private const string RpcName="VM_CookingProducerV2", JournalKey="vm.cooking.input.journal_v2", CounterKey="vm.cooking.input.sequence_v2";
         private enum Message { Hello, HelloReply, Offer, Reserved, Commit, Result, Query, Cancel, Tap }
         private sealed class Client
-        { internal Fermenter Station; internal ItemDrop.ItemData Item; internal CookingFermenterReceipts.Input Receipt; internal string Token, ItemBytes, BeforeBytes, AfterBytes; internal bool Debited, Persisted, OwnerRouted, Refunded; internal float Last, Started; }
+        { internal Fermenter Station; internal ItemDrop.ItemData Item; internal CookingFermenterReceipts.Input Receipt; internal string Token, ItemBytes, BeforeBytes, AfterBytes; internal bool Debited, Recovered, OwnerRouted, Refunded; internal float Last, Started; }
         private sealed class NativeProbe
         {internal Fermenter Station;internal ItemDrop.ItemData Item;internal long Actor,Owner;internal string Nonce;internal float Started,Last;}
         private sealed class NativeOwnerProof {internal long Owner;internal float At;}
@@ -319,7 +319,8 @@ namespace ValheimMastery
                     if(old!=null && old.State==CookingFermenterReceipts.Phase.Reserved && old.Deadline<Now)
                     {old.State=CookingFermenterReceipts.Phase.Rejected;Save(zdo,old);}
                     var output=CookingFermenterOutput.Pending(f);
-                    var phase=CookingFermenterReceipts.Reserve(old,request,f.GetContent()==0 && CookingFermenterOutput.Removable(f) && (output==null || output.Released),Capacity(f,2),Now);
+                    bool inputSafe=CookingFermenterOutput.CanAcceptInput(f),capacity=Capacity(f,2);
+                    var phase=CookingFermenterReceipts.Reserve(old,request,inputSafe && (output==null || output.Released),capacity,Now);
                     if(old?.Same(request)==true){Reply(rpc,old.State==CookingFermenterReceipts.Phase.Reserved?Message.Reserved:Message.Result,f,old,saved);return;}
                     if(old!=null && request.Sequence<=old.Sequence){Trace("offer:stale-sequence");return;}
                     // One reservation per station: all actor rows are bounded and persisted.
@@ -337,7 +338,7 @@ namespace ValheimMastery
                         zdo.Set("vm.cooking.fermenter.actors_v1",string.Join(";",actors.Concat(new[]{actorName})));
                     }
                     request.State=phase;request.Deadline=Now+TimeSpan.FromSeconds(15).Ticks;Save(zdo,request);
-                    Trace("offer:"+phase);Reply(rpc,phase==CookingFermenterReceipts.Phase.Reserved?Message.Reserved:Message.Result,f,request,saved);return;
+                    Trace("offer:"+phase+" inputSafe="+inputSafe+" capacity="+capacity);Reply(rpc,phase==CookingFermenterReceipts.Phase.Reserved?Message.Reserved:Message.Result,f,request,saved);return;
                 }
                 if(mode!=Message.Commit || old?.Same(request)!=true)return;
                 if(old.State==CookingFermenterReceipts.Phase.Accepted || old.State==CookingFermenterReceipts.Phase.Rejected)
@@ -388,6 +389,17 @@ namespace ValheimMastery
             state.Token=token;
             Player player=Player.m_localPlayer;
             if(player==null || player.GetPlayerID()!=state.Receipt.Actor)return;
+            if(state.Recovered)
+            {
+                // Ordinary native saves may capture this RAM journal before or
+                // after debit. Restored state is never proof for inventory replay.
+                Trace("recovery:"+receipt.State+":no-inventory-replay");
+                if(receipt.State==CookingFermenterReceipts.Phase.Accepted || receipt.State==CookingFermenterReceipts.Phase.Rejected)
+                {player.m_customData.Remove(Journal);Pending=null;return;}
+                if(receipt.State==CookingFermenterReceipts.Phase.Reserved)
+                    Send(Message.Cancel,state.Station,state.Receipt,token);
+                return; // Committing/Uncertain remains fail-closed, query only.
+            }
             if(mode==Message.Reserved && !state.Debited)
             {
                 if(player.IsDead() || player.IsTeleporting() || state.Station==null ||
@@ -405,15 +417,15 @@ namespace ValheimMastery
                 state.AfterBytes=InventoryBytes(expected);WriteJournal(state,false);
                 if(!player.GetInventory().RemoveOneItem(state.Item))
                 {player.m_customData.Remove(Journal);Send(Message.Cancel,state.Station,state.Receipt,token);return;}
-                state.Debited=true;WriteJournal(state,true);CommitSaved(state);return;
+                state.Debited=true;CommitLive(state);return;
             }
-            if(mode==Message.Reserved && state.Debited){CommitSaved(state);return;}
+            if(mode==Message.Reserved && state.Debited){CommitLive(state);return;}
             if(mode!=Message.Result)return;
             Trace("client-result:"+receipt.State);
             if(receipt.State==CookingFermenterReceipts.Phase.Reserved)
-            {if(state.Debited)CommitSaved(state);else Send(Message.Cancel,state.Station,state.Receipt,token);return;}
+            {if(state.Debited)CommitLive(state);else Send(Message.Cancel,state.Station,state.Receipt,token);return;}
             if(receipt.State==CookingFermenterReceipts.Phase.Accepted)
-            {player.m_customData.Remove(Journal);CookingCharacterCheckpoint.Persist(player);Pending=null;return;}
+            {player.m_customData.Remove(Journal);Pending=null;return;}
             if(receipt.State!=CookingFermenterReceipts.Phase.Rejected)return; // Unknown acceptance never authorizes blind refund.
             if(state.Debited)
             {
@@ -425,27 +437,21 @@ namespace ValheimMastery
                 }
                 if(state.OwnerRouted)
                 {
-                    WriteJournal(state,true); // Refund flag + inventory saved in the same profile snapshot.
-                    if(!CookingCharacterCheckpoint.Persist(player))return;
+                    WriteJournal(state,true); // Live refund bookkeeping; no profile save is forced.
                 }
             }
-            player.m_customData.Remove(Journal);CookingCharacterCheckpoint.Persist(player);Pending=null;
+            player.m_customData.Remove(Journal);Pending=null;
         }
-        private static void CommitSaved(Client state)
+        private static void CommitLive(Client state)
         {
-            if(!state.Debited)return;
-            if(state.OwnerRouted && state.Refunded)
-            {
-                WriteJournal(state,true);
-                if(!CookingCharacterCheckpoint.Persist(Player.m_localPlayer))return;
-                Player.m_localPlayer.m_customData.Remove(Journal);
-                CookingCharacterCheckpoint.Persist(Player.m_localPlayer);Pending=null;return;
-            }
-            // The native profile snapshot contains exact debit and journal together.
-            // A failed writer keeps escrow and never permits server acceptance.
-            if(!state.Persisted){WriteJournal(state,true);state.Persisted=CookingCharacterCheckpoint.Persist(Player.m_localPlayer);}
-            Trace(state.Persisted?"debit:durable-commit":"debit:persistence-pending");
-            if(state.Persisted)Send(Message.Commit,state.Station,state.Receipt,state.Token);
+            if(!state.Debited || state.Recovered)return;
+            // Explicit performance policy: live debit is authoritative locally;
+            // ordinary native saves alone persist character state. No cloud wait.
+            WriteJournal(state,true);
+            if(state.Refunded)
+            {Player.m_localPlayer.m_customData.Remove(Journal);Pending=null;return;}
+            Trace("debit:live-commit");
+            Send(Message.Commit,state.Station,state.Receipt,state.Token);
         }
         internal static bool Begin(Fermenter f,Humanoid user,ItemDrop.ItemData item)
         {
@@ -489,7 +495,7 @@ namespace ValheimMastery
         {var inv=new Inventory("Cooking input escrow",null,1,1);inv.Load(new ZPackage(Convert.FromBase64String(bytes)));return inv.GetAllItems().Single();}
         private static void WriteJournal(Client state,bool debited)
         {
-            var data=new ZPackage();data.Write(state.OwnerRouted?3:2);data.Write(ZNet.instance.GetWorldUID());data.Write(state.Token);
+            var data=new ZPackage();data.Write(state.OwnerRouted?4:2);data.Write(ZNet.instance.GetWorldUID());data.Write(state.Token);
             data.Write(CookingFermenterReceipts.Encode(state.Receipt));data.Write(state.ItemBytes);data.Write(state.BeforeBytes??"");data.Write(state.AfterBytes??"");data.Write(debited);if(state.OwnerRouted)data.Write(state.Refunded);
             Player.m_localPlayer.m_customData[Journal]=Convert.ToBase64String(data.GetArray());
         }
@@ -512,20 +518,15 @@ namespace ValheimMastery
                 try
                 {
                     var data=new ZPackage(Convert.FromBase64String(saved));
-                    int schema=data.ReadInt();if((schema!=2 && schema!=3) || data.ReadLong()!=net.GetWorldUID())return;
-                    string token=data.ReadString();var row=CookingFermenterReceipts.DecodeInput(data.ReadString());string bytes=data.ReadString(),before=data.ReadString(),after=data.ReadString();bool debited=data.ReadBool();bool refunded=schema==3 && data.ReadBool();
+                    int schema=data.ReadInt();if((schema!=2 && schema!=3 && schema!=4) || data.ReadLong()!=net.GetWorldUID())return;
+                    string token=data.ReadString();var row=CookingFermenterReceipts.DecodeInput(data.ReadString());string bytes=data.ReadString(),before=data.ReadString(),after=data.ReadString();bool debited=data.ReadBool();bool refunded=schema>=3 && data.ReadBool();
                     if(data.GetPos()!=data.Size() || row==null || row.Actor!=player.GetPlayerID())return;
-                    if(!debited)
-                    {
-                        string current=InventoryBytes(player.GetInventory());
-                        if(current==after)debited=true;
-                        else if(current!=before)throw new InvalidOperationException("Prepared input has ambiguous debit proof; reconciliation required.");
-                    }
+                    // No before/after inventory inference for restored journals:
+                    // stale/native/cloud snapshots have no per-input durability.
                     if(MeadStationIdentity.TryGet(f.m_nview.GetZDO(),net.GetWorldUID(),out string found) && found==token)
-                        // Explicit v2 transport adoption: retain the same station token,
-                        // actor/request/source/sequence/XP receipt. No new Offer or debit.
-                        // The compatible current owner alone reconciles/commits that row.
-                        Pending=new Client{Station=f,Token=token,Receipt=row,ItemBytes=bytes,BeforeBytes=before,AfterBytes=after,Debited=debited,Persisted=debited,OwnerRouted=true,Refunded=refunded,Last=-10,Started=Time.time};
+                        // Retain exact identity for query/cancel only. No inventory replay,
+                        // Commit or refund is authorized by a restored journal.
+                        Pending=new Client{Station=f,Token=token,Receipt=row,ItemBytes=bytes,BeforeBytes=before,AfterBytes=after,Debited=debited,Recovered=true,OwnerRouted=true,Refunded=refunded,Last=-10,Started=Time.time};
                 }
                 catch(Exception error){Fault(error);}
             }
@@ -535,7 +536,7 @@ namespace ValheimMastery
             if(Pending!=null && !Pending.Debited && !player.m_customData.ContainsKey(Journal) && Time.time-Pending.Started>6f)
             {Trace("retry:predebit-timeout-cancel");Send(Message.Cancel,Pending.Station,Pending.Receipt,Pending.Token);Pending=null;}
             if(Pending!=null && (Pending.OwnerRouted?NativeSessionReady():Ready) && Time.time-Pending.Last>=2f)
-            {Pending.Last=Time.time;if(Pending.Debited)CommitSaved(Pending);else Send(Message.Query,Pending.Station,Pending.Receipt,Pending.Token);}
+            {Pending.Last=Time.time;if(Pending.Debited && !Pending.Recovered)CommitLive(Pending);else Send(Message.Query,Pending.Station,Pending.Receipt,Pending.Token);}
         }
     }
     [HarmonyPatch(typeof(NetworkSync),nameof(NetworkSync.Register))]
@@ -635,3 +636,4 @@ namespace ValheimMastery
     }
 
 }
+

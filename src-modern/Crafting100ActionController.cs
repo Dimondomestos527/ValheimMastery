@@ -62,7 +62,7 @@ namespace ValheimMastery
                     else action.ItemIdentity = "";
                 }
                 if (!string.IsNullOrEmpty(action.ItemIdentity) && !Guid.TryParseExact(action.ItemIdentity, "N", out _)) return null;
-                var idol = player.GetFirstRequiredItem(player.GetInventory(), recipe, item.m_quality + 1, out _, out _, 1);
+                var idol = Crafting100ActionApplication.SelectRequiredIdol(player.GetInventory(), recipe, item.m_quality + 1, item);
                 if (idol != null) { action.Idol = TierDatabase.ItemKey(idol); action.IdolQuality = idol.m_quality; }
             }
             return action;
@@ -86,6 +86,31 @@ namespace ValheimMastery
             var action = Build(gui, player, false);
             return action != null && Crafting100PermitService.CanStart(action.Kind) &&
                 LocalValid(player, action, gui.m_selectedRecipe.Recipe, gui.m_selectedRecipe.ItemData, false);
+        }
+        // Read-only snapshot for explicitly armed diagnostics, including disabled buttons.
+        // CanStart remains the sole admission predicate; this never assigns item identity.
+        internal static string StartRefusalReason(InventoryGui gui, Player player)
+        {
+            if (!Visible(player)) return "perk-or-client-unavailable";
+            if (gui == null) return "gui-missing";
+            if (gui.m_currentContainer != null) return "container-open";
+            if (gui.m_craftTimer >= 0) return "native-timer-busy";
+            if (Current != null) return "special-intent-busy";
+            if (Busy) return "receipt-or-workshop-busy";
+            if (!Crafting100PermitService.Ready) return "permit-unconfirmed";
+            var action = Build(gui, player, false);
+            if (action == null) return "recipe-or-identity-invalid";
+            if (!Crafting100PermitService.CanStart(action.Kind)) return "permit-or-cooldown";
+            var target = gui.m_selectedRecipe.ItemData;
+            if (action.Kind == 2)
+            {
+                if (target == null) return "forge-target-missing";
+                if (!player.GetInventory().ContainsItem(target)) return "forge-target-not-in-inventory";
+                if (Crafting100ForgeItemRules.Used(target.m_customData)) return "forge-target-already-used";
+                if (!Crafting100ForgeItemRules.CanUpgrade(target.m_quality, target.m_customData)) return "forge-target-quality-invalid";
+                if (string.IsNullOrEmpty(action.Idol)) return "forge-recipe-idol-unavailable";
+            }
+            return LocalValid(player, action, gui.m_selectedRecipe.Recipe, target, false) ? "ready" : "local-validation";
         }
         internal static void Begin(InventoryGui gui)
         {
@@ -126,6 +151,7 @@ namespace ValheimMastery
             if (gui != null && gui.m_craftRecipe == intent.Recipe && gui.m_craftTimer >= 0)
                 gui.OnCraftCancelPressed();
         }
+        internal static bool HasIntent(InventoryGui gui) => Current != null && ReferenceEquals(Current.Gui, gui);
         internal static bool NativeStart(InventoryGui gui)
         {
             bool allowed = Current?.Gui != gui;
@@ -174,11 +200,11 @@ namespace ValheimMastery
             if (action.Kind == 1) return target == null && GoldMasterworkRules.StationTypeMatches(
                 recipe.GetRequiredStation(1)?.m_name, station?.m_name, station?.m_upgrader == true, station?.m_showBasicRecipies == true) &&
                 player.GetInventory().CanAddItem(recipe.m_item.gameObject, 1);
-            if (action.Kind != 2 || station?.m_upgrader != true || !GoldCraftingService.HoldsHammer(player) || target == null ||
+            if (action.Kind != 2 || station?.m_upgrader != true || target == null ||
                 !player.GetInventory().ContainsItem(target) || target.m_quality != action.OldQuality || target.m_variant != action.Variant ||
                 !Crafting100ForgeItemRules.CanUpgrade(target.m_quality, target.m_customData)) return false;
             if (identity && (!target.m_customData.TryGetValue(Crafting100ActionApplication.IdentityKey, out var key) || key != action.ItemIdentity)) return false;
-            var idol = player.GetFirstRequiredItem(player.GetInventory(), recipe, action.OldQuality + 1, out _, out _, 1);
+            var idol = Crafting100ActionApplication.SelectRequiredIdol(player.GetInventory(), recipe, action.OldQuality + 1, target);
             return idol != null && TierDatabase.ItemKey(target) == action.Prefab && TierDatabase.ItemKey(idol) == action.Idol &&
                 idol.m_quality == action.IdolQuality && idol.m_stack >= 1;
         }
@@ -197,7 +223,8 @@ namespace ValheimMastery
         {
             var recipe = RecipeFor(action);
             if (recipe?.m_item?.m_itemData == null || !Eligible(recipe.m_item.m_itemData)) return 0;
-            if (action.Kind == 1) return action.OldQuality == 0 && action.NewQuality == 5 ? PerfectDuration(recipe) : 0;
+            // Historical import predates the armor discount; do not retime old receipts.
+            if (action.Kind == 1) return action.OldQuality == 0 && action.NewQuality == 5 ? PerfectDuration(recipe, true) : 0;
             if (action.Kind != 2 || action.OldQuality < 1 || action.OldQuality > 9997 || action.NewQuality != action.OldQuality + 3) return 0;
             foreach (var requirement in recipe.m_resources ?? Array.Empty<Piece.Requirement>())
                 if (requirement?.m_upgraderResource == true && requirement.m_resItem?.gameObject.name == action.Idol &&
@@ -228,7 +255,16 @@ namespace ValheimMastery
                 InventoryGui.instance.m_selectedRecipe.Recipe == recipe && InventoryGui.instance.m_selectedRecipe.ItemData == target &&
                 LocalValid(player, action, recipe, target, true);
         }
-        private static double PerfectDuration(Recipe recipe) { int tier = RecipeTier(recipe); return tier == 0 ? 0 : Crafting100CooldownRules.PerfectCraftSeconds(tier); }
+        private static double PerfectDuration(Recipe recipe, bool historical = false)
+        {
+            int tier = RecipeTier(recipe);
+            if (tier == 0) return 0;
+            if (historical) return Crafting100CooldownRules.PerfectCraftSeconds(tier);
+            var type = recipe.m_item.m_itemData.m_shared.m_itemType;
+            bool armor = type == ItemDrop.ItemData.ItemType.Helmet || type == ItemDrop.ItemData.ItemType.Chest ||
+                type == ItemDrop.ItemData.ItemType.Legs || type == ItemDrop.ItemData.ItemType.Shoulder;
+            return Crafting100CooldownRules.PerfectCraftSeconds(tier, armor);
+        }
         private static double ServerDuration(WorkshopActor actor, GoldAction action, bool environment)
         {
             if (!MasteryPlugin.Settings.Enabled.Value || actor?.Available != true || actor.IsDead() || actor.IsTeleporting() ||
@@ -246,7 +282,7 @@ namespace ValheimMastery
                 (environment && !WorkshopStationProof.Usable(entry.Data, station))) return 0;
             if (action.Kind == 1) return GoldMasterworkRules.StationTypeMatches(required?.m_name, station.m_name,
                 station.m_upgrader, station.m_showBasicRecipies) ? PerfectDuration(recipe) : 0;
-            if (action.Kind != 2 || !station.m_upgrader || !GoldCraftingService.ServerHammer(actor)) return 0;
+            if (action.Kind != 2 || !station.m_upgrader) return 0;
             foreach (var requirement in recipe.m_resources ?? Array.Empty<Piece.Requirement>())
                 if (requirement?.m_upgraderResource == true && requirement.m_resItem?.gameObject.name == action.Idol &&
                     requirement.GetAmount(action.OldQuality + 1) > 0 && action.IdolQuality >= 0 &&
@@ -284,6 +320,7 @@ namespace ValheimMastery
     internal static class Crafting100NativeCraftPatch
     { [HarmonyPriority(Priority.First + 200)] private static bool Prefix(InventoryGui __instance, Player player) => Crafting100ActionController.Intercept(__instance, player); }
 }
+
 
 
 

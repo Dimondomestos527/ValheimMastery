@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -9,7 +9,7 @@ namespace ValheimMastery
 {
     internal static class BloodMagicCombatXp
     {
-        private const string Rpc = "VM_BloodCombatXpV1", SequenceKey = "vm.bloodxp.seq",
+        private const string Rpc = "VM_BloodCombatXpV2", SequenceKey = "vm.bloodxp.seq",
             ShieldAuthorKey = "vm.bloodxp.shield.author", ShieldCasterKey = "vm.bloodxp.shield.caster",
             CapacityKey = "vm.bloodxp.shield.capacity", FractionKey = "vm.bloodxp.shield.fraction",
             WeightedKey = "vm.bloodxp.shield.weight", ReceiptKey = "valheim_mastery.bloodxp.receipts.v1";
@@ -38,6 +38,7 @@ namespace ValheimMastery
             internal long Sender, World, Author, Serial, Stamp;
             internal ZDOID Source, Caster;
             internal int Kind;
+            internal string Target = "action";
             internal float Raw, Tier, Expires;
         }
         private sealed class RecipientState
@@ -50,7 +51,8 @@ namespace ValheimMastery
         private static readonly ConditionalWeakTable<Player, RecipientState> Recipients = new ConditionalWeakTable<Player, RecipientState>();
         private static bool Enabled => MasteryPlugin.Settings.Enabled.Value;
         private static bool IsSkeleton(Character source) => source?.m_nview?.IsValid() == true && source.IsTamed() &&
-            source.m_nview.GetZDO().GetPrefab() == "Skeleton_Friendly".GetStableHashCode();
+            (source.m_nview.GetZDO().GetPrefab() == "Skeleton_Friendly".GetStableHashCode() ||
+             source.m_nview.GetZDO().GetPrefab() == "Skeleton_Friendly_Archer".GetStableHashCode());
         internal static bool Enemy(Character source, Character target) => source != null && target != null &&
             target != source && !target.IsDead() && !target.IsPlayer() && !target.IsTamed() && BaseAI.IsEnemy(source, target);
         internal struct AttackFrame { internal bool Captured; internal AttackScope Previous; }
@@ -79,11 +81,13 @@ namespace ValheimMastery
             Tameable tameable = source.GetComponent<Tameable>();
             if (tameable == null || tameable.m_levelUpOwnerSkill != Skills.SkillType.BloodMagic) return true;
             ZDOID caster = source.m_nview.GetZDO().GetZDOID(SkeletonCasterKey);
-            if (caster == ZDOID.None) caster = FindAuthor(author);
+            ZDOID current = FindAuthor(author);
+            if (current != ZDOID.None && current != caster)
+            { caster = current; source.m_nview.GetZDO().Set(SkeletonCasterKey, caster); }
             if (caster != ZDOID.None) Send(source, caster, author, 1, factor * tameable.m_levelUpFactor, scope.TargetTier);
             return false;
         }
-        private static ZDOID FindAuthor(long author)
+        internal static ZDOID FindAuthor(long author)
         {
             if (author == 0) return ZDOID.None;
             if (Player.m_localPlayer?.GetPlayerID() == author) return Player.m_localPlayer.GetZDOID();
@@ -146,6 +150,9 @@ namespace ValheimMastery
                 PerkRuntimeService.IsPerkGenerated(hit) || !Enemy(shield.m_character, hit.GetAttacker())) return;
             ShieldState state = Shield(shield);
             if (state == null) return;
+            ZDOID current = FindAuthor(state.Author);
+            if (current != ZDOID.None && current != state.Caster)
+            { state.Caster = current; shield.m_character.m_nview.GetZDO().Set(ShieldCasterKey, current); }
             BloodMagicXpRules.Credit credit = state.Credit.Add(incoming, remaining, TierDatabase.GetTargetTier(hit.GetAttacker()));
             PersistCredit(shield.m_character.m_nview.GetZDO(), state);
             if (credit.Raw > 0f) Send(shield.m_character, state.Caster, state.Author, 2, credit.Raw, credit.TargetTier);
@@ -167,13 +174,14 @@ namespace ValheimMastery
             if (id == ZDOID.None || RequestedProofs.Count >= 8 || !RequestedProofs.Add(id)) return;
             ZDOMan.instance?.RequestZDO(id); // Global maximum32 unique requests/s, shared by both queues.
         }
-        private static void Send(Character source, ZDOID caster, long author, int kind, float raw, float tier)
+        private static void Send(Character source, ZDOID caster, long author, int kind, float raw, float tier) => SendStaff(source, caster, author, kind, raw, tier, "action");
+        internal static bool SendStaff(Character source, ZDOID caster, long author, int kind, float raw, float tier, string target)
         {
-            if (source.m_nview?.IsOwner() != true || caster == ZDOID.None || author == 0 || ZNet.instance == null || ZNet.instance.GetWorld() == null ||
-                !ValidValues(kind, raw, tier)) return;
+            if (source?.m_nview?.IsOwner() != true || caster == ZDOID.None || author == 0 || ZNet.instance == null || ZNet.instance.GetWorld() == null ||
+                !ValidValues(kind, raw, tier) || !StaffMagicXpRules.Target(target)) return false;
             EnsureSession();
             ZDO zdo = source.m_nview.GetZDO(); long serial = zdo.GetLong(SequenceKey, 0), issuer = zdo.GetOwner();
-            if (serial < 0 || serial == long.MaxValue) return;
+            if (serial < 0 || serial == long.MaxValue) return false;
             // Keep one previous owner interval so its already-issued reliable RPCs
             // remain verifiable after transfer. Neither issuer can mint future serials.
             if (zdo.GetLong(IssuerKey, 0) != issuer)
@@ -184,13 +192,15 @@ namespace ValheimMastery
             }
             zdo.Set(SequenceKey, ++serial);
             var value = new Delivery { Sender = issuer, World = SessionWorld, Source = source.GetZDOID(), Caster = caster,
-                Author = author, Serial = serial, Stamp = ZNet.instance.GetTime().Ticks, Kind = kind, Raw = raw, Tier = tier, Expires = Time.time + 10f };
-            if (!Dispatch(value) && Outgoing.Count < 64) Outgoing.Add(value);
+                Author = author, Serial = serial, Stamp = ZNet.instance.GetTime().Ticks, Kind = kind, Raw = raw, Tier = tier, Target = target, Expires = Time.time + 10f };
+            if (Dispatch(value)) return true;
+            if (Outgoing.Count >= 64) return false;
+            Outgoing.Add(value); return true;
         }
         private static bool Dispatch(Delivery value)
         {
             var data = new ZPackage(); data.Write(value.World); data.Write(value.Source); data.Write(value.Caster);
-            data.Write(value.Author); data.Write(value.Serial); data.Write(value.Stamp); data.Write(value.Kind); data.Write(value.Raw); data.Write(value.Tier);
+            data.Write(value.Author); data.Write(value.Serial); data.Write(value.Stamp); data.Write(value.Kind); data.Write(value.Raw); data.Write(value.Tier); data.Write(value.Target);
             Player local = Player.m_localPlayer;
             if (local != null && local.GetZDOID() == value.Caster && local.m_nview?.IsOwner() == true)
             { Receive(local, value.Sender, data); return true; }
@@ -211,20 +221,18 @@ namespace ValheimMastery
                 if (Time.time > value.Expires || value.World != SessionWorld || Dispatch(value)) Outgoing.RemoveAt(i);
             }
         }
-        private static bool ValidValues(int kind, float raw, float tier) => (kind == 1 || kind == 2) &&
-            BloodMagicXpRules.Finite(raw) && raw > 0f && raw <= (kind == 1 ? 1.5f : 1.000001f) &&
-            BloodMagicXpRules.Finite(tier) && tier >= 1f && tier <= 8f;
+        private static bool ValidValues(int kind, float raw, float tier) => StaffMagicXpRules.Valid(kind, raw, tier);
         private static RecipientState Recipient(Player player) => Recipients.GetValue(player, p => new RecipientState
         { Receipts = BloodMagicXpRules.Receipts.Import(p.m_customData.TryGetValue(ReceiptKey, out string saved) ? saved : "") });
         private static void Receive(Player player, long sender, ZPackage data)
         {
-            if (!Enabled || player != Player.m_localPlayer || player.m_nview?.IsOwner() != true || data == null || data.Size() > 128 || ZNet.instance == null || ZNet.instance.GetWorld() == null) return;
+            if (!Enabled || player != Player.m_localPlayer || player.m_nview?.IsOwner() != true || data == null || data.Size() > 512 || ZNet.instance == null || ZNet.instance.GetWorld() == null) return;
             try
             {
                 data.SetPos(0);
                 var value = new Delivery { Sender = sender, World = data.ReadLong(), Source = data.ReadZDOID(),
                     Caster = data.ReadZDOID(), Author = data.ReadLong(), Serial = data.ReadLong(), Stamp = data.ReadLong(),
-                    Kind = data.ReadInt(), Raw = data.ReadSingle(), Tier = data.ReadSingle(), Expires = Time.time + 10f };
+                    Kind = data.ReadInt(), Raw = data.ReadSingle(), Tier = data.ReadSingle(), Target = data.ReadString(), Expires = Time.time + 10f };
                 if (data.GetPos() != data.Size() || !Basic(player, value)) return;
                 RecipientState state = Recipient(player);
                 if (Ready(value)) Apply(player, state, value);
@@ -243,7 +251,7 @@ namespace ValheimMastery
             return value.World == ZNet.instance.GetWorldUID() && value.Caster == player.GetZDOID() &&
                 value.Author != 0 && value.Author == player.GetPlayerID() && value.Source != ZDOID.None && value.Serial > 0 &&
                 value.Stamp >= now - TimeSpan.TicksPerSecond * 10L && value.Stamp <= now + TimeSpan.TicksPerSecond &&
-                ValidValues(value.Kind, value.Raw, value.Tier);
+                ValidValues(value.Kind, value.Raw, value.Tier) && StaffMagicXpRules.Target(value.Target);
         }
         private static bool Ready(Delivery value)
         {
@@ -254,9 +262,12 @@ namespace ValheimMastery
             bool previous = source.GetLong(PreviousIssuerKey, 0) != 0 && source.GetLong(PreviousIssuerKey, 0) == value.Sender &&
                 value.Serial > source.GetLong(PreviousLowerKey, 0) && value.Serial <= boundary;
             if (!issuer && !previous) return false;
-            if (value.Kind == 1) return source.GetPrefab() == "Skeleton_Friendly".GetStableHashCode() &&
+            if (value.Kind == 1) return (source.GetPrefab() == "Skeleton_Friendly".GetStableHashCode() ||
+                source.GetPrefab() == "Skeleton_Friendly_Archer".GetStableHashCode()) &&
                 source.GetLong(SkeletonAuthorKey, 0) == value.Author;
-            return source.GetLong(ShieldAuthorKey, 0) == value.Author && source.GetZDOID(ShieldCasterKey) == value.Caster;
+            if (value.Kind == 2) return source.GetLong(ShieldAuthorKey, 0) == value.Author && source.GetZDOID(ShieldCasterKey) == value.Caster;
+            return StaffMagicXpContext.Proof(source, value.Kind, value.Author, value.Caster, value.World) &&
+                (value.Kind != StaffMagicXpRules.Roots || StaffMagicXpContext.RootProof(source, value.Raw));
         }
         private static void Apply(Player player, RecipientState state, Delivery value)
         {
@@ -265,8 +276,27 @@ namespace ValheimMastery
             if (!state.Receipts.Accept(key, value.Serial)) return;
             // Native direct Skills semantics: no additional Player-level rested/food
             // multiplier; the shared RaiseSkill hook and world skill rate run once.
-            using (ExperienceContext.BeginBloodCombat(player, value.Tier, value.Kind == 1 ? "StaffSkeleton" : "StaffShield"))
-                player.GetSkills().RaiseSkill(Skills.SkillType.BloodMagic, value.Raw);
+            if (value.Kind <= 2)
+            {
+                using (ExperienceContext.BeginBloodCombat(player, value.Tier, value.Kind == 1 ? "StaffSkeleton" : "StaffShield"))
+                    player.GetSkills().RaiseSkill(Skills.SkillType.BloodMagic, value.Raw);
+                return;
+            }
+            Skills.SkillType skill = StaffMagicXpRules.Skill(value.Kind);
+            if (PerkRuntimeService.GetActualSkillLevel(player, skill) >= 100f) return;
+            using (ExperienceContext.BeginStaffCombat(player, skill, StaffMagicXpRules.Staff(value.Kind), value.Tier, value.Target, value.Kind == StaffMagicXpRules.Spirit))
+            {
+                // Native direct AoE/return calls use Player modifiers; summoned/reaction
+                // credits use the established direct-Skills transport semantics.
+                StaffMagicXpContext.Frame previous = StaffMagicXpContext.Current;
+                try
+                {
+                    StaffMagicXpContext.Current = null;
+                    if (value.Kind >= 100 || value.Kind == StaffMagicXpRules.AhriReturn) player.RaiseSkill(skill, value.Raw);
+                    else player.GetSkills().RaiseSkill(skill, value.Raw);
+                }
+                finally { StaffMagicXpContext.Current = previous; }
+            }
         }
         internal static void Tick(Player player)
         {
@@ -323,6 +353,13 @@ namespace ValheimMastery
     }
     [HarmonyPatch(typeof(Attack), nameof(Attack.DoMeleeAttack))]
     internal static class BloodSkeletonXpMeleePatch
+    {
+        private static void Prefix(Attack __instance, out BloodMagicCombatXp.AttackFrame __state) => BloodMagicCombatXp.BeginAttack(__instance.m_character, out __state);
+        private static Exception Finalizer(BloodMagicCombatXp.AttackFrame __state, Exception __exception)
+        { if (__state.Captured) BloodMagicCombatXp.CurrentAttack = __state.Previous; return __exception; }
+    }
+    [HarmonyPatch(typeof(Attack), nameof(Attack.DoAreaAttack))]
+    internal static class BloodSkeletonXpAreaPatch
     {
         private static void Prefix(Attack __instance, out BloodMagicCombatXp.AttackFrame __state) => BloodMagicCombatXp.BeginAttack(__instance.m_character, out __state);
         private static Exception Finalizer(BloodMagicCombatXp.AttackFrame __state, Exception __exception)

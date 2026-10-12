@@ -6,9 +6,14 @@ namespace ValheimMastery
         internal const float ChargeSeconds = 3f, ChainRadius = 5f;
         internal const double FriendlySeconds = 15d, RootBoostSeconds = 15d;
         internal static int Steps(float held) => !float.IsFinite(held) || held <= 0f ? 0 : Math.Min(6, (int)Math.Floor(Math.Min(held, 3f) * 2f));
-        internal static int Fragments(int steps) => 12 + Math.Clamp(steps, 0, 6);
+        internal static int Fragments(int steps)
+        {
+            steps = Math.Clamp(steps, 0, 6);
+            // Half-second charge stages reach +60% before the full-charge jump.
+            return steps == 6 ? 24 : (int)Math.Ceiling(12d * (1d + .6d * steps / 5d));
+        }
         internal static float Damage(int steps) => 1f + Math.Clamp(steps, 0, 6) / 12f;
-        internal static float Radius(int steps) => 1f + Math.Clamp(steps, 0, 6) / 24f;
+        internal static float Radius(int steps) => 1f + Math.Clamp(steps, 0, 6) / 12f;
         internal static float Cost(float held) => 1f + .5f * Math.Clamp(float.IsFinite(held) ? held : 0f, 0f, 3f) / 3f;
         internal static long Until(long now, double seconds) => checked(now + (long)(seconds * TimeSpan.TicksPerSecond));
         internal static bool Active(long now, long until) => now > 0 && until > now;

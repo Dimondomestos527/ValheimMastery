@@ -115,8 +115,8 @@ namespace ValheimMastery
                 else if (status == Crafting100ButtonStatus.Unconfirmed)
                     tip.m_text = GoldUiLocalization.Text("The availability of this gift has not been confirmed yet.", "Доступність дару ще не підтверджено.");
                 else tip.m_text = forge ?
-                    GoldUiLocalization.Text("Guarantee +3 quality for one required idol, once per item. Independent 15-minute cooldown. Hold a Hammer.",
-                        "Гарантовано підвищити якість на 3 за один потрібний ідол, лише раз на предмет. Окреме відновлення: 15 хвилин. Тримай молот.") :
+                    GoldUiLocalization.Text("Guarantee +3 quality for one required idol, once per item. Independent 15-minute cooldown.",
+                        "Гарантовано підвищити якість на 3 за один потрібний ідол, лише раз на предмет. Окреме відновлення: 15 хвилин.") :
                     GoldUiLocalization.Text("Create one quality-5 item without recipe materials. Requires the usual station type, at any level. Cooldown depends on item tier.",
                         "Створити один предмет якості 5 без матеріалів рецепта. Потрібний звичайний тип станції будь-якого рівня. Час відновлення залежить від тіру виробу.");
                 if (forge && item?.m_customData != null && Crafting100ForgeItemRules.Used(item.m_customData))
@@ -171,9 +171,3 @@ namespace ValheimMastery
         private static void Prefix(InventoryGui __instance) => Crafting100ActionController.Cancel(__instance);
     }
 }
-
-
-
-
-
-

@@ -14,7 +14,8 @@ namespace ValheimMastery
         private static readonly FieldInfo NameInputField = AccessTools.Field(typeof(Minimap), "m_nameInput");
         private sealed class Capture
         {
-            internal Minimap Map; internal Vector3 Position; internal string Label;
+            internal Minimap Map; internal Vector3 Position; internal string Label, Category;
+            internal Sprite Sprite;
             internal Minimap.PinData Pin; internal bool Ambiguous;
         }
         private sealed class Entry { internal string Name, Category; internal Sprite Sprite, NativeSprite; internal float RetryAt; }
@@ -71,7 +72,7 @@ namespace ValheimMastery
             foreach (var pair in Owned)
                 if (pair.Key.m_name == pair.Value.Name && pair.Value.Category == category &&
                     Utils.DistanceXZ(pair.Key.m_pos, position) < 1f) return false;
-            var capture = new Capture { Map = map, Position = position, Label = label };
+            var capture = new Capture { Map = map, Position = position, Label = label, Category = category };
             _capture = capture;
             bool created;
             try { created = map.DiscoverLocation(position, Minimap.PinType.Icon4, label, false); }
@@ -89,7 +90,7 @@ namespace ValheimMastery
                 return true; // Native success stops the scan; cosmetic proof is a separate boundary.
             }
             pin.m_name = encoded;
-            Owned[pin] = new Entry { Name = encoded, Category = category, NativeSprite = pin.m_icon };
+            Owned[pin] = new Entry { Name = encoded, Category = category, Sprite = capture.Sprite, RetryAt = Time.unscaledTime + 1f, NativeSprite = pin.m_icon };
             // Existing label object is refreshed without a global name or icon override.
             if (pin.m_NamePinData?.PinNameText != null)
                 pin.m_NamePinData.PinNameText.text = label;
@@ -101,7 +102,25 @@ namespace ValheimMastery
             if (context == null || context.Map != map || pin == null || pin.m_name != context.Label ||
                 pin.m_type != Minimap.PinType.Icon4 || (pin.m_pos - context.Position).sqrMagnitude > .0001f) return;
             if (context.Pin != null) context.Ambiguous = true;
-            else context.Pin = pin;
+            else
+            {
+                context.Pin = pin;
+                // Resolve once inside this synchronous native discovery; both consumers
+                // use this exact reference. Missing assets retain native fallback.
+                try { context.Sprite = _icon != null ? _icon(context.Category) : ApprovedUiAssetBank.Run70(context.Category); }
+                catch { }
+            }
+        }
+        internal static void NotificationIcon(Character actor, MessageHud.MessageType type, string text, ref Sprite icon)
+        {
+            var context = _capture;
+            var pin = context?.Pin;
+            if (context == null || context.Ambiguous || context.Sprite == null || pin == null ||
+                actor != Player.m_localPlayer || type != MessageHud.MessageType.TopLeft ||
+                !Current(context.Map) || context.Map != Minimap.instance ||
+                pin.m_name != context.Label || pin.m_type != Minimap.PinType.Icon4 || !pin.m_save || pin.m_ownerID != 0 ||
+                text != "$msg_pin_added: " + context.Label) return;
+            icon = context.Sprite;
         }
         internal static void Reload(Minimap map)
         {
@@ -155,6 +174,12 @@ namespace ValheimMastery
         { foreach (var pair in Owned) RestoreIcon(pair.Key, pair.Value); }
         internal static void Clear()
         { RestoreOwnedIcons(); Owned.Clear(); Stale.Clear(); _capture = null; _map = null; _session = null; _player = null; _world = 0; }
+    }
+    [HarmonyPatch(typeof(Character), nameof(Character.Message), new[] { typeof(MessageHud.MessageType), typeof(string), typeof(int), typeof(Sprite), typeof(bool) })]
+    internal static class Run70DiscoveryNotificationIconPatch
+    {
+        private static void Prefix(Character __instance, MessageHud.MessageType __0, string __1, ref Sprite __3)
+            => Run70MapMarkerPresentation.NotificationIcon(__instance, __0, __1, ref __3);
     }
     [HarmonyPatch(typeof(Minimap), "AddPin")]
     internal static class Run70MapMarkerCapturePatch

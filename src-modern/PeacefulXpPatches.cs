@@ -19,7 +19,7 @@ namespace ValheimMastery
             float value = ResourceValue(recipe.m_resources, quality);
             string item = recipe.m_item != null ? TierDatabase.ItemKey(recipe.m_item.m_itemData) : "unknown";
             string key = (upgrade ? "upgrade." : "craft.") + item + ".q" + quality;
-            float perRecipe = 0.15f + CompressedCraftingValue(value);
+            float perRecipe = (0.15f + CompressedCraftingValue(value)) * CraftingProgressionXpPolicy.RecipeMultiplier;
             // One native Raise call per completed recipe preserves proportional
             // batches despite Valheim discarding surplus after a level crossing.
             for (int i = 0; i < completedRecipes; i++)
@@ -36,8 +36,9 @@ namespace ValheimMastery
             string key = piece.gameObject != null ? piece.gameObject.name.Replace("(Clone)", string.Empty) : "piece";
             if (plant)
                 ExperienceContext.ObserveGatheringAction(player, skill, key, GatheringProgressionService.GetResourceTier(key, skill));
-            Award(player, skill, (plant ? "plant." : "build.") + key,
-                0.10f + (plant ? value : CompressedCraftingValue(value)));
+            float baseXp = 0.10f + (plant ? value : CompressedCraftingValue(value));
+            if (!plant) baseXp *= CraftingProgressionXpPolicy.BuildingMultiplier(piece);
+            Award(player, skill, (plant ? "plant." : "build.") + key, baseXp);
         }
 
         private static void Award(Player player, Skills.SkillType skill, string key, float baseXp)

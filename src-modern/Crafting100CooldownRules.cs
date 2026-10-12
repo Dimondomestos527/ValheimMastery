@@ -25,6 +25,9 @@ namespace ValheimMastery
                 default: throw new ArgumentOutOfRangeException(nameof(tier));
             }
         }
+        // New armor actions only; historical receipts retain the original table.
+        internal static double PerfectCraftSeconds(int tier, bool armor) =>
+            PerfectCraftSeconds(tier) / (armor ? 2 : 1);
         internal static double Duration(Crafting100CooldownChannel channel, int itemTier)
         {
             if (channel == Crafting100CooldownChannel.PerfectCraft) return PerfectCraftSeconds(itemTier);

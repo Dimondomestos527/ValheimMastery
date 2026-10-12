@@ -196,7 +196,7 @@ namespace ValheimMastery
             if (completed && state?.BonusApplied == true && !state.FeedbackPlayed)
             {
                 state.FeedbackPlayed = true;
-                PerkVisualService.PlayGenericResourceBonus(state.Player, state.BonusPosition);
+                PerkVisualService.PlayGenericResourceBonus(state.Player, state.BonusPosition, skill: Skills.SkillType.Cooking);
             }
             if (state?.Conversion != null) state.Conversion.m_producedItems = state.Amount;
             if (state?.Output?.m_itemData != null && state.CookingTier >= 35)
@@ -231,6 +231,3 @@ namespace ValheimMastery
         private static Exception Finalizer(FermenterBonusState __state, Exception __exception) { FermenterBonusService.End(__state, false); return __exception; }
     }
 }
-
-
-

@@ -35,6 +35,9 @@ namespace ValheimMastery
         private CraftingStation _station;
         private string _selected = "Meadows", _message = "";
         private bool _open, _pending;
+        private UIGroupHandler _priorUiGroup, _ownedUiGroup;
+        private static int _traceClicks, _traceLines;
+        private static bool _traceBound;
         private int _epoch;
         private long _revision = -1;
         private float _nextRefresh;
@@ -205,8 +208,9 @@ namespace ValheimMastery
             _learn = NewButton(panel, Text("Зачарувати", "Enchant"), new Vector2(190, -320), new Vector2(145, 32));
             _switch = NewButton(panel, Text("Активувати", "Activate"), new Vector2(190, -358), new Vector2(145, 32));
             PlaceAction(_learn, 70); PlaceAction(_switch, 32);
-            _learn.onClick.AddListener(() => Begin(WorkbenchOperationKind.Learn));
-            _switch.onClick.AddListener(() => Begin(_snapshot?.Active == _selected ? WorkbenchOperationKind.Disable : WorkbenchOperationKind.Switch));
+            _learn.onClick.AddListener(() => ActionClick(WorkbenchOperationKind.Learn));
+            _switch.onClick.AddListener(() => ActionClick(_snapshot?.Active == _selected ? WorkbenchOperationKind.Disable : WorkbenchOperationKind.Switch));
+            if (!_traceBound) { _traceBound = true; ActionTrace(0, "actions-bound"); }
             _panel.SetActive(false);
         }
         private static void PlaceAction(Button button, float bottom)
@@ -285,6 +289,7 @@ namespace ValheimMastery
             if (!InventoryGui.IsVisible() || !Bench(station) || _gui.m_craftTimer >= 0) return;
             _player = player; _station = station; _epoch++; _revision = -1; _snapshot = null;
             _priorSelection = EventSystem.current?.currentSelectedGameObject;
+            ActivateCraftingGroup();
             _open = true; _pending = false; _message = ""; _panel.SetActive(true);
             HideNative(); _nextRefresh = 0; Tick();
             EventSystem.current?.SetSelectedGameObject(_choices[0].gameObject);
@@ -381,18 +386,38 @@ namespace ValheimMastery
                 (_snapshot.Learned?.Length ?? 0) < Math.Min(6, _snapshot.NativeLevel);
             _switch.interactable = !blocked && Contains(_snapshot.Available, _selected);
         }
-        private void Begin(WorkbenchOperationKind kind)
+        // First four natural action clicks only; never polls or changes admission.
+        private void ActionClick(WorkbenchOperationKind kind)
         {
-            if (!_open || _pending || _snapshot == null || Request == null || !string.IsNullOrEmpty(_snapshot.Reason)) return;
+            int attempt = !Application.isBatchMode && _traceClicks < 4 ? ++_traceClicks : 0;
+            ActionTrace(attempt, "click-" + kind);
+            Begin(kind, attempt);
+        }
+        private void ActionTrace(int attempt, string stage)
+        {
+            if (Application.isBatchMode || (attempt == 0 && stage != "actions-bound") || _traceLines >= 24) return;
+            _traceLines++;
+            try { MasteryPlugin.Log?.LogInfo("[EnchantUI] attempt=" + attempt + " stage=" + stage +
+                " open=" + _open + " pending=" + _pending + " snapshot=" + (_snapshot != null) +
+                " request=" + (Request != null) + " blockedReason=" + !string.IsNullOrEmpty(_snapshot?.Reason)); }
+            catch { } // Diagnostic failure must not alter input or completion.
+        }
+        private void Begin(WorkbenchOperationKind kind, int attempt)
+        {
+            if (!_open || _pending || _snapshot == null || Request == null || !string.IsNullOrEmpty(_snapshot.Reason))
+            { ActionTrace(attempt, "begin-refused"); return; }
             if (kind == WorkbenchOperationKind.Learn && (!CooldownReady(SelectedCooldown()) ||
-                Contains(_snapshot.Learned, _selected) || _snapshot.Learned.Length >= Math.Min(6, _snapshot.NativeLevel))) return;
+                Contains(_snapshot.Learned, _selected) || _snapshot.Learned.Length >= Math.Min(6, _snapshot.NativeLevel)))
+            { ActionTrace(attempt, "learn-refused"); return; }
             var snapshot = _snapshot; var player = _player; var station = _station; int epoch = _epoch;
-            _pending = true; Render(); bool queued = false;
+            _pending = true; Render(); ActionTrace(attempt, "pending"); bool queued = false;
             try
             {
                 queued = Request(player, station, snapshot, kind, _selected, (committed, reason) =>
                 {
-                    if (!_open || _epoch != epoch || _player != player || _station != station) return;
+                    if (!_open || _epoch != epoch || _player != player || _station != station)
+                    { ActionTrace(attempt, "callback-discarded"); return; }
+                    ActionTrace(attempt, committed ? "callback-committed" : "callback-refused");
                     _pending = false; _snapshot = null; _nextRefresh = 0;
                     // An authenticated idempotent success may retain the same durable revision.
                     // Still reread the authoritative snapshot; never grant optimistic UI state.
@@ -401,8 +426,28 @@ namespace ValheimMastery
                     Render();
                 });
             }
-            catch { }
+            catch (Exception error) { ActionTrace(attempt, "request-exception-" + error.GetType().Name); }
+            ActionTrace(attempt, queued ? "request-queued" : "request-not-queued");
             if (!queued) { _pending = false; _snapshot = null; _message = Text("Дію не підтверджено.", "Action not confirmed."); Render(); }
+        }
+        private void ActivateCraftingGroup()
+        {
+            var groups = _gui != null ? _gui.m_uiGroups : null;
+            if (groups == null || groups.Length <= 3 || groups[3] == null) return;
+            int prior = _gui.m_activeGroup;
+            _priorUiGroup = prior >= 0 && prior < groups.Length ? groups[prior] : null;
+            _ownedUiGroup = groups[3];
+            // Match native crafting-tab input ownership, without a new presentation cue.
+            _gui.SetActiveGroup(_ownedUiGroup, false);
+        }
+        private void RestoreCraftingGroup()
+        {
+            var groups = _gui != null ? _gui.m_uiGroups : null;
+            if (groups != null && _priorUiGroup != null && _ownedUiGroup != null &&
+                _gui.m_activeGroup >= 0 && _gui.m_activeGroup < groups.Length &&
+                groups[_gui.m_activeGroup] == _ownedUiGroup && Array.IndexOf(groups, _priorUiGroup) >= 0)
+                _gui.SetActiveGroup(_priorUiGroup, false);
+            _priorUiGroup = null; _ownedUiGroup = null;
         }
         internal void Close()
         {
@@ -411,6 +456,7 @@ namespace ValheimMastery
             if (_panel != null) _panel.SetActive(false);
             foreach (var pair in _hidden) if (pair.Key != null) pair.Key.SetActive(pair.Value);
             _hidden.Clear();
+            RestoreCraftingGroup();
             var system = EventSystem.current; var selected = system?.currentSelectedGameObject;
             bool owned = selected != null && (selected == _tab?.gameObject || (_panel != null && selected.transform.IsChildOf(_panel.transform)));
             if (owned)

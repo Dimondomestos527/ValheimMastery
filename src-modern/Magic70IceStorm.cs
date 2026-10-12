@@ -178,7 +178,13 @@ namespace ValheimMastery
         private void Visual(float skill)
         {
             if (!Active || !MasteryPlugin.Settings.EnablePerkProcVFX.Value) { ClearVisual(); return; }
-            if (_weather != null || Time.time < _nextVisualAttempt) return;
+            if (_weather != null)
+            {
+                if (Player.m_localPlayer != null)
+                    _weather.SetVisualDistance((Player.m_localPlayer.transform.position - transform.position).sqrMagnitude);
+                return;
+            }
+            if (Time.time < _nextVisualAttempt) return;
             _nextVisualAttempt = Time.time + .5f;
             _weather = NativeStormWeatherVisual.Create(transform, Magic70IceStorm.Radius(skill));
         }

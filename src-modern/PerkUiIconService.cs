@@ -34,11 +34,29 @@ namespace ValheimMastery
 
         internal static Sprite ForPerk(string perkId, Sprite fallback)
         {
+            if (perkId == "pickaxes_70_collapse") perkId = "pickaxes_70";
+            else if (perkId == "woodcutting_35_complete") perkId = "woodcutting_35";
             Skills.SkillType skill;
             if (!TryMap(perkId, out skill)) return fallback;
             Sprite sprite;
-            Sprite native = Icons.TryGetValue(skill, out sprite) && sprite != null ? sprite : fallback;
+            Sprite native = Player.m_localPlayer?.GetSkills()?.GetSkillDef(skill)?.m_icon;
+            if (native == null) native = Icons.TryGetValue(skill, out sprite) && sprite != null ? sprite : fallback;
             return MasteryHudArtwork.Icon(perkId, native);
+        }
+
+        internal static Sprite ForResourceSkill(Skills.SkillType skill)
+        {
+            // Unknown legacy feedback retains its text, never guesses a raven or another skill.
+            switch (skill)
+            {
+                case Skills.SkillType.Cooking: return ForPerk("cooking_35", null);
+                case Skills.SkillType.Crafting: return ForPerk("crafting_35", null);
+                case Skills.SkillType.Farming: return ForPerk("farming_35", null);
+                case Skills.SkillType.Fishing: return ForPerk("fishing_35", null);
+                case Skills.SkillType.Pickaxes: return ForPerk("pickaxes_35", null);
+                case Skills.SkillType.WoodCutting: return ForPerk("woodcutting_35", null);
+                default: return null;
+            }
         }
 
         private static bool TryMap(string perkId, out Skills.SkillType skill)
@@ -80,4 +98,3 @@ namespace ValheimMastery
         }
     }
 }
-

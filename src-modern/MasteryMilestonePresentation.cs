@@ -36,7 +36,8 @@ namespace ValheimMastery
             pr.pivot = new Vector2(.5f, 1f);
             pr.anchoredPosition = new Vector2(0f, -10f);
             pr.sizeDelta = customArtwork ? new Vector2(640f, 360f) : new Vector2(560f, 300f);
-            Image background = panel.AddComponent<Image>();
+            GameObject frameObject = customArtwork ? CroppedArtworkFrame(panel, pr, frameSprite, milestone) : panel;
+            Image background = frameObject.AddComponent<Image>();
             background.sprite = frameSprite;
             background.preserveAspect = customArtwork;
             background.color = customArtwork ? Color.white : new Color(.035f, .025f, .018f, .90f);
@@ -79,6 +80,37 @@ namespace ValheimMastery
             {
                 PerkAudioService.PlayPrefab("milestone_achievement", template.m_unlockSfx, player.GetCenterPoint(), 0.5f);
             }
+        }
+
+        internal static Rect ArtworkCrop(int milestone)
+        {
+            // Pixel coordinates are bottom-left based. Six-pixel safety margin
+            // around inspected ornament bounds; opaque corner regions remain.
+            if (milestone == 35) return new Rect(2f, 44f, 1018f, 488f);
+            if (milestone == 70) return new Rect(7f, 49f, 1000f, 500f);
+            if (milestone == 100) return new Rect(3f, 29f, 1015f, 527f);
+            return new Rect(0f, 0f, 1024f, 576f);
+        }
+        private static GameObject CroppedArtworkFrame(GameObject panel, RectTransform layout, Sprite sprite, int milestone)
+        {
+            string tier = milestone == 100 ? "gold" : milestone == 70 ? "silver" : milestone == 35 ? "bronze" : null;
+            // A different donor/layout retains its original image, never a guessed crop.
+            if (tier == null || sprite == null || sprite.texture == null ||
+                sprite.texture.name != "MasteryMilestone_frame_" + tier + ".png" ||
+                sprite.rect.width != 1024f || sprite.rect.height != 576f) return panel;
+            Rect crop = ArtworkCrop(milestone);
+            Vector2 scale = new Vector2(layout.sizeDelta.x / 1024f, layout.sizeDelta.y / 576f);
+            Vector2 offset = new Vector2((crop.center.x - 512f) * scale.x, (crop.center.y - 288f) * scale.y);
+            GameObject mask = Ui("ArtworkOuterCrop", panel.transform);
+            RectTransform mr = mask.AddComponent<RectTransform>();
+            mr.anchorMin = mr.anchorMax = new Vector2(.5f, .5f);
+            mr.anchoredPosition = offset; mr.sizeDelta = new Vector2(crop.width * scale.x, crop.height * scale.y);
+            mask.AddComponent<RectMask2D>();
+            GameObject frame = Ui("ArtworkFrame", mask.transform);
+            RectTransform fr = frame.AddComponent<RectTransform>();
+            fr.anchorMin = fr.anchorMax = new Vector2(.5f, .5f);
+            fr.anchoredPosition = -offset; fr.sizeDelta = layout.sizeDelta;
+            return frame;
         }
 
         private static GameObject Ui(string name, Transform parent) { GameObject go = new GameObject(name); go.transform.SetParent(parent, false); return go; }

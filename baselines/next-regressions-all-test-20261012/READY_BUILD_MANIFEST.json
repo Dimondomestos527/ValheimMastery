@@ -1,0 +1,41 @@
+{
+  "installResultSha256": "B9919C168EED71E66B59590FAE5DB019E272800A1C0CAD60CFF504A028D329B0",
+  "sourceRoot": "artifacts/build-workspaces/next-regressions-all-20261012",
+  "version": "1.4.123-test-next-regressions-all-20261012",
+  "nativeEvidence": "validation/next-regressions-live-20261012/TRANSPILE_EVIDENCE_REUSE.json",
+  "publicationAuthorized": true,
+  "variants": [
+    {
+      "variant": "Client",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "errors": 0,
+      "dll": "E5FBD3D0CC986D1EDCCED778B22F24E207754D78FDEF7393E32B44A447674460",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json"
+    },
+    {
+      "variant": "Server",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "errors": 0,
+      "dll": "1A53A1A84E948F33E20DD1B9C0768ED22E0B3711AA59ED53223A2948F02F5AEA",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json"
+    },
+    {
+      "variant": "Steam",
+      "native": "25A0A107DCE4D834C44C2B72D0EAFD5CB7793933BDA81816ACCFA1EA9543DACE",
+      "errors": 0,
+      "dll": "AC43762C21651266006D8BB91946C25F88B7071AC708E7C32DA29574A8CB075D",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json"
+    }
+  ],
+  "installResult": "validation/next-regressions-live-20261012/INSTALL_RESULT.json",
+  "live": "UNTESTED",
+  "sourceGate": "validation/next-regressions-live-20261012/PUBLICATION_SOURCE_GATE.json",
+  "sourceGateSha256": "673273A626977BE1509D43E188961C3A9A316C71378AF6DFAD4251F47F663723",
+  "knownIssues": [
+    "Full Unity PatchAll and multiplayer delivery need actual game test; static gates are not LIVE.",
+    "Missing bonus on prior meads not proven fixed; readonly consumption observer included.",
+    "Legacy cooking-forge QC wiring assertions fail on both baseline and candidate identically; superseded helper assumptions, excluded from PASS.",
+    "Only full-proc same-attack confirmed resource episodes earn new XP; ordinary non-proc destruction excluded."
+  ],
+  "wireIdentity": "1.4.123+rpc-20261012-resourceproc-r1-test"
+}

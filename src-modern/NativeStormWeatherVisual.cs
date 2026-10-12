@@ -15,7 +15,10 @@ namespace ValheimMastery
         private static float NextTextureWarning;
         private ParticleSystem[] Systems;
         private readonly ParticleSystem.Particle[] Buffer = new ParticleSystem.Particle[ParticleBudget];
-        private float Radius, NextBoundsCheck;
+        private float Radius, NextBoundsCheck, NextDetailCheck;
+        private int DetailTier;
+        private int[] BaseBudgets;
+        private float[] BaseRates;
 
         internal static NativeStormWeatherVisual Create(Transform parent, float radius)
         {
@@ -91,6 +94,9 @@ namespace ValheimMastery
             root.transform.localScale = Vector3.one;
             NativeStormWeatherVisual visual = root.AddComponent<NativeStormWeatherVisual>();
             visual.Systems = selected.ToArray(); visual.Radius = radius;
+            visual.BaseBudgets = new int[visual.Systems.Length]; visual.BaseRates = new float[visual.Systems.Length];
+            for (int i = 0; i < visual.Systems.Length; i++)
+            { visual.BaseBudgets[i] = visual.Systems[i].main.maxParticles; visual.BaseRates[i] = visual.Systems[i].emission.rateOverTime.constantMax; }
             root.SetActive(true);
             foreach (ParticleSystem particles in visual.Systems) particles.Play(false);
             if (MasteryPlugin.Settings.VerboseLogging.Value)
@@ -200,6 +206,21 @@ namespace ValheimMastery
             return true;
         }
 
+        internal void SetVisualDistance(float squaredDistance)
+        {
+            if (Time.time < NextDetailCheck) return;
+            NextDetailCheck = Time.time + .25f;
+            int tier = MistlandsFrostVisualRules.Tier(squaredDistance, DetailTier);
+            if (tier == DetailTier) return;
+            DetailTier = tier;
+            int divisor = MistlandsFrostVisualRules.StormDivisor(tier);
+            for (int i = 0; i < Systems.Length; i++)
+            {
+                var main = Systems[i].main; main.maxParticles = Mathf.Max(1, BaseBudgets[i] / divisor);
+                var emission = Systems[i].emission; emission.rateOverTime = BaseRates[i] / divisor;
+            }
+        }
+
         private void Update()
         {
             if (Time.time < NextBoundsCheck) return;
@@ -208,10 +229,12 @@ namespace ValheimMastery
             // flakes; no per-frame manual particle lattice/ring or global fog.
             foreach (ParticleSystem particles in Systems)
             {
+                Transform emitter = particles.transform;
+                Matrix4x4 toRoot = transform.worldToLocalMatrix * emitter.localToWorldMatrix;
                 int count = particles.GetParticles(Buffer), kept = 0;
                 for (int i = 0; i < count; i++)
                 {
-                    Vector3 point = transform.InverseTransformPoint(particles.transform.TransformPoint(Buffer[i].position));
+                    Vector3 point = toRoot.MultiplyPoint3x4(Buffer[i].position);
                     if (point.y < -.2f || point.y > 8.3f || point.x * point.x + point.z * point.z > Radius * Radius) continue;
                     Buffer[kept++] = Buffer[i];
                 }

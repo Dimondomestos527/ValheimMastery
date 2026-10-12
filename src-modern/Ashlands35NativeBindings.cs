@@ -20,6 +20,8 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.Setup))]
     internal static class Ashlands35ProjectileSetupPatch
     {
+        private static void Prefix(Projectile __instance, Character __0, ref Vector3 __1, HitData hitData, ItemDrop.ItemData item)
+            => Ashlands35ClusterSpread.Apply(__instance, __0, ref __1, hitData, item);
         private static void Postfix(Projectile __instance, HitData hitData, ItemDrop.ItemData item)
         {
             Ashlands35Dundr.Bind(__instance, item, hitData);

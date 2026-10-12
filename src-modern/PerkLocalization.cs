@@ -34,6 +34,8 @@ namespace ValheimMastery
                 words["vm_perk_crossbows_70_desc"] = "Deploy one personal turret with crossbow secondary attack. Supply your crossbow and as many compatible bolts as fit in its container. Empty hands + secondary starts or stops it. It searches the forward firing sector for hostile creatures while its owner is alive and online; never players or tames. Retrieve the same weapon and remaining bolts from the stopped container, then clear the empty platform.";
                 words["vm_perk_crossbows_70_flavor"] = "A siege engine begins with a weapon worth installing.";
                 words["vm_perk_dodge_70_name"] = "Not This Time";
+                words["vm_perk_woodcutting_35_complete_name"] = "The tree is completely dismantled.";
+                words["vm_perk_pickaxes_70_collapse_name"] = "The vein is completely destroyed.";
                 words["vm_perk_pickaxes_70_desc"] = "A pickaxe strike sometimes damages neighbouring pieces of the same vein. Rarely, a mighty strike crumbles the entire deposit with subterranean thunder.";
                 words["vm_perk_dodge_70_desc"] = "A real perfect dodge restores half the stamina spent on that roll. The refund can occur once every 8 seconds.";
                 words["vm_perk_dodge_70_flavor"] = "The world tried. It missed.";
