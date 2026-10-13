@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Client",
-  "version": "1.4.123-test-next-regressions-all-20261012",
-  "archive": "client-1.4.123-test-next-regressions-all-20261012.zip",
-  "archive_sha256": "7bfc29e4d188b9c5723ca4c4dbd307c8a9d2808119bddc26efad1ab5a8cdb0a2",
+  "version": "1.4.123-test-enchantment-volundr-all-20261013",
+  "archive": "client-1.4.123-test-enchantment-volundr-all-20261013.zip",
+  "archive_sha256": "f1e30e090c1821b0e622eaad1adf253c5a707d4fae3529a61726ae378850f5c3",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26280960,
-      "sha256": "ac43762c21651266006d8bb91946c25f88b7071ac708e7c32da29574a8cb075d"
+      "size": 26344960,
+      "sha256": "e4fc9c6d666890001295f9f6d22a804897b68dceafd92026a260eb075267a78f"
     }
   ],
   "validation": "TEST_COHORT;ROOT_FINAL_STATIC_GATE_PASS;THREE_NATIVE_BUILDS;EXACT_ACCEPTED_SOURCE_RESOURCES;LIVE_UNTESTED",
@@ -18,12 +18,17 @@
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261012-resourceproc-r1-test",
+  "network_wire_identity": "1.4.123+rpc-20261013-volundr-v2-all-test",
   "known_issues": [
-    "Full Unity PatchAll and multiplayer delivery need actual game test; static gates are not LIVE.",
-    "Missing bonus on prior meads not proven fixed; readonly consumption observer included.",
-    "Legacy cooking-forge QC wiring assertions fail on both baseline and candidate identically; superseded helper assumptions, excluded from PASS.",
-    "Only full-proc same-attack confirmed resource episodes earn new XP; ordinary non-proc destruction excluded.",
+    "Vanilla fermenter visuals unchanged; optional cloud observer excluded",
+    "Initial two cultivator server admission refusals remain UNKNOWN",
+    "Meadows HUD fix; native Meadows effects not claimed failed",
+    "Historical BlackForest exact LIVE cause unknown; current legacy gate corrected",
+    "Native/controlled checks are not full Unity LIVE",
+    "Völund V2 private character receipt phase4 is unresolved outcome fencing; not a public server phase. Paired new runtime required; older client/server cohort is wire-incompatible.",
+    "Shared character cooldown maximum8100 seconds (135minutes). Installer schema/path/helper behavior unchanged; no receipt/config migration or automatic downgrade is introduced.",
+    "Rare crash/stale Cloud character inconsistency accepted under current performance policy; server-world and normal debit/replay protections retained.",
+    "Full Unity PatchAll, multiplayer, saving/reconnect/restart, actual input and effects remain LIVE UNTESTED.",
     "Full Unity PatchAll offline host cctor is LIMITED; no gameplay PASS is claimed.",
     "TEST cohort; full gameplay LIVE acceptance is UNTESTED."
   ]
