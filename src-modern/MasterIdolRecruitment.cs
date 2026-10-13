@@ -26,7 +26,7 @@ namespace ValheimMastery
         }
         internal static void Tick(List<MasterIdolEffectZone> zones,ISet<string> assigned,Func<bool> publishable)
         {
-            var net=ZNet.instance;if(net?.IsServer()!=true||net.GetWorld()==null||!MasterIdolWorldRegistry.EffectsSettled)return;
+            var net=ZNet.instance;if(net?.IsServer()!=true||net.GetWorld()==null||!WorkbenchEnchantmentRuntime.Ready)return;
             if(Session!=net||World!=net.GetWorldUID()){Session=net;World=net.GetWorldUID();Vacancies.Clear();Arrivals.Clear();PreviousMembers.Clear();Next=NextSave=0;Cursor=0;Store=new MasterIdolRecruitmentStore(System.IO.Path.Combine(BepInEx.Paths.ConfigPath,"ValheimMastery","Idols",World+".residents.vmi"),World);foreach(var saved in Store.Load().OrderBy(x=>x.Key,StringComparer.Ordinal)){string group=saved.Key.Substring(0,saved.Key.LastIndexOf('|'));if(!Vacancies.TryGetValue(group,out var entry)){entry=new Vacancy();Vacancies[group]=entry;}entry.Times.Enqueue(saved.Value);}foreach(var saved in Store.Members)PreviousMembers[saved.Key]=new HashSet<string>(saved.Value,StringComparer.Ordinal);Dirty=false;}
             Store.Poll();
             var forest=zones.Where(x=>x.Type=="BlackForest").OrderBy(x=>x.Id,StringComparer.Ordinal).ToArray();

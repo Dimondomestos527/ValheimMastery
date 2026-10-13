@@ -15,7 +15,7 @@ namespace ValheimMastery
         private RectTransform _rect, _nativeRect;
         private TMP_Text _label;
         private float _nextState; private Recipe _lastRecipe; private ItemDrop.ItemData _lastItem;
-        private CraftingStation _lastStation; private int _lastQuality; private bool _lastCrafting;
+        private CraftingStation _lastStation; private int _lastQuality; private bool _lastCrafting, _lastShift;
 
         internal static void Refresh(InventoryGui gui, Player player)
         {
@@ -62,9 +62,7 @@ namespace ValheimMastery
             if (tip != null)
             {
                 tip.m_topic = "";
-                tip.m_text = GoldUiLocalization.Text(
-                    "Create one quality-5 item without recipe materials. Requires the usual station type, at any level. Cooldown depends on item tier.",
-                    "Створити один предмет якості 5 без матеріалів рецепта. Потрібний звичайний тип станції будь-якого рівня. Час відновлення залежить від тіру виробу.");
+                tip.m_text = ""; // Filled from the domain preview before becoming visible.
             }
         }
         private void UpdateState(Player player)
@@ -74,60 +72,25 @@ namespace ValheimMastery
             Crafting100ActionController.Refresh(_gui);
             var recipe = _gui.m_selectedRecipe.Recipe; var item = _gui.m_selectedRecipe.ItemData;
             var station = player?.GetCurrentCraftingStation(); bool crafting = _gui.m_craftTimer >= 0;
+            bool shift = ZInput.GetKey(KeyCode.LeftShift, false) || ZInput.GetKey(KeyCode.RightShift, false);
             if (Time.unscaledTime < _nextState && recipe == _lastRecipe && item == _lastItem && station == _lastStation &&
-                (item?.m_quality ?? 0) == _lastQuality && crafting == _lastCrafting) return;
+                (item?.m_quality ?? 0) == _lastQuality && crafting == _lastCrafting && shift == _lastShift) return;
             _nextState = Time.unscaledTime + .2f; _lastRecipe = recipe; _lastItem = item;
             _lastStation = station; _lastQuality = item?.m_quality ?? 0; _lastCrafting = crafting;
-            bool forge = station?.m_upgrader == true;
-            bool visible = InventoryGui.IsVisible() && Crafting100ActionController.Visible(player) &&
-                (forge ? _gui.m_selectedRecipe.ItemData != null : _gui.m_selectedRecipe.ItemData == null) &&
-                GoldDivineTransactions.Eligible(_gui.m_selectedRecipe.Recipe?.m_item?.m_itemData) &&
-                player != null && _gui.m_craftTimer < 0;
-            SetVisible(visible);
-            if (!visible) return;
+            var preview = Crafting100ActionController.Preview(_gui, player);
+            _lastShift = preview.Shift;
+            SetVisible(preview.Visible);
+            if (!preview.Visible) return;
             // Follow the actual native rectangle instead of a resolution-specific screen position.
             _rect.anchorMin = _nativeRect.anchorMin; _rect.anchorMax = _nativeRect.anchorMax;
             _rect.pivot = _nativeRect.pivot; _rect.sizeDelta = _nativeRect.sizeDelta;
             _rect.anchoredPosition = _nativeRect.anchoredPosition + Vector2.down * (_nativeRect.rect.height + 6f);
-            if (_label != null) _label.text = forge ?
-                GoldUiLocalization.Text("Forge with Völundr · +3", "Кувати з Вьолундром · +3") :
-                GoldUiLocalization.Text("Völundr's creation · quality 5", "Творіння Вьолундра · якість 5");
-            var status = Crafting100ActionController.ButtonStatus(forge, item);
-            _button.interactable = status == Crafting100ButtonStatus.Action && Crafting100ActionController.CanStart(_gui, player);
-            double remaining = forge ? Crafting100PermitService.ForgeRemaining : Crafting100PermitService.CraftRemaining;
-            if (_label != null)
-            {
-                if (status == Crafting100ButtonStatus.Pending)
-                    _label.text = GoldUiLocalization.Text("Unfinished action", "Незавершена дія");
-                else if (status == Crafting100ButtonStatus.Unconfirmed)
-                    _label.text = GoldUiLocalization.Text("State not confirmed", "Стан не підтверджено");
-                else if (status == Crafting100ButtonStatus.ForgeUsed)
-                    _label.text = GoldUiLocalization.Text("Gift already used", "Дар уже використано");
-                else if (status == Crafting100ButtonStatus.Cooldown)
-                    _label.text += " · " + Math.Ceiling(remaining / 60d).ToString("0") + GoldUiLocalization.Text(" min", " хв");
-            }
+            if (_label != null) _label.text = preview.Caption;
+            _button.interactable = preview.Enabled;
             var tip = _button.GetComponent<UITooltip>();
-            if (tip != null)
-            {
-                if (status == Crafting100ButtonStatus.Pending)
-                    tip.m_text = GoldUiLocalization.Text("The previous action has not been confirmed. A new creation is unavailable for now.",
-                        "Попередню дію ще не підтверджено. Нове творіння поки недоступне.");
-                else if (status == Crafting100ButtonStatus.Unconfirmed)
-                    tip.m_text = GoldUiLocalization.Text("The availability of this gift has not been confirmed yet.", "Доступність дару ще не підтверджено.");
-                else tip.m_text = forge ?
-                    GoldUiLocalization.Text("Guarantee +3 quality for one required idol, once per item. Independent 15-minute cooldown.",
-                        "Гарантовано підвищити якість на 3 за один потрібний ідол, лише раз на предмет. Окреме відновлення: 15 хвилин.") :
-                    GoldUiLocalization.Text("Create one quality-5 item without recipe materials. Requires the usual station type, at any level. Cooldown depends on item tier.",
-                        "Створити один предмет якості 5 без матеріалів рецепта. Потрібний звичайний тип станції будь-якого рівня. Час відновлення залежить від тіру виробу.");
-                if (forge && item?.m_customData != null && Crafting100ForgeItemRules.Used(item.m_customData))
-                {
-                    string used = GoldUiLocalization.Text("This item has already received this gift. Use ordinary forge upgrades.",
-                        "Вьолундр уже зміцнив цей виріб. Далі покращуй його звичайним способом.");
-                    tip.m_text = status == Crafting100ButtonStatus.Pending || status == Crafting100ButtonStatus.Unconfirmed
-                        ? tip.m_text + "\n" + used : used;
-                }
-            }
+            if (tip != null) tip.m_text = preview.Tooltip;
         }
+
         private void ReleaseFocus()
         {
             var events = EventSystem.current;

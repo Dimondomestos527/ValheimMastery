@@ -1,0 +1,50 @@
+{
+  "version": "1.4.123-test-enchantment-volundr-all-20261013",
+  "wireIdentity": "1.4.123+rpc-20261013-volundr-v2-all-test",
+  "sourceRoot": "artifacts/build-workspaces/enchantment-volundr-all-20261013",
+  "sourceGate": "artifacts/release-candidates/enchantment-volundr-all-test-20261013/PUBLICATION_SOURCE_GATE.json",
+  "sourceGateSha256": "E382149F8128E62A2EC9A55D19863354908036B8EF92475E2BA490211EDF3D9D",
+  "rootAcceptance": "validation/enchantment-volundr-all-root-20261013/FINAL_OWNER_ACCEPTANCE.json",
+  "rootAcceptanceSha256": "6A601CFA3B60378D2FF5FAD98B58928B3FE91C144CC35610A83B8759ED5AE2BC",
+  "variants": [
+    {
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "variant": "Client",
+      "dll": "033B4F55924FCF9C2ACDC5B35F8E8266BC50A4AC5BCDE24DE5BBF6DF43B8F862",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "errors": 0
+    },
+    {
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "variant": "Server",
+      "dll": "D37EE0F3BF2DD04340EE0FA06372A66CE8ACD504B683E31021EE06F7915E8DCB",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "errors": 0
+    },
+    {
+      "errors": 0,
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "dll": "E4FC9C6D666890001295F9F6D22A804897B68DCEAFD92026A260EB075267A78F",
+      "variant": "Steam",
+      "native": "25A0A107DCE4D834C44C2B72D0EAFD5CB7793933BDA81816ACCFA1EA9543DACE"
+    }
+  ],
+  "knownIssues": [
+    "Vanilla fermenter visuals unchanged; optional cloud observer excluded",
+    "Initial two cultivator server admission refusals remain UNKNOWN",
+    "Meadows HUD fix; native Meadows effects not claimed failed",
+    "Historical BlackForest exact LIVE cause unknown; current legacy gate corrected",
+    "Native/controlled checks are not full Unity LIVE",
+    "Völund V2 private character receipt phase4 is unresolved outcome fencing; not a public server phase. Paired new runtime required; older client/server cohort is wire-incompatible.",
+    "Shared character cooldown maximum8100 seconds (135minutes). Installer schema/path/helper behavior unchanged; no receipt/config migration or automatic downgrade is introduced.",
+    "Rare crash/stale Cloud character inconsistency accepted under current performance policy; server-world and normal debit/replay protections retained.",
+    "Full Unity PatchAll, multiplayer, saving/reconnect/restart, actual input and effects remain LIVE UNTESTED."
+  ],
+  "evidence": {
+    "installation": "validation/enchantment-volundr-all-root-20261013/INSTALL_RESULT.json",
+    "steamEquivalence": "STEAM_EQUIVALENCE.json",
+    "steamContracts": "Steam-contracts.log",
+    "rootPreservation": "validation/enchantment-volundr-all-root-20261013/COMBINED_PRESERVATION.json",
+    "rootTranspilers": "validation/enchantment-volundr-all-root-20261013/TRANSPILE_EVIDENCE_REUSE.json"
+  }
+}

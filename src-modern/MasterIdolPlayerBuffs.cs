@@ -7,7 +7,20 @@ namespace ValheimMastery
     // Pure presentation marker: no stat modifiers, timed refresh, resource writes or gameplay grants.
     internal static class MasterIdolPlayerBuffs
     {
-        private static readonly string[] Types={"Swamp","Mountain","Plains","Mistlands"};
+        private static readonly string[] Types={"Meadows","BlackForest","Swamp","Mountain","Plains","Mistlands"};
+        internal static string DisplayName(string type)
+        {
+            switch(type)
+            {
+                case "Meadows":return GoldUiLocalization.Text("Earth's Bounty","Щедрість землі");
+                case "BlackForest":return GoldUiLocalization.Text("Forest Watch","Варта пралісу");
+                case "Swamp":return GoldUiLocalization.Text("Quiet Haven","Тиха гавань");
+                case "Mountain":return GoldUiLocalization.Text("Forge's Breath","Подих горна");
+                case "Plains":return GoldUiLocalization.Text("Bountiful Feast","Щедрий бенкет");
+                case "Mistlands":return GoldUiLocalization.Text("Mist's Touch","Дотик імли");
+                default:return "";
+            }
+        }
         private sealed class Lease{internal StatusEffect Template,Marker;}
         private static readonly Dictionary<string,Lease> Owned=new Dictionary<string,Lease>(StringComparer.Ordinal);
         private static Player Player;private static SEMan Manager;private static ZNetScene Scene;private static float Next;
@@ -24,11 +37,10 @@ namespace ValheimMastery
             foreach(string type in Types)
             {
                 if(!eligible||!Applies(type,player.transform.position)){Remove(type);continue;}
-                int hash=("VM_Idol_Blessing_"+type).GetStableHashCode();
                 if(Owned.TryGetValue(type,out var existing)&&Manager.GetStatusEffects().Contains(existing.Marker))continue;Remove(type);
-                var profile=MasterIdolProfiles.Find(type);var icon=Scene.GetPrefab(profile.Prefab)?.GetComponent<Piece>()?.m_icon;if(icon==null)continue;
+                var icon=ApprovedUiAssetBank.Enchantment(type);if(icon==null)continue;
                 var template=ScriptableObject.CreateInstance<StatusEffect>();template.name="VM_Idol_Blessing_"+type;
-                template.m_name=GoldUiLocalization.Text(profile.English,profile.Ukrainian);template.m_tooltip=MasterIdolEffectsSummary.For(type);template.m_icon=icon;template.m_ttl=0;template.m_cooldownIcon=false;template.m_flashIcon=false;
+                template.m_name=DisplayName(type);template.m_tooltip=WorkbenchEnchantmentUiBinding.Detail(type);template.m_icon=icon;template.m_ttl=0;template.m_cooldownIcon=false;template.m_flashIcon=false;
                 var marker=Manager.AddStatusEffect(template,false,0,0,0);if(marker!=null)Owned[type]=new Lease{Template=template,Marker=marker};else UnityEngine.Object.Destroy(template);
             }
         }

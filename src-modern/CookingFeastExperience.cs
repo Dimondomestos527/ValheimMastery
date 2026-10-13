@@ -37,9 +37,14 @@ namespace ValheimMastery
             state.FeastBoostApplied = true;
             bool mead = CookingRecipeProgression.IsMeadBase(state.Recipe);
             float perRecipe = mead ? MeadXpReceiptPolicy.PreparationXp : IsPreparation(state.Recipe) ? 5f : 1f;
+            int completedRecipes = state.CompletedRecipes;
             using (ExperienceContext.BeginCookingRecipe(state.Player,
                 CookingRecipeProgression.IngredientCoefficient(state.Recipe, state.Quality), mead))
-                receiver.RaiseSkill(skill, state.CompletedRecipes * perRecipe);
+                // Native Raise discards surplus after one level crossing. Award each
+                // confirmed recipe separately so later recipes survive that crossing.
+                // The ordinary first key is consumed only by the first recipe.
+                for (int recipe = 0; recipe < completedRecipes; recipe++)
+                    receiver.RaiseSkill(skill, perRecipe);
         }
     }
 }

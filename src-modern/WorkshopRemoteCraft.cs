@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
@@ -10,6 +11,15 @@ namespace ValheimMastery
     internal static class WorkshopRemoteCraft
     {
         internal const string EscrowKey = "vm.workshop.escrow";
+        // Native private field, inspected on current API cohorts; payment only, not a scanner.
+        static readonly FieldInfo PlaceRotationField=AccessTools.Field(typeof(Player),"m_placeRotation");
+        private sealed class NativeBuildSelection
+        {
+            internal ZDOID Character;
+            internal int ToolHash;
+            internal GameObject ToolDefinition;
+            internal PieceTable Table;
+        }
         private sealed class ServerAction
         {
             internal ZRpc Rpc;
@@ -29,6 +39,8 @@ namespace ValheimMastery
             internal Recipe Recipe;
             internal ZDOID StationId;
             internal Piece BuildPiece;
+            internal ItemDrop.ItemData BuildTool;
+            internal PieceTable BuildTable;
             internal Vector3 BuildPosition;
             internal Quaternion BuildRotation;
             internal Vector3 BuildRayOrigin, BuildRayDirection;
@@ -216,6 +228,7 @@ namespace ValheimMastery
                 !TryResourceCosts(piece.m_resources, 0, 1, out var costs)) return false;
             if (GameCamera.instance == null) return false;
             var state = new ClientAction { Id = Guid.NewGuid().ToString("N"), BuildPiece = piece,
+                BuildTool = player.GetRightItem(), BuildTable = player.m_buildPieces,
                 BuildRayOrigin = GameCamera.instance.transform.position, BuildRayDirection = GameCamera.instance.transform.forward,
                 BuildPosition = player.m_placementGhost.transform.position, BuildRotation = player.m_placementGhost.transform.rotation,
                 Quality = 0, Amount = 1, Costs = costs, StartedAt = Time.time, ServerRpc = ZNet.instance.GetServerRPC() };
@@ -384,11 +397,12 @@ namespace ValheimMastery
                 WorkshopTiming.Mark(id, true, "Sjournal.admitted");
                 Recipe recipe = null;
                 Piece buildPiece = null;
+                NativeBuildSelection buildSelection = null;
                 Vector3 actionPoint = player.Position;
                 Dictionary<string, int> costs;
                 if (recipeName.StartsWith("@build:", StringComparison.Ordinal))
                 {
-                    buildPiece = ZNetScene.instance.GetPrefab(recipeName.Substring(7))?.GetComponent<Piece>();
+                    buildPiece = ResolveServerBuildPiece(player, recipeName.Substring(7), out buildSelection);
                     actionPoint = package.ReadVector3();
                     if (quality != 0 || amount != 1 || !WorkshopBuildBridge.ServerEligible(player, buildPiece, actionPoint) ||
                         !TryResourceCosts(buildPiece.m_resources, 0, 1, out costs))
@@ -425,7 +439,7 @@ namespace ValheimMastery
                         WorkshopTiming.Mark(id, true, "T4.ownershipReady");
                         MasteryPlugin.Log.LogInfo("[Workshop70] Preparation " + id + " ms=" + preparation.ElapsedMilliseconds);
                         var debitTime = System.Diagnostics.Stopwatch.StartNew();
-                        CommitRequest(rpc, id, player, recipe, quality, amount, costs, credit, buildPiece, actionPoint, stationId);
+                        CommitRequest(rpc, id, player, recipe, quality, amount, costs, credit, buildPiece, actionPoint, stationId, buildSelection);
                         MasteryPlugin.Log.LogInfo("[Workshop70] Debit/grant " + id + " ms=" + debitTime.ElapsedMilliseconds);
                     },
                     reason => Deny(rpc, id, reason)); }, reason => Deny(rpc, id, reason));
@@ -438,7 +452,8 @@ namespace ValheimMastery
         }
 
         private static void CommitRequest(ZRpc rpc, string id, WorkshopActor player, Recipe recipe, int quality, int amount,
-            Dictionary<string, int> costs, Dictionary<string, int> credit, Piece buildPiece, Vector3 actionPoint, ZDOID stationId)
+            Dictionary<string, int> costs, Dictionary<string, int> credit, Piece buildPiece, Vector3 actionPoint, ZDOID stationId,
+            NativeBuildSelection buildSelection)
         {
             WorkshopAtomicDebit debit = null;
             bool ownsPending = false;
@@ -448,7 +463,7 @@ namespace ValheimMastery
                 ZNet net = ZNet.instance;
                 long playerId = player != null ? player.GetPlayerID() : 0;
                 Dictionary<string, int> currentCosts = null;
-                bool validCosts = buildPiece != null ? WorkshopBuildBridge.ServerEligible(player, buildPiece, actionPoint) &&
+                bool validCosts = buildPiece != null ? ServerBuildCurrent(player, buildPiece, buildSelection) && WorkshopBuildBridge.ServerEligible(player, buildPiece, actionPoint) &&
                     TryResourceCosts(buildPiece.m_resources, 0, 1, out currentCosts) : TryCosts(recipe, quality, amount, out currentCosts);
                 if (net == null || !net.IsServer() || player == null || player.IsDead() || player.IsTeleporting() ||
                     ZoneSystem.instance?.GetGlobalKey(GlobalKeys.NoCraftCost) == true ||
@@ -502,7 +517,8 @@ namespace ValheimMastery
                     if (line.Store is WorkshopRecordStore store) CookingDebitProvenance.Preflight(store.Inventory, line.Item);
                 using (var sourceTrace = feastMaterial != null ? CookingDebitProvenance.Begin() : null)
                 {
-                    debit = WorkshopAtomicDebit.Begin(lines, () => player.HasCrafting70 && !player.IsDead() && !player.IsTeleporting());
+                    debit = WorkshopAtomicDebit.Begin(lines, () => player.HasCrafting70 && !player.IsDead() && !player.IsTeleporting() &&
+                        (buildPiece == null || ServerBuildCurrent(player, buildPiece, buildSelection)));
                     if (debit != null && feastMaterial != null && credit.TryGetValue(buildPiece.m_resources[0].m_resItem.m_itemData.m_shared.m_name, out int paidMaterial) && paidMaterial == 1)
                         cookingSource = sourceTrace.Single(feastMaterial);
                 }
@@ -618,9 +634,10 @@ namespace ValheimMastery
                 {
                     _validatingBuild = state;
                     if (!WorkshopBuildBridge.ClientEligible(player, state.BuildPiece) ||
-                        player.GetSelectedPiece() != state.BuildPiece || !player.HaveStamina(player.GetBuildStamina()))
+                        player.GetSelectedPiece() != state.BuildPiece || !ClientBuildToolCurrent(state, player) || !player.HaveStamina(player.GetBuildStamina()))
                     { MasteryPlugin.Log.LogWarning("[Workshop70] Build cancelled: tool/piece/stamina changed " + id); return; }
-                    player.UpdatePlacementGhost(true);
+                    // TryPlacePiece performs fresh native ghost validation itself.
+                    // Do not recompute the collider-adjusted pose twice before PlacePiece.
                     if (player.m_placementGhost == null || player.m_placementStatus != Player.PlacementStatus.Valid ||
                         Vector3.Distance(player.m_placementGhost.transform.position, state.BuildPosition) > 0.05f ||
                         Quaternion.Angle(player.m_placementGhost.transform.rotation, state.BuildRotation) > 1f)
@@ -686,7 +703,19 @@ namespace ValheimMastery
 
         private static void ExecuteBuild(ClientAction state, Player player)
         {
-            PayPersonal(state, player);
+            if (!ClientBuildToolCurrent(state, player)) throw new InvalidOperationException("Building tool changed after authorization.");
+            bool preserveRotation=state.BuildPiece.m_randomInitBuildRotation;
+            if(preserveRotation&&PlaceRotationField==null)throw new InvalidOperationException("Native placement rotation is unavailable.");
+            int rotation=preserveRotation?(int)PlaceRotationField.GetValue(player):0;
+            try{PayPersonal(state, player);}
+            finally
+            {
+                // Inventory.Changed rebuilds the ghost and randomizes this field for saplings.
+                // Preserve only the same authorized native selection; never restore a ghost/status.
+                if(preserveRotation&&CanRestoreBuildRotation(state,player))PlaceRotationField.SetValue(player,rotation);
+            }
+            if(!ClientBuildToolCurrent(state,player)||player.GetSelectedPiece()!=state.BuildPiece)
+                throw new InvalidOperationException("Building selection changed during payment.");
             var producerScope = CookingFeastProvenance.Begin();
             try { state.BuildCompleted = player.TryPlacePiece(state.BuildPiece); }
             finally { CookingFeastProvenance.End(producerScope); }
@@ -700,9 +729,61 @@ namespace ValheimMastery
             var state = _executing;
             if (state?.BuildPiece == null || player != Player.m_localPlayer) return;
             if (state.BuildEntered || piece != state.BuildPiece || Vector3.Distance(pos, state.BuildPosition) > 0.05f ||
-                Quaternion.Angle(rot, state.BuildRotation) > 1f || !state.Paid)
+                Quaternion.Angle(rot, state.BuildRotation) > 1f || !state.Paid || !ClientBuildToolCurrent(state, player))
                 throw new InvalidOperationException("Building placement changed after authorization.");
             state.BuildEntered = true;
+        }
+
+        private static bool ClientBuildToolCurrent(ClientAction state, Player player) =>
+            state.BuildTool != null && ReferenceEquals(player.GetRightItem(), state.BuildTool) &&
+            ReferenceEquals(player.m_buildPieces, state.BuildTable) &&
+            ReferenceEquals(state.BuildTool.m_shared?.m_buildPieces, state.BuildTable);
+
+        private static bool CanRestoreBuildRotation(ClientAction state,Player player)
+        {
+            if(player!=Player.m_localPlayer||player.IsDead()||player.IsTeleporting()||!ClientBuildToolCurrent(state,player)||player.GetSelectedPiece()!=state.BuildPiece)return false;
+            var ghost=player.m_placementGhost;var piece=ghost?.GetComponent<Piece>();
+            return piece!=null&&piece.m_randomInitBuildRotation&&Utils.GetPrefabName(ghost)==state.BuildPiece.gameObject.name&&piece.m_name==state.BuildPiece.m_name;
+        }
+
+        // Some native tool actions (e.g. terrain operations) are PieceTable assets,
+        // not entries in the scene prefab registry. Never search arbitrary tables.
+        private static Piece ResolveServerBuildPiece(WorkshopActor actor, string name, out NativeBuildSelection selection)
+        {
+            selection = null;
+            var scene = ZNetScene.instance;
+            if (scene == null || string.IsNullOrEmpty(name)) return null;
+            var networked = scene.GetPrefab(name);
+            if (networked != null) return networked.GetComponent<Piece>();
+            if (actor?.Available != true) return null;
+            var character = ZDOMan.instance?.GetZDO(actor.CharacterId);
+            if (character == null || character.GetLong(ZDOVars.s_playerID, 0) != actor.GetPlayerID()) return null;
+            int toolHash = character.GetInt(ZDOVars.s_rightItem, 0);
+            var definition = toolHash != 0 ? ObjectDB.instance?.GetItemPrefab(toolHash) : null;
+            if (definition == null || definition.name.GetStableHashCode() != toolHash) return null;
+            var table = definition.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_buildPieces;
+            if (table?.m_pieces == null) return null;
+            Piece found = null;
+            foreach (var prefab in table.m_pieces)
+            {
+                if (prefab == null || !string.Equals(prefab.name, name, StringComparison.Ordinal)) continue;
+                var piece = prefab.GetComponent<Piece>();
+                if (piece == null || found != null) return null;
+                found = piece;
+            }
+            if (found == null) return null;
+            selection = new NativeBuildSelection { Character = actor.CharacterId, ToolHash = toolHash, ToolDefinition = definition, Table = table };
+            return found;
+        }
+        private static bool ServerBuildCurrent(WorkshopActor actor, Piece piece, NativeBuildSelection selection)
+        {
+            if (actor?.Available != true || piece == null) return false;
+            var current = ResolveServerBuildPiece(actor, piece.gameObject.name, out var currentSelection);
+            if (!ReferenceEquals(current, piece)) return false;
+            if (selection == null) return currentSelection == null;
+            return currentSelection != null && selection.Character == actor.CharacterId &&
+                currentSelection.Character == selection.Character && currentSelection.ToolHash == selection.ToolHash &&
+                ReferenceEquals(currentSelection.ToolDefinition, selection.ToolDefinition) && ReferenceEquals(currentSelection.Table, selection.Table);
         }
 
         private static void ExecuteSelected(ClientAction state, Player player)
@@ -834,6 +915,7 @@ namespace ValheimMastery
             foreach (var cost in state.Costs)
                 {
                     int debit = cost.Value - state.Credit[cost.Key];
+                    if(debit==0)continue; // Native RemoveItem(0) still rebuilds/randomizes placement preview.
                     int before = player.GetInventory().CountItems(cost.Key, -1, false);
                     if (before < debit) throw new InvalidOperationException("Personal stock changed.");
                     player.GetInventory().RemoveItem(cost.Key, debit, -1, false);

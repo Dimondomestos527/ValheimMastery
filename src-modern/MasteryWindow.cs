@@ -407,7 +407,7 @@ namespace ValheimMastery
             RectTransform viewport = CreateViewport(_skillsView.transform, "SkillsViewport", new Vector2(0f, 0f), new Vector2(0f, -38f));
             RectTransform content = CreateVerticalContent(viewport, "SkillRows", 4f, new RectOffset(2, 2, 2, 4));
             _skillsScroll = _skillsView.AddComponent<ScrollRect>();
-            ConfigureScroll(_skillsScroll, viewport, content, 240f);
+            ConfigureScroll(_skillsScroll, viewport, content, 480f);
             foreach (Skills.SkillType skill in SkillOrder) _skillRows.Add(CreateSkillRow(content, skill));
         }
 

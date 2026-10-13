@@ -10,7 +10,7 @@ namespace ValheimMastery
     {
         // The semantic mod version is intentionally stable across compatible releases.
         // WireIdentity changes whenever the RPC/build cohort is not safe to mix.
-        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261012-resourceproc-r1-test";
+        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261013-volundr-v2-all-test";
         private static readonly HashSet<ZRpc> Registered = new HashSet<ZRpc>();
         private static readonly Dictionary<ZNetPeer, float> PendingHello = new Dictionary<ZNetPeer, float>();
         private static readonly Dictionary<ZNetPeer, float> PendingConfirmation = new Dictionary<ZNetPeer, float>();

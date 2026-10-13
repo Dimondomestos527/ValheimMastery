@@ -11,23 +11,35 @@ namespace ValheimMastery
     {
         internal string Token, Recipe, Prefab, ItemIdentity, Idol;
         internal int Kind, OldQuality, NewQuality, Variant, IdolQuality;
+        internal int WireVersion = 1, Operation, OutputAmount;
+        internal bool Shift;
         internal ZDOID Station;
-        internal float Cost => Kind == 1 ? GoldCraftingService.MasterworkCost : GoldCraftingService.UpgradeCost;
+        internal float Cost => WireVersion == 2 ? throw new InvalidOperationException("V2 actions have no legacy Favor cost") : Kind == 1 ? GoldCraftingService.MasterworkCost : GoldCraftingService.UpgradeCost;
         internal string Encode()
         {
-            var p = new ZPackage(); p.Write(1); p.Write(Token); p.Write(Kind); p.Write(Recipe); p.Write(Prefab);
+            var p = new ZPackage(); p.Write(WireVersion); p.Write(Token); p.Write(Kind); p.Write(Recipe); p.Write(Prefab);
             p.Write(ItemIdentity ?? ""); p.Write(OldQuality); p.Write(NewQuality); p.Write(Variant);
             p.Write(Station); p.Write(Idol ?? ""); p.Write(IdolQuality);
+            if (WireVersion == 2) { p.Write(Operation); p.Write(Shift); p.Write(OutputAmount); }
+            else if (WireVersion != 1) throw new FormatException("Gold contract version");
             return Convert.ToBase64String(p.GetArray());
         }
         internal static GoldAction Decode(string text)
         {
             if (string.IsNullOrEmpty(text) || text.Length > 1024) throw new FormatException("Gold contract size");
             var p = new ZPackage(Convert.FromBase64String(text));
-            if (p.ReadInt() != 1) throw new FormatException("Gold contract version");
-            var a = new GoldAction { Token = p.ReadString(), Kind = p.ReadInt(), Recipe = p.ReadString(),
+            int version = p.ReadInt();
+            if (version != 1 && version != 2) throw new FormatException("Gold contract version");
+            var a = new GoldAction { WireVersion = version, Token = p.ReadString(), Kind = p.ReadInt(), Recipe = p.ReadString(),
                 Prefab = p.ReadString(), ItemIdentity = p.ReadString(), OldQuality = p.ReadInt(), NewQuality = p.ReadInt(),
                 Variant = p.ReadInt(), Station = p.ReadZDOID(), Idol = p.ReadString(), IdolQuality = p.ReadInt() };
+            if (version == 2)
+            {
+                a.Operation = p.ReadInt(); a.Shift = p.ReadBool(); a.OutputAmount = p.ReadInt();
+                ValidateV2(a);
+                if (p.GetPos() != p.Size()) throw new FormatException("Gold contract trailing bytes");
+                return a;
+            }
             if (!Guid.TryParseExact(a.Token, "N", out _) || a.Recipe.Length > 128 || a.Prefab.Length > 128 ||
                 a.Recipe.Length == 0 || a.Prefab.Length == 0 || a.Idol.Length > 128 || a.Variant < 0 ||
                 (a.Kind != 1 && a.Kind != 2) || a.OldQuality < 0 || a.NewQuality < 1 || a.NewQuality > 10000 ||
@@ -36,6 +48,33 @@ namespace ValheimMastery
                     !Guid.TryParseExact(a.ItemIdentity, "N", out _) || a.Idol.Length == 0 || a.IdolQuality < 0))
                 throw new FormatException("Gold contract fields");
             return a;
+        }
+        private static void ValidateV2(GoldAction a)
+        {
+            if (!Guid.TryParseExact(a.Token, "N", out _) || a.Recipe.Length == 0 || a.Recipe.Length > 128 ||
+                a.Prefab.Length == 0 || a.Prefab.Length > 128 || a.Idol.Length > 128 || a.Variant < 0 ||
+                a.OldQuality < 0 || a.NewQuality < 1 || a.NewQuality > 10000 ||
+                (a.Kind != 1 && a.Kind != 2)) throw new FormatException("Gold V2 contract fields");
+            bool valid;
+            switch (a.Operation)
+            {
+                case 1: // Craft: server still derives actual quantity, equipment category and native caps.
+                    valid = a.Kind == 1 && a.OldQuality == 0 && a.ItemIdentity == "" && a.Idol == "" &&
+                        a.IdolQuality == 0 && a.OutputAmount > 0 &&
+                        (a.Shift ? a.NewQuality == 1 || a.NewQuality == 3 : a.NewQuality == 1);
+                    break;
+                case 2: // Native upgrade shares channel 1, not Potential Forge channel 2.
+                    valid = a.Kind == 1 && a.OldQuality >= 1 && (long)a.NewQuality == (long)a.OldQuality + (a.Shift ? 2 : 1) &&
+                        Guid.TryParseExact(a.ItemIdentity, "N", out _) && a.Idol == "" && a.IdolQuality == 0 && a.OutputAmount == 0;
+                    break;
+                case 3: // Potential Forge retains +3 and one idol; Shift is not supported.
+                    valid = a.Kind == 2 && a.OldQuality >= 1 && (long)a.NewQuality == (long)a.OldQuality + 3 &&
+                        Guid.TryParseExact(a.ItemIdentity, "N", out _) && a.Idol.Length > 0 && a.IdolQuality >= 0 &&
+                        !a.Shift && a.OutputAmount == 0;
+                    break;
+                default: valid = false; break;
+            }
+            if (!valid) throw new FormatException("Gold V2 operation fields");
         }
     }
 
@@ -174,6 +213,7 @@ namespace ValheimMastery
             {
                 int split = raw.IndexOf(':'); phase = int.Parse(raw.Substring(0, split));
                 action = GoldAction.Decode(raw.Substring(split + 1));
+                if (action.WireVersion != 1) throw new FormatException("Legacy Gold receipt requires V1.");
                 return phase >= Requested && phase <= Rejected;
             }
             catch { phase = -1; return true; } // Invalid durable state never admits a new item.
@@ -239,7 +279,7 @@ namespace ValheimMastery
         }
         private static bool LocalValid(Player player, GoldAction a, Recipe recipe, bool requireHammer, ItemDrop.ItemData candidate = null)
         {
-            if (player == null || player.IsDead() || player.IsTeleporting() || recipe?.m_item == null || !recipe.m_enabled ||
+            if (a?.WireVersion != 1 || player == null || player.IsDead() || player.IsTeleporting() || recipe?.m_item == null || !recipe.m_enabled ||
                 !Eligible(recipe.m_item.m_itemData) || recipe.m_item.gameObject.name != a.Prefab ||
                 !player.m_knownRecipes.Contains(recipe.m_item.m_itemData.m_shared.m_name) ||
                 (a.Kind == 2 && requireHammer && !GoldCraftingService.HoldsHammer(player))) return false;
@@ -328,6 +368,7 @@ namespace ValheimMastery
             try
             {
                 int phase = p.ReadInt(); string encoded = p.ReadString(); GoldAction a = GoldAction.Decode(encoded);
+                if (a.WireVersion != 1) return;
                 if (ledger?.IsAvailable != true) { Reply(rpc, 4, encoded, "storage"); return; }
                 long id = actor.GetPlayerID(); var state = ledger.Get(id);
                 if (state.SettledTokens.Contains(a.Token))
@@ -347,7 +388,7 @@ namespace ValheimMastery
             try
             {
                 int kind = p.ReadInt(); string encoded = p.ReadString(); p.ReadString();
-                GoldAction action = GoldAction.Decode(encoded); Player player = Player.m_localPlayer;
+                GoldAction action = GoldAction.Decode(encoded); if (action.WireVersion != 1) return; Player player = Player.m_localPlayer;
                 ZNet grantSession = ZNet.instance; long grantWorld = grantSession.GetWorldUID();
                 ZDOID grantCharacter = player.m_nview?.GetZDO()?.m_uid ?? ZDOID.None;
                 // Deferred work is bounded, preventing packet re-entry during mutation or save callbacks.

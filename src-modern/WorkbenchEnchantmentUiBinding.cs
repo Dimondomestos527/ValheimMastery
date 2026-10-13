@@ -10,19 +10,18 @@ namespace ValheimMastery
                 ApprovedUiAssetBank.Enchantment,Detail);
         }
         internal static void Shutdown()=>WorkbenchEnchantmentUi.Shutdown();
-        static string Detail(string choice)
+        internal static string Detail(string choice)
         {
             switch(choice)
             {
-                case "Meadows":return GoldUiLocalization.Text("Crops, animal breeding and maturation progress twice as fast. Tamed animal limits double; incoming damage is reduced by 75%.","Рослини, розмноження й дорослішання тварин прискорюються вдвічі. Ліміт свійських тварин подвоюється; отримана ними шкода зменшується на 75%.");
-                case "BlackForest":return GoldUiLocalization.Text("Friendly forest residents patrol and help the workshop: four greylings, two greydwarfs, one shaman and one brute. The shaman can heal allies.","Дружні лісові мешканці обходять майстерню й допомагають їй: чотири грейлінги, два грейдворфи, шаман і велетень. Шаман може лікувати союзників.");
-                case "Swamp":return GoldUiLocalization.Text("A sanctuary keeps hostile creatures outside and shields the workshop from rain.","Святилище утримує ворожих істот за межею та захищає майстерню від дощу.");
-                case "Mountain":return GoldUiLocalization.Text("Furnaces and cooking progress faster. Buildings receive 90% less damage; buildings and equipment gradually repair.","Печі та приготування працюють швидше. Будівлі отримують на 90% менше шкоди; будівлі й спорядження поступово відновлюються.");
-                case "Plains":return GoldUiLocalization.Text("Feasts consumed here last three times longer. Active Rested, boss powers and poison, frost and fire resistance are renewed while you remain under the enchantment.","Спожиті тут бенкети тривають утричі довше. Поки діють чари, поновлюються активні відпочинок, сили босів та опір отруті, морозу й вогню.");
-                case "Mistlands":return GoldUiLocalization.Text("Feather fall protects players. Eitr refining and sap collection progress faster; refinery projectiles cannot damage buildings in the workshop.","Легке падіння захищає гравців. Очищення ейтру та збирання соку прискорюються; снаряди очищувача не пошкоджують будівлі майстерні.");
+                case "Meadows":return GoldUiLocalization.Text("Under this blessing, crops ripen sooner and tame animals breed and mature faster. More can thrive near the workshop, where they withstand blows better.","Під цими чарами врожай достигає швидше, а свійські тварини швидше розмножуються й дорослішають. У межах майстерні їх може бути більше, і вони краще витримують удари.");
+                case "BlackForest":return GoldUiLocalization.Text("Greylings and greydwarfs settle near the workshop and help defend it. Their shaman supports allies with healing.","Грейлінги та грейдворфи оселяються біля майстерні й допомагають її обороняти. Шаман підтримує союзників зціленням.");
+                case "Swamp":return GoldUiLocalization.Text("The blessing forms a quiet haven: it holds hostile creatures at bay, shelters you from rain-soaking, and protects structures from rain wear.","Чари утворюють тихий прихисток: стримують ворожих істот, захищають тебе від дощового промокання, а споруди — від зношування під дощем.");
+                case "Mountain":return GoldUiLocalization.Text("The forge's heat hastens furnaces and cooking. Structures withstand attacks better; they and equipment in your inventory gradually regain durability.","Жар горна пришвидшує роботу печей і приготування їжі. Споруди краще витримують атаки; вони та спорядження у твоєму інвентарі поступово відновлюють міцність.");
+                case "Plains":return GoldUiLocalization.Text("Feasts eaten here sustain you longer. Within the blessing, already-active Rested, Forsaken powers, and poison, frost and fire resistance are renewed; your Forsaken power recovers sooner.","Бенкети, спожиті тут, довше підтримують твої сили. У межах чарів поновлюються вже активні відпочинок, сили босів та опір отруті, морозу й вогню; сила боса швидше відновлюється.");
+                case "Mistlands":return GoldUiLocalization.Text("Within the blessing, mist parts and movement and falling become light, as with a feather cape. Eitr refining and sap collection quicken; refinery projectiles cannot harm workshop structures.","У межах чарів імла розступається, а рух і падіння стають легкими, як у пір’яній накидці. Очищення ейтру та збирання соку пришвидшуються; снаряди очищувача не шкодять спорудам майстерні.");
                 default:return "";
             }
         }
     }
 }
-

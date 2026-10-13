@@ -51,9 +51,13 @@ namespace ValheimMastery
         [ThreadStatic]internal static ZDO Spawning;
         [ThreadStatic]internal static bool Hit;
         private const string SourceKey="vm.idol.radiation.source.v1",CreatorKey="vm.idol.radiation.creator.v1",WorldKey="vm.idol.radiation.world.v1";
+        private static Type IteratorType;
+        private static FieldInfo IteratorOwner;
         internal static ZDO Source(object iterator)
         {
-            var radiator=AccessTools.Field(iterator.GetType(),"<>4__this")?.GetValue(iterator) as Radiator;
+            var type=iterator.GetType();
+            if(IteratorType!=type){IteratorOwner=AccessTools.Field(type,"<>4__this");IteratorType=type;}
+            var radiator=IteratorOwner?.GetValue(iterator) as Radiator;
             var station=radiator?.GetComponentInParent<Smelter>();return MasterIdolMistlands.Refinery(station)&&station.m_nview?.IsValid()==true&&station.m_nview.IsOwner()?station.m_nview.GetZDO():null;
         }
         internal static void Mark(Projectile projectile)

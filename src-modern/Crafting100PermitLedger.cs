@@ -39,6 +39,7 @@ namespace ValheimMastery
         internal sealed class State
         {
             internal double Craft, Forge;
+            internal double SharedRemaining => Math.Max(Craft, Forge);
             internal long Generation;
             internal Permit Pending;
             internal Dictionary<string, Terminal> Results = new Dictionary<string, Terminal>(StringComparer.Ordinal);
@@ -112,7 +113,7 @@ namespace ValheimMastery
             State p = Get(id);
             if (p.Results.ContainsKey(permit.Token)) return false;
             if (p.Pending != null) return Same(p.Pending, permit);
-            if (p.Results.Count >= MaximumResults || !Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)permit.Kind, p.Craft, p.Forge, false)) return false;
+            if (p.Results.Count >= MaximumResults || (p.SharedRemaining != 0 || !Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)permit.Kind, p.Craft, p.Forge, false))) return false;
             if (!Players.ContainsKey(id) && Players.Count >= MaximumPlayers || p.Generation == long.MaxValue) return false;
             p.Pending = permit.Copy(); p.Generation++; Players[id] = p; Dirty = true;
             return Flush();
@@ -131,7 +132,7 @@ namespace ValheimMastery
         {
             if (!Available || !Players.TryGetValue(id, out var old) || old.Pending == null || old.Pending.Token != token || old.Pending.Encoded != encoded || old.Pending.World != world || old.Pending.OriginPhase != 1) return false;
             if (old.Pending.Admitted) return true;
-            if (!Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)old.Pending.Kind, old.Craft, old.Forge, false) || old.Generation == long.MaxValue) return false;
+            if ((old.SharedRemaining != 0 || !Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)old.Pending.Kind, old.Craft, old.Forge, false)) || old.Generation == long.MaxValue) return false;
             var p = old.Copy(); p.Pending.Admitted = true; p.Generation++; Players[id] = p; Dirty = true; return Flush();
         }
         internal bool Settle(long id, string token, string encoded, long world, int phase)
@@ -141,7 +142,7 @@ namespace ValheimMastery
             if (old.Pending == null || old.Pending.Token != token || old.Pending.Encoded != encoded || old.Pending.World != world || old.Generation == long.MaxValue) return false;
             var p = old.Copy();
             if (phase == 2 && !p.Pending.Admitted && p.Pending.OriginPhase != 2) return false;
-            if (phase == 2) { if (p.Pending.Kind == 1) p.Craft = Math.Max(p.Craft, p.Pending.Duration); else p.Forge = Math.Max(p.Forge, p.Pending.Duration); }
+            if (phase == 2) { double shared = Math.Max(p.SharedRemaining, p.Pending.Duration); p.Craft = p.Forge = shared; }
             p.Results.Add(token, new Terminal { Encoded = encoded, World = world, Phase = phase, OriginPhase = p.Pending.OriginPhase, OriginRaw = p.Pending.OriginRaw }); p.Pending = null; p.Generation++;
             Players[id] = p; Dirty = true; return Flush();
         }

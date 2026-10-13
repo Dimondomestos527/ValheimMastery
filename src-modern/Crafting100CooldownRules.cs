@@ -9,7 +9,7 @@ namespace ValheimMastery
     internal static class Crafting100CooldownRules
     {
         internal const double ForgeSeconds = 15 * 60;
-        internal const double MaximumSeconds = 90 * 60;
+        internal const double MaximumSeconds = 135 * 60;
         internal static double PerfectCraftSeconds(int tier)
         {
             switch (tier)
@@ -48,8 +48,8 @@ namespace ValheimMastery
             double forgeRemaining, bool unresolvedAction)
         {
             if (unresolvedAction || !ValidRemaining(craftRemaining) || !ValidRemaining(forgeRemaining)) return false;
-            if (channel == Crafting100CooldownChannel.PerfectCraft) return craftRemaining == 0;
-            if (channel == Crafting100CooldownChannel.PotentialForge) return forgeRemaining == 0;
+            if (channel == Crafting100CooldownChannel.PerfectCraft || channel == Crafting100CooldownChannel.PotentialForge)
+                return Math.Max(craftRemaining, forgeRemaining) == 0;
             return false;
         }
     }

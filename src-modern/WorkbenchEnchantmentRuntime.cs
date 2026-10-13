@@ -6,6 +6,8 @@ using System.Linq;
 using UnityEngine;
 namespace ValheimMastery
 {
+    internal enum WorkbenchEnchantmentAccessFailure
+    { None, Runtime, Disabled, Load, StateUnavailable, IndexUnavailable, JournalUnavailable, Session, Actor, NativeRecord, RenderedIdentity, ServerStation, Range, Skill, Ward, MissingMarker, LostMarker, InvalidMarker, DuplicateMarker, Index, Network, Registration, ReloadAlias }
     internal static class WorkbenchEnchantmentRuntime
     {
         internal const string StationKey="vm.enchant.station.v1";
@@ -62,37 +64,80 @@ namespace ValheimMastery
         }
         internal static string Witness(ZDO data)
         {var p=data.GetPosition();return data.GetPrefab()+"/"+data.GetLong(ZDOVars.s_creator,0)+"/"+p.x.ToString("R",CultureInfo.InvariantCulture)+"/"+p.y.ToString("R",CultureInfo.InvariantCulture)+"/"+p.z.ToString("R",CultureInfo.InvariantCulture);}
-        static bool ActorValid(WorkshopActor actor,ZDO data,CraftingStation station,bool requireSkill=true)
+        // A dedicated host's valid world record need not have a rendered instance.
+        // A present but invalid instance is an identity failure, never a fallback.
+        static bool TryStation(ZDO data,out CraftingStation station,out int level,out WorkbenchEnchantmentAccessFailure failure)
         {
-            if(!Ready||actor?.Available!=true||actor.IsDead()||actor.IsTeleporting()||data==null||station==null||data.GetPrefab()!="piece_workbench".GetStableHashCode()||!ReferenceEquals(Manager.GetZDO(data.m_uid),data)||station.GetComponent<ZNetView>()?.GetZDO()!=data||Vector3.Distance(actor.Position,data.GetPosition())>5f)return false;
+            station=null;level=0;failure=WorkbenchEnchantmentAccessFailure.NativeRecord;
+            if(data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode()||!ReferenceEquals(Manager?.GetZDO(data.m_uid),data))return false;
+            var scene=ZNetScene.instance;if(scene==null)return false;
+            var loaded=scene.FindInstance(data.m_uid);
+            if(loaded!=null)
+            {
+                failure=WorkbenchEnchantmentAccessFailure.RenderedIdentity;
+                var live=loaded.GetComponent<CraftingStation>();var view=loaded.GetComponent<ZNetView>();
+                if(live==null||view?.IsValid()!=true||!ReferenceEquals(view.GetZDO(),data))return false;
+                station=live;level=live.GetLevel(false);failure=WorkbenchEnchantmentAccessFailure.None;return true;
+            }
+            failure=WorkbenchEnchantmentAccessFailure.ServerStation;
+            var entry=WorkshopWorldRecords.Find(data.m_uid);var definition=scene.GetPrefab(data.GetPrefab());
+            if(entry?.Station==null||entry.Level<1||!ReferenceEquals(entry.Data,data)||!ReferenceEquals(Manager.GetZDO(data.m_uid),data)||
+                definition==null||!ReferenceEquals(entry.Definition,definition)||!ReferenceEquals(definition.GetComponent<CraftingStation>(),entry.Station))return false;
+            station=entry.Station;level=entry.Level;failure=WorkbenchEnchantmentAccessFailure.None;return true;
+        }
+        static WorkbenchEnchantmentAccessFailure ActorFailure(WorkshopActor actor,ZDO data,CraftingStation station,bool requireSkill)
+        {
+            if(!Ready)return WorkbenchEnchantmentAccessFailure.Runtime;
+            if(actor?.Available!=true||actor.IsDead()||actor.IsTeleporting())return WorkbenchEnchantmentAccessFailure.Actor;
+            if(!TryStation(data,out var current,out _,out var failure))return failure;
+            if(station==null||!ReferenceEquals(station,current))return WorkbenchEnchantmentAccessFailure.RenderedIdentity;
+            if(Vector3.Distance(actor.Position,data.GetPosition())>5f)return WorkbenchEnchantmentAccessFailure.Range;
             bool skill=actor.Rpc==null?OwnerSkillAuthority.Has(Player.m_localPlayer,Skills.SkillType.Crafting,100):OwnerSkillAuthority.Has(actor.Rpc,actor.CharacterId,actor.GetPlayerID(),Skills.SkillType.Crafting,100);
-            return (!requireSkill||skill)&&MasterIdolWorldIndex.WardAllows(actor.GetPlayerID(),data.GetPosition());
+            if(requireSkill&&!skill)return WorkbenchEnchantmentAccessFailure.Skill;
+            return MasterIdolWorldIndex.WardAllows(actor.GetPlayerID(),data.GetPosition())?WorkbenchEnchantmentAccessFailure.None:WorkbenchEnchantmentAccessFailure.Ward;
+        }
+        static bool ActorValid(WorkshopActor actor,ZDO data,CraftingStation station,bool requireSkill=true)=>ActorFailure(actor,data,station,requireSkill)==WorkbenchEnchantmentAccessFailure.None;
+        static WorkbenchEnchantmentAccessFailure ReadinessFailure()
+        {
+            if(MasteryPlugin.Settings?.Enabled?.Value!=true)return WorkbenchEnchantmentAccessFailure.Disabled;
+            if(!MasterIdolLoadIdentity.LoadReady)return WorkbenchEnchantmentAccessFailure.Load;
+            if(Failed)return WorkbenchEnchantmentAccessFailure.StateUnavailable;
+            if(!MasterIdolWorldIndex.Ready)return WorkbenchEnchantmentAccessFailure.IndexUnavailable;
+            if(Service==null||Journal?.Ready!=true)return WorkbenchEnchantmentAccessFailure.JournalUnavailable;
+            return Current()?WorkbenchEnchantmentAccessFailure.None:WorkbenchEnchantmentAccessFailure.Session;
         }
         internal static WorkbenchEnchantmentContext Resolve(ZRpc rpc,ZDOID selected,bool allowNew,bool requireSkill=true)
+            =>Resolve(rpc,selected,allowNew,requireSkill,out _);
+        internal static WorkbenchEnchantmentContext Resolve(ZRpc rpc,ZDOID selected,bool allowNew,bool requireSkill,out WorkbenchEnchantmentAccessFailure failure)
         {
-            Tick();if(!Ready)return null;var actor=WorkshopActor.Resolve(rpc);var data=Manager.GetZDO(selected);var station=ZNetScene.instance?.FindInstance(selected)?.GetComponent<CraftingStation>();
-            if(!ActorValid(actor,data,station,requireSkill))return null;Index();string id=data.GetString(StationKey,"");
+            Tick();failure=ReadinessFailure();if(failure!=WorkbenchEnchantmentAccessFailure.None)return null;var actor=WorkshopActor.Resolve(rpc);var data=Manager.GetZDO(selected);
+            if(!TryStation(data,out var station,out int level,out failure))return null;
+            failure=ActorFailure(actor,data,station,requireSkill);if(failure!=WorkbenchEnchantmentAccessFailure.None)return null;Index();string id=data.GetString(StationKey,"");
             if(id.Length==0)
             {
-                if(!allowNew)return null;string witness=Witness(data);
+                if(!allowNew){failure=WorkbenchEnchantmentAccessFailure.MissingMarker;return null;}string witness=Witness(data);
                 // A lost native marker is unresolved, never a second charged bench.
-                var all=Journal.Snapshot();if(all.Stations.Values.Any(b=>!b.Removed&&(b.NativeUid==selected.ToString()||b.NativeWitness==witness)))return null;
+                var all=Journal.Snapshot();if(all.Stations.Values.Any(b=>!b.Removed&&(b.NativeUid==selected.ToString()||b.NativeWitness==witness))){failure=WorkbenchEnchantmentAccessFailure.LostMarker;return null;}
                 id=Guid.NewGuid().ToString("N");data.Set(StationKey,id);InvalidateIndex();Index();
             }
-            if(!Guid.TryParseExact(id,"N",out _)||Duplicates.Contains(id)||!NativeStations.TryGetValue(id,out var current)||!ReferenceEquals(current,data)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out string network))return null;
-            var context=new WorkbenchEnchantmentContext{World=World,Actor=actor.GetPlayerID(),Station=id,NativeUid=selected.ToString(),NativeLevel=station.GetLevel(false),Network=network};
+            if(!Guid.TryParseExact(id,"N",out _)){failure=WorkbenchEnchantmentAccessFailure.InvalidMarker;return null;}
+            if(Duplicates.Contains(id)){failure=WorkbenchEnchantmentAccessFailure.DuplicateMarker;return null;}
+            if(!NativeStations.TryGetValue(id,out var current)||!ReferenceEquals(current,data)){failure=WorkbenchEnchantmentAccessFailure.Index;return null;}
+            if(!MasterIdolNetworkCache.TryKey(data.GetPosition(),out string network)){failure=WorkbenchEnchantmentAccessFailure.Network;return null;}
+            var context=new WorkbenchEnchantmentContext{World=World,Actor=actor.GetPlayerID(),Station=id,NativeUid=selected.ToString(),NativeLevel=level,Network=network};
             var expectedSession=Session;var expectedManager=Manager;ulong expectedGeneration=Generation;
             context.Revalidate=()=>
             {
                 if(Session!=expectedSession||Manager!=expectedManager||Generation!=expectedGeneration||!ActorValid(actor,data,station,requireSkill)||data.GetString(StationKey,"")!=id)return false;
                 Index();if(Duplicates.Contains(id)||!NativeStations.TryGetValue(id,out var record)||!ReferenceEquals(record,data)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var key))return false;
-                context.NativeLevel=station.GetLevel(false);context.Network=key;return true;
+                if(!TryStation(data,out var bound,out int currentLevel,out _)||!ReferenceEquals(bound,station))return false;
+                context.NativeLevel=currentLevel;context.Network=key;return true;
             };
             var saved=Journal.ReadStation(id);
-            if(saved==null){if(!allowNew||!Service.RegisterSelected(context,Witness(data)))return null;}
+            if(saved==null){if(!allowNew||!Service.RegisterSelected(context,Witness(data))){failure=WorkbenchEnchantmentAccessFailure.Registration;return null;}}
             else if(saved.NativeUid!=selected.ToString())
             {
-                if(!Service.BindReloadAlias(context,Witness(data),()=>WorkbenchEnchantmentNativeIdentity.Matches(data,saved.Id)&&context.Revalidate()))return null;
+                if(!Service.BindReloadAlias(context,Witness(data),()=>WorkbenchEnchantmentNativeIdentity.Matches(data,saved.Id)&&context.Revalidate())){failure=WorkbenchEnchantmentAccessFailure.ReloadAlias;return null;}
             }
             return context;
         }
@@ -103,7 +148,7 @@ namespace ValheimMastery
             int count=0;foreach(var b in state.Stations.Values)
             {
                 if(b.Id==selected||b.Removed||b.Active.Length==0||Journal.HasPending(b.Id)||!NativeStations.TryGetValue(b.Id,out var data)||Duplicates.Contains(b.Id)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var other)||other!=group)continue;
-                var native=ZNetScene.instance.FindInstance(data.m_uid)?.GetComponent<CraftingStation>();if(native==null||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),native.GetLevel(false),out var available)||!available.Contains(b.Active))continue;
+                if(!TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),level,out var available)||!available.Contains(b.Active))continue;
                 if(b.Active==choice)return false;count++;
             }
             return count<2;
@@ -128,6 +173,27 @@ namespace ValheimMastery
         {
             if(!Ready||data==null||!MasterIdolWorldIndex.Ensure()||!ReferenceEquals(Manager.GetZDO(data.m_uid),data))return false;
             Index();return !Duplicates.Contains(id)&&NativeStations.TryGetValue(id,out var selected)&&ReferenceEquals(selected,data)&&data.GetString(StationKey,"")==id;
+        }
+        // Natural travel-menu opens only. An over-limit sentinel is denied, never truncated.
+        internal static ZDOID[] TravelCandidates()
+        {
+            if(!Ready||Session?.IsServer()!=true||!MasterIdolWorldIndex.Ensure())return Array.Empty<ZDOID>();
+            Index();return NativeStations.Values.Take(4097).Select(data=>data.m_uid).ToArray();
+        }
+        internal static bool TryTravelEndpoint(ZDOID uid,WorkshopActor actor,out WorkbenchTravelEndpoint endpoint)
+        {
+            endpoint=null;
+            if(!Ready||Session?.IsServer()!=true||actor?.Available!=true||actor.IsDead()||actor.IsTeleporting())return false;
+            var data=Manager?.GetZDO(uid);if(data==null)return false;
+            string id=data.GetString(StationKey,"");
+            if(!Guid.TryParseExact(id,"N",out _)||!UniqueNative(data,id)||Journal.HasPending(id))return false;
+            var row=Journal.ReadStation(id);
+            if(row==null||row.Removed||row.NativeUid!=uid.ToString()||row.NativeWitness!=Witness(data)||!WorkbenchEnchantmentRules.Known(row.Active)||
+                !TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(row),level,out var available)||!available.Contains(row.Active))return false;
+            var published=MasterIdolEffectZones.Find(uid+"/"+id);
+            if(published==null||published.Type!=row.Active||published.Home!=data.GetPosition()||
+                !MasterIdolWorldIndex.WardAllows(actor.GetPlayerID(),data.GetPosition()))return false;
+            endpoint=new WorkbenchTravelEndpoint(uid,id,row.Active,data.GetPosition(),data.GetRotation());return true;
         }
         // No player opening is needed to certify a loaded bench's exact identity.
         internal static bool BindLoadedNative(ZDO data)
@@ -201,7 +267,7 @@ namespace ValheimMastery
             {
                 if(Duplicates.Contains(id)||Journal.HasPending(id))continue;var b=Journal.ReadStation(id);var data=NativeStations[id];
                 if(b==null||b.Removed||b.NativeUid!=data.m_uid.ToString()||b.Active.Length==0)continue;
-                var native=ZNetScene.instance.FindInstance(data.m_uid)?.GetComponent<CraftingStation>();if(native==null||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),native.GetLevel(false),out var available)||!available.Contains(b.Active)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var group))continue;
+                if(!TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),level,out var available)||!available.Contains(b.Active)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var group))continue;
                 if(!groups.TryGetValue(group,out var types))groups[group]=types=new HashSet<string>(StringComparer.Ordinal);if(types.Count>=2||!types.Add(b.Active))continue;
                 var circles=MasterIdolNetworkCache.EffectCoverage(data.GetPosition());if(circles.Length==0)continue;
                 string home=data.m_uid+"/"+id;

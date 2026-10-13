@@ -8,7 +8,7 @@ namespace ValheimMastery
 {
     internal static class Crafting100PermitService
     {
-        private const int Version = 2, Requested = 1, Applied = 2, Rejected = 3;
+        private const int Version = 2, Requested = 1, Applied = 2, Rejected = 3, Uncertain = 4;
         private static Func<WorkshopActor, GoldAction, bool, double> ValidateServer;
         private static Func<Player, GoldAction, int> ApplyLocal;
         private static Func<GoldAction, double> MigrationDuration;
@@ -53,7 +53,7 @@ namespace ValheimMastery
         internal static bool Outstanding => ReadReceipt(Player.m_localPlayer, out _, out _) || !string.IsNullOrEmpty(PendingToken);
         internal static bool CanStart(int kind) => Ready && !Outstanding && !GoldDivineTransactions.Outstanding &&
             !WorkshopRemoteCraft.ClientBusy && !WorkshopRecovery.Outstanding &&
-            Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)kind, CraftRemaining, ForgeRemaining, false);
+            CraftRemaining == 0 && ForgeRemaining == 0 && Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)kind, CraftRemaining, ForgeRemaining, false);
         internal static bool ServerBlocksLegacy(long id) => !CurrentLedger(ZNet.instance, World, Ledger) || Validating.ContainsKey(id) || Ledger.Get(id)?.Pending != null;
         private static bool LegacySafe(WorkshopActor actor) => actor?.Available == true &&
             GoldCraftingService.TryGetRecoveryLedger(Session, World, out var oldLedger) &&
@@ -75,7 +75,7 @@ namespace ValheimMastery
         // Every unfinished legacy request is fenced from old Commit/Apply under this patch.
         internal static bool HandleLegacy(ZRpc rpc, WorkshopActor actor, GoldAction action, string encoded, int phase)
         {
-            if (!CurrentLedger(ZNet.instance, World, Ledger) || MigrationDuration == null || PrepareLegacy == null || actor?.Available != true) return true;
+            if (action?.WireVersion != 1 || !CurrentLedger(ZNet.instance, World, Ledger) || MigrationDuration == null || PrepareLegacy == null || actor?.Available != true) return true;
             string nonce = MigrationNonce(actor); if (nonce == null) return true;
             var state = Ledger.Get(actor.GetPlayerID());
             if (state.Results.TryGetValue(action.Token, out var terminal))
@@ -126,7 +126,7 @@ namespace ValheimMastery
         }
         private static void ReceiveMigrationProof(ZRpc rpc, WorkshopActor actor, string nonce, GoldAction action, string encoded, int originPhase, string originRaw, int outcome)
         {
-            if (MigrationNonce(actor) != nonce) return;
+            if (action?.WireVersion != 1 || MigrationNonce(actor) != nonce) return;
             long id = actor.GetPlayerID(); var state = Ledger.Get(id);
             if (OriginPhase(originRaw, encoded) != originPhase || originPhase == 0 || outcome < 1 || outcome > 3 ||
                 (originPhase == 2 ? outcome != 2 : originPhase == 3 ? outcome != 3 : outcome == 2)) return;
@@ -202,7 +202,7 @@ namespace ValheimMastery
         { rpc.Register<ZPackage>("VM_C100_Request", Receive); rpc.Register<ZPackage>("VM_C100_Grant", Grant); rpc.Register<ZPackage>("VM_C100_State", State); }
         internal static bool TryRequest(GoldAction action)
         {
-            if (action == null || !CanStart(action.Kind)) return false;
+            if (action?.WireVersion != 2 || !CanStart(action.Kind)) return false;
             try
             {
                 string encoded = action.Encode(); GoldAction.Decode(encoded);
@@ -216,17 +216,26 @@ namespace ValheimMastery
         private static bool SaveOutcome(Player player, GoldAction action, int phase)
         {
             if (!CurrentLocal || player != Player.m_localPlayer || Quarantined || !ReadReceipt(player, out var saved, out int old) ||
-                saved == null || saved.Encode() != action?.Encode() || old != Requested || Applying != null && !ApplicationCurrent(action)) return false;
+                saved == null || saved.Encode() != action?.Encode() || (old != Requested && !(old == Uncertain && action.WireVersion == 2)) || Applying != null && !ApplicationCurrent(action)) return false;
             return WriteReceipt(player, action, phase);
         }
         private static bool ApplicationCurrent(GoldAction action) => ContextCurrent(Applying) && Applying.Encoded == action?.Encode() &&
             (string.IsNullOrEmpty(Applying.OriginRaw) || Linked(Player.m_localPlayer, Applying.Encoded, Applying.OriginRaw));
+        // Private V2 RAM fence, never a server phase or another profile checkpoint.
+        // Ordinary saves may capture this unresolved receipt with a partial batch.
+        private static bool FenceV2Application(Player player, GoldAction action)
+        {
+            if (action?.WireVersion != 2 || !ApplicationCurrent(action) || player != Player.m_localPlayer ||
+                !ReadReceipt(player, out var saved, out int phase) || phase != Requested || saved?.Encode() != action.Encode()) return false;
+            player.m_customData[JournalKey] = Uncertain + ":" + action.Encode();
+            return true;
+        }
         private static bool ReadReceipt(Player player, out GoldAction action, out int phase)
         {
             action = null; phase = 0;
             if (player == null || !player.m_customData.TryGetValue(JournalKey, out string raw)) return false;
             try
-            { int split = raw.IndexOf(':'); phase = int.Parse(raw.Substring(0, split)); action = GoldAction.Decode(raw.Substring(split + 1)); if (phase < 1 || phase > 3) throw new FormatException(); return true; }
+            { int split = raw.IndexOf(':'); phase = int.Parse(raw.Substring(0, split)); action = GoldAction.Decode(raw.Substring(split + 1)); if (phase < Requested || (phase > Rejected && !(phase == Uncertain && action.WireVersion == 2))) throw new FormatException(); return true; }
             catch { phase = -1; action = null; return true; }
         }
         private static bool WriteReceipt(Player player, GoldAction action, int phase)
@@ -247,7 +256,7 @@ namespace ValheimMastery
         { var p = new ZPackage(); p.Write(Version); p.Write(World); p.Write(LocalId); p.Write(LocalCharacter); p.Write(Nonce); return p; }
         private static void Send(GoldAction action, int phase)
         {
-            if (!CurrentLocal || string.IsNullOrEmpty(Nonce)) return;
+            if (!CurrentLocal || string.IsNullOrEmpty(Nonce) || action != null && (phase < Requested || phase > Rejected)) return;
             try
             {
                 var p = Header(); p.Write(phase); p.Write(action?.Encode() ?? "");
@@ -310,9 +319,12 @@ namespace ValheimMastery
                 }
                 if (phase != Requested || !Enabled || ValidateServer == null || !GoldCraftingService.HasGold(actor) || actor.IsDead() || actor.IsTeleporting()) return;
                 if (state.Pending?.OriginPhase != 0 && state.Pending != null) { RequestMigrated(rpc, actor, nonce, a, encoded); return; }
+                // V1 is recovery only. A fresh quality-5 request cannot enter the new design.
+                if (a.WireVersion == 1 && (state.Pending?.Admitted != true || state.Pending.Token != a.Token || state.Pending.Encoded != encoded || state.Pending.World != World))
+                { Reply(rpc, actor, nonce, 0, encoded); return; }
                 if (!LegacySafe(actor)) { Reply(rpc, actor, nonce, 0, encoded); return; }
                 double duration = ValidateServer(actor, a, false);
-                if (!ValidDuration(duration) || state.Pending == null && !Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)a.Kind, state.Craft, state.Forge, false))
+                if (!ValidDuration(duration) || state.Pending == null && (state.SharedRemaining != 0 || !Crafting100CooldownRules.CanStart((Crafting100CooldownChannel)a.Kind, state.Craft, state.Forge, false)))
                 { Reply(rpc, actor, nonce, 0, encoded); return; }
                 if (Validating.ContainsKey(id)) return;
                 Validating.Add(id, encoded);
@@ -354,7 +366,7 @@ namespace ValheimMastery
         {
             var state = Ledger?.Get(actor.GetPlayerID()); if (state == null) return;
             var p = ReplyHeader(actor, nonce); p.Write(Enabled && ValidateServer != null && LegacySafe(actor)); p.Write(GoldCraftingService.HasGold(actor));
-            p.Write(state.Generation); p.Write(state.Craft); p.Write(state.Forge); p.Write(state.Pending?.Token ?? "");
+            p.Write(state.Generation); p.Write(state.SharedRemaining); p.Write(state.SharedRemaining); p.Write(state.Pending?.Token ?? "");
             try { if (rpc == null) { p.SetPos(0); State(null, p); } else rpc.Invoke("VM_C100_State", p); }
             catch (Exception e) { Log("Snapshot deferred", e); }
         }
@@ -422,7 +434,11 @@ namespace ValheimMastery
                     var context = new ApplicationContext { Session = session, World = world, Player = id, Character = character, Nonce = nonce, Encoded = encoded, OriginRaw = originRaw };
                     KnownEpochs[id] = Crafting100LegacySaveProof.RecordedEpoch(player);
                     Applying = context; int result;
-                    try { result = ApplyLocal(player, action); }
+                    try
+                    {
+                        if (action.WireVersion == 2 && !FenceV2Application(player, action)) { FaultActor(id); return; }
+                        result = ApplyLocal(player, action);
+                    }
                     finally { if (ReferenceEquals(Applying, context)) Applying = null; }
                     if (CurrentLocal && session == Session && world == World && id == LocalId && character == LocalCharacter && nonce == Nonce &&
                         (result == Applied || result == Rejected) && ReadReceipt(player, out var outcome, out int outcomePhase) &&
@@ -447,6 +463,7 @@ namespace ValheimMastery
         }
         private static void PrepareMigration(Player player, GoldAction action, string originRaw)
         {
+            if (action?.WireVersion != 1) { FaultActor(player.GetPlayerID()); return; }
             string encoded = action.Encode(); int originPhase = OriginPhase(originRaw, encoded);
             if (originPhase == 0 || PrepareLegacy == null || !player.m_customData.TryGetValue(LegacyKey, out string original) || original != originRaw) return;
             if (ReadReceipt(player, out var existing, out int existingPhase))
@@ -528,7 +545,11 @@ namespace ValheimMastery
             if (Deferred.Count > 0) { try { Deferred.Dequeue()(); } catch (Exception e) { FaultActor(LocalId); Log("Outcome uncertain", e); } }
             if (!CurrentLocal || Time.unscaledTime < NextSync || !Session.IsServer() && !NetworkSync.HasServerSettings) return;
             NextSync = Time.unscaledTime + 2f; OwnerSkillAuthority.SendNow(); Send(null, 0);
-            if (!Quarantined && ReadReceipt(local, out var receipt, out int phase) && receipt != null && phase > 0 && (phase != Requested || Enabled)) Send(receipt, phase);
+            if (ReadReceipt(local, out var receipt, out int phase) && receipt != null)
+            {
+                if (phase == Uncertain) { RecoveryReason = "v2-outcome-unresolved"; FaultActor(id); }
+                else if (!Quarantined && phase >= Requested && phase <= Rejected && (phase != Requested || Enabled)) Send(receipt, phase);
+            }
         }
         private static void TrackClock(WorkshopActor actor, float now, Dictionary<long, Clock> online)
         {

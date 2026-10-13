@@ -28,7 +28,7 @@ namespace ValheimMastery
                 words["vm_perk_polearms_100_desc"] = "The All-Father saw in your whirlwind a will capable of turning the tide of battle. Only while continuously spinning your atgeir, you reflect hostile arrows and other supported projectiles.";
                 words["vm_perk_polearms_100_flavor"] = "A hostile shot does not have the final word.";
                 words["vm_perk_crossbows_35_name"] = "Iron Composure";
-                words["vm_perk_crossbows_35_desc"] = "While actively reloading a crossbow: +20 armor, +40% current armor and double stagger capacity. Protection ends when the reload ends or is interrupted. Crossbows retain 85% of the native skill-derived damage contribution, not 85% final damage.";
+                words["vm_perk_crossbows_35_desc"] = "While reloading, your crossbow grants extra armor and stagger resistance—even while sprinting. Its parries withstand much stronger blows, and its bolts hit staggered creatures harder. The skill's contribution to crossbow damage remains reduced.";
                 words["vm_perk_crossbows_35_flavor"] = "A heavy shot rewards the one who survives preparing it.";
                 words["vm_perk_crossbows_70_name"] = "Personal Field Turret";
                 words["vm_perk_crossbows_70_desc"] = "Deploy one personal turret with crossbow secondary attack. Supply your crossbow and as many compatible bolts as fit in its container. Empty hands + secondary starts or stops it. It searches the forward firing sector for hostile creatures while its owner is alive and online; never players or tames. Retrieve the same weapon and remaining bolts from the stopped container, then clear the empty platform.";
@@ -65,12 +65,12 @@ namespace ValheimMastery
                 words["vm_perk_blocking_70_name"] = "Shield Rush";
                 words["vm_perk_blocking_70_desc"] = "Block and dodge to rush without direct damage or dodge invulnerability. Bucklers move faster and farther; tower shields push a wider corridor with stronger stagger and force. Your stagger pressure strengthens the impact.";
 #endif
-                words["vm_perk_elementalmagic_35_name"] = "Path of Two Elements";
-                words["vm_perk_elementalmagic_35_desc"] = "A fire staff gathers heat: a longer charge strengthens its flames, blast and burning. An ice staff leaves frost that wounds and slows foes. Frostbitten flying prey descends and stays low until the cold fades; bosses resist this pressure.";
+                words["vm_perk_elementalmagic_35_name"] = "Path of the Elements";
+                words["vm_perk_elementalmagic_35_desc"] = "The fireball staff gathers heat: a longer charge strengthens its flames, blast and burning. The ice-shard staff leaves frost that wounds and slows; flying foes descend until the cold fades, but bosses resist this pressure. A charged fracturing staff scatters more fragments with stronger, wider blasts, at greater eitr cost. If most of a Dundr volley hits one foe, extra projectiles scatter from that foe toward the nearest other unobstructed foes. Each summoned vine regrows only once after death or withering and briefly strikes harder.";
                 words["vm_perk_elementalmagic_70_name"] = "Spells of the Nine Worlds";
-                words["vm_perk_elementalmagic_70_desc"] = "A fire staff summons Zharik, a fiery companion who fights at your side. A stronger staff empowers him; another call brings back and heals the same living companion. An ice staff raises a storm that wounds and binds foes; another call relocates it.";
+                words["vm_perk_elementalmagic_70_desc"] = "The fireball staff summons Zharik, a fiery companion who fights at your side. A stronger staff empowers him; another call brings back and heals the same living companion. The ice-shard staff raises a storm that wounds and binds foes; another call relocates it.";
                 words["vm_perk_bloodmagic_35_name"] = "The Dead Keep Pace";
-                words["vm_perk_bloodmagic_35_desc"] = "A skeleton staff gathers a retinue of skeletons around you. A protection staff sustains its shield bearer and lets you replenish unbroken shields with your own lifeblood. Each successive second of renewal consumes more health.";
+                words["vm_perk_bloodmagic_35_desc"] = "A skeleton staff gathers a retinue of skeletons. A protection staff sustains its shield bearer and lets you replenish unbroken shields with your lifeblood, spending more health each second. The troll staff summons a temporary ally who is more vulnerable during that time; its allegiance then ends. Its death repeats the summoning blast, endangering everyone nearby.";
                 words["vm_perk_bloodmagic_70_desc"] = "A skeleton staff summons Torba, a hardy bearer of portal-safe cargo who avoids battle and recovers in safety. A protection staff binds a foe in a blood cage; when its bonds burst, the shield's strength punishes the captive.";
                 words["vm_perk_spears_70_desc"] = "Your thrown spear attaches to an enemy. With your hand free, secondary attack pulls a small enemy towards you, or pulls you towards a heavy enemy or boss. Kick is disabled while attached; facing the target is unnecessary. Pull speed scales up to +100% at skill100. An obstacle stops movement without breaking the tether: reposition and press again. Failed motion refunds its cooldown; a successful pull has a12-second cooldown. Returning or losing the spear, death of either character, or player teleportation ends the tether. Block returns the same spear.";
                 words["vm_perk_bows_70_name"] = "Through and Through";
@@ -124,3 +124,4 @@ namespace ValheimMastery
         private static void Postfix(Localization __instance) => PerkLocalization.Register(__instance);
     }
 }
+

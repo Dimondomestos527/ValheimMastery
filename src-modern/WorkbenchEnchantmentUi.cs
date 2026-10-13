@@ -35,6 +35,7 @@ namespace ValheimMastery
         private CraftingStation _station;
         private string _selected = "Meadows", _message = "";
         private bool _open, _pending;
+        private bool _nativeTabsOwned, _priorCraftTabInteractable, _priorUpgradeTabInteractable;
         private UIGroupHandler _priorUiGroup, _ownedUiGroup;
         private static int _traceClicks, _traceLines;
         private static bool _traceBound;
@@ -80,11 +81,11 @@ namespace ValheimMastery
             value.Ready && !value.Pending && value.RemainingSeconds == 0;
         private string CooldownText()
         {
-            if (Contains(_snapshot?.Learned, _selected)) return Text("Відкрито. Перемикання безкоштовне.", "Unlocked. Switching is free.");
+            if (Contains(_snapshot?.Learned, _selected)) return "";
             var value = SelectedCooldown();
             if (value == null) return Text("Кулдаун не підтверджено.", "Cooldown not confirmed.");
             if (value.Pending) return Text("Очікує підтвердження.", "Awaiting confirmation.");
-            if (CooldownReady(value)) return Text("Готово. Без ресурсів.", "Ready. No materials required.");
+            if (CooldownReady(value)) return "";
             if (value.RemainingSeconds > 0)
             {
                 double seconds = Math.Ceiling(value.RemainingSeconds);
@@ -110,12 +111,12 @@ namespace ValheimMastery
         {
             switch (id)
             {
-                case "Meadows": return Text("Луги", "Meadows");
-                case "BlackForest": return Text("Чорний ліс", "Black Forest");
-                case "Swamp": return Text("Болота", "Swamp");
-                case "Mountain": return Text("Гори", "Mountains");
-                case "Plains": return Text("Рівнини", "Plains");
-                case "Mistlands": return Text("Імлисті землі", "Mistlands");
+                case "Meadows": return Text("Щедрість землі", "Earth's Bounty");
+                case "BlackForest": return Text("Варта пралісу", "Forest Watch");
+                case "Swamp": return Text("Тиха гавань", "Quiet Haven");
+                case "Mountain": return Text("Подих горна", "Forge's Breath");
+                case "Plains": return Text("Щедрий бенкет", "Bountiful Feast");
+                case "Mistlands": return Text("Дотик імли", "Mist's Touch");
                 default: return "";
             }
         }
@@ -290,7 +291,7 @@ namespace ValheimMastery
             _player = player; _station = station; _epoch++; _revision = -1; _snapshot = null;
             _priorSelection = EventSystem.current?.currentSelectedGameObject;
             ActivateCraftingGroup();
-            _open = true; _pending = false; _message = ""; _panel.SetActive(true);
+            _open = true; _pending = false; _message = ""; SelectOwnedTab(); _panel.SetActive(true);
             HideNative(); _nextRefresh = 0; Tick();
             EventSystem.current?.SetSelectedGameObject(_choices[0].gameObject);
         }
@@ -309,6 +310,7 @@ namespace ValheimMastery
             Hide(_gui.m_variantButton?.gameObject); Hide(_gui.m_qualityPanel?.gameObject);
             Hide(_gui.m_upgradeItemQuality?.gameObject); Hide(_gui.m_upgradeItemQualityArrow);
             Hide(_gui.m_upgradeItemNextQuality?.gameObject); Hide(_gui.m_itemCraftType?.gameObject);
+            Hide(_gui.m_minStationLevelIcon?.gameObject); Hide(_gui.m_minStationLevelText?.gameObject);
             Hide(_gui.m_craftButton?.transform.parent.Find("ValheimMasteryCreationButton")?.gameObject);
             foreach (var item in _gui.m_recipeRequirementList) Hide(item);
         }
@@ -321,7 +323,7 @@ namespace ValheimMastery
             _tab.gameObject.SetActive(visible);
             if (!_open) return;
             if (!visible || player != _player || station != _station || _gui.m_craftTimer >= 0) { Close(); return; }
-            HideNative();
+            HideNative(); SelectOwnedTab();
             if (Time.unscaledTime < _nextRefresh) return;
             _nextRefresh = Time.unscaledTime + .2f;
             try
@@ -358,8 +360,7 @@ namespace ValheimMastery
                 if (learned && !available) state += Text(" · дрімає", " · dormant");
                 if (_snapshot?.Active == id) state += Text(" · активне", " · active");
                 _choices[i].GetComponentInChildren<TMP_Text>(true).text = ChoiceLabel(id) + state;
-                _choices[i].GetComponentInChildren<TMP_Text>(true).color = _snapshot?.Active == id ?
-                    new Color(.91f, .72f, .36f, 1f) : learned && !available ? Color.gray : Color.white;
+                // Native ButtonTextColor owns label tint; semantic state stays in text and icons.
                 var image = _choices[i].transform.Find("Icon")?.GetComponent<Image>();
                 if (image != null)
                 {
@@ -378,7 +379,10 @@ namespace ValheimMastery
                 description = Detail?.Invoke(_selected) ?? "";
             }
             catch { }
-            _detail.text = ChoiceLabel(_selected) + "\n" + description + "\n" + CooldownText() + "\n" + reason;
+            string cooldown = CooldownText();
+            _detail.text = ChoiceLabel(_selected) + "\n" + description;
+            if (!string.IsNullOrEmpty(cooldown)) _detail.text += "\n" + cooldown;
+            if (!string.IsNullOrEmpty(reason)) _detail.text += "\n" + reason;
             float width = Mathf.Max(1f, _detailViewport.rect.width - 8f);
             _detail.rectTransform.sizeDelta = new Vector2(-8f,
                 Mathf.Max(_detailViewport.rect.height, _detail.GetPreferredValues(_detail.text, width, 0).y + 8f));
@@ -430,6 +434,37 @@ namespace ValheimMastery
             ActionTrace(attempt, queued ? "request-queued" : "request-not-queued");
             if (!queued) { _pending = false; _snapshot = null; _message = Text("Дію не підтверджено.", "Action not confirmed."); Render(); }
         }
+        private void SelectOwnedTab()
+        {
+            if (!_nativeTabsOwned)
+            {
+                _priorCraftTabInteractable = _gui.m_tabCraft.interactable;
+                _priorUpgradeTabInteractable = _gui.m_tabUpgrade.interactable;
+                _nativeTabsOwned = true;
+            }
+            _gui.m_tabCraft.interactable = true; _gui.m_tabUpgrade.interactable = true;
+            _tab.interactable = false; // Native tabs use disabled state for the selected tab.
+        }
+        private void RestoreNativeTabs()
+        {
+            if (!_nativeTabsOwned) return;
+            if (_gui != null)
+            {
+                _gui.m_tabCraft.interactable = _priorCraftTabInteractable;
+                _gui.m_tabUpgrade.interactable = _priorUpgradeTabInteractable;
+            }
+            if (_tab != null) _tab.interactable = true;
+            _nativeTabsOwned = false;
+        }
+        internal static bool TryNativeCraftTab(InventoryGui gui, out bool result)
+        {
+            result = false;
+            var ui = gui != null ? gui.GetComponent<WorkbenchEnchantmentUi>() : null;
+            if (ui == null || !ui._open || !ui._nativeTabsOwned) return false;
+            // Preserve native recipe mode while the custom tab owns visual selection.
+            result = !ui._priorCraftTabInteractable && gui.m_tabCraft.gameObject.activeSelf;
+            return true;
+        }
         private void ActivateCraftingGroup()
         {
             var groups = _gui != null ? _gui.m_uiGroups : null;
@@ -456,7 +491,7 @@ namespace ValheimMastery
             if (_panel != null) _panel.SetActive(false);
             foreach (var pair in _hidden) if (pair.Key != null) pair.Key.SetActive(pair.Value);
             _hidden.Clear();
-            RestoreCraftingGroup();
+            RestoreNativeTabs(); RestoreCraftingGroup();
             var system = EventSystem.current; var selected = system?.currentSelectedGameObject;
             bool owned = selected != null && (selected == _tab?.gameObject || (_panel != null && selected.transform.IsChildOf(_panel.transform)));
             if (owned)
@@ -479,6 +514,15 @@ namespace ValheimMastery
             }
         }
         private void OnDestroy() { OnDisable(); if (_tab != null) Destroy(_tab.gameObject); if (_panel != null) Destroy(_panel); }
+    }
+    [HarmonyPatch(typeof(InventoryGui), "InCraftTab")]
+    internal static class WorkbenchEnchantmentNativeTabModePatch
+    {
+        private static bool Prefix(InventoryGui __instance, ref bool __result)
+        {
+            if (!WorkbenchEnchantmentUi.TryNativeCraftTab(__instance, out bool mode)) return true;
+            __result = mode; return false;
+        }
     }
     [HarmonyPatch(typeof(InventoryGui), "UpdateCraftingPanel")]
     internal static class WorkbenchEnchantmentRefreshPatch
