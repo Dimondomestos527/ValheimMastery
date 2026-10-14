@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Client",
-  "version": "1.4.123-test-enchantment-volundr-all-20261013",
-  "archive": "client-1.4.123-test-enchantment-volundr-all-20261013.zip",
-  "archive_sha256": "f1e30e090c1821b0e622eaad1adf253c5a707d4fae3529a61726ae378850f5c3",
+  "version": "1.4.123-test-ready-fixes-20261014",
+  "archive": "client-1.4.123-test-ready-fixes-20261014.zip",
+  "archive_sha256": "c2754b0a324c0e1317fef1a157a93d4faf171b120d3244e87990bc78ab9e828e",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26344960,
-      "sha256": "e4fc9c6d666890001295f9f6d22a804897b68dceafd92026a260eb075267a78f"
+      "size": 26399744,
+      "sha256": "7c9b0c8987f50d04d73d7c032efcb09111b68866a71f8c12a0cbaf34e1594704"
     }
   ],
   "validation": "TEST_COHORT;ROOT_FINAL_STATIC_GATE_PASS;THREE_NATIVE_BUILDS;EXACT_ACCEPTED_SOURCE_RESOURCES;LIVE_UNTESTED",
@@ -18,17 +18,13 @@
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261013-volundr-v2-all-test",
+  "network_wire_identity": "1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes",
   "known_issues": [
-    "Vanilla fermenter visuals unchanged; optional cloud observer excluded",
-    "Initial two cultivator server admission refusals remain UNKNOWN",
-    "Meadows HUD fix; native Meadows effects not claimed failed",
-    "Historical BlackForest exact LIVE cause unknown; current legacy gate corrected",
-    "Native/controlled checks are not full Unity LIVE",
-    "Völund V2 private character receipt phase4 is unresolved outcome fencing; not a public server phase. Paired new runtime required; older client/server cohort is wire-incompatible.",
-    "Shared character cooldown maximum8100 seconds (135minutes). Installer schema/path/helper behavior unchanged; no receipt/config migration or automatic downgrade is introduced.",
-    "Rare crash/stale Cloud character inconsistency accepted under current performance policy; server-world and normal debit/replay protections retained.",
-    "Full Unity PatchAll, multiplayer, saving/reconnect/restart, actual input and effects remain LIVE UNTESTED.",
+    "Requires paired client/server wire1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes. Earlier installed or public cohorts are incompatible; package readiness does not authorize installation/publication.",
+    "Resident reader accepts3/4 and writes4; after schema4/gameplay writes old425 downgrade is unsupported. Preserve coherent current/old world and store snapshots; no automatic migration or state rollback.",
+    "Völund V2 private character receipt phase4 remains unresolved outcome fencing; maximum8100seconds shared cooldown; installer schema/helpers/paths unchanged.",
+    "Four unfinished Gold100 perks, event topology and unselected ritual5second/audio changes excluded.",
+    "Actual Unity PatchAll/gameplay/rendering/transport remain LIVE UNTESTED. Native compile, contracts and semantic preservation are not gameplay acceptance.",
     "Full Unity PatchAll offline host cctor is LIMITED; no gameplay PASS is claimed.",
     "TEST cohort; full gameplay LIVE acceptance is UNTESTED."
   ]
