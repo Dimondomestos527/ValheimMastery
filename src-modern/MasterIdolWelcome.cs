@@ -16,7 +16,7 @@ namespace ValheimMastery
         private bool Battle=>Ai==null||Creature==null||MasterIdolResidentWork.Busy(Creature)||GetComponent<MasterIdolResidentPresentation>()?.Playing==true||Creature.IsDead()||Creature.InAttack()||Creature.IsStaggering()||Ai.IsAlerted()||Ai is MonsterAI monster&&(monster.m_targetCreature!=null||monster.m_targetStatic!=null);
         private void Update()
         {
-            using var aggregate=new MasterIdolPerf.Scope("welcome.update");
+            using var aggregate=new MasterIdolPerf.Scope("welcome.update");if(MasterIdolResidentBirthPresentation.Playing(Creature))return;
             if(View?.IsValid()!=true){Stop("view-invalid");return;}
             if(!Registered){View.Register<ZPackage>(Rpc,Receive);Registered=true;}
             if(ZNet.instance?.GetWorld()==null){Stop("world-unavailable");return;}

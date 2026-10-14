@@ -32,11 +32,16 @@ namespace ValheimMastery
                     room+=Math.Max(0,item.m_shared.m_maxStackSize-item.m_stack);
             return room>=quantity&&inventory.CanAddItem(preview,quantity);
         }
+        internal static bool FoodStation(CraftingStation station)=>station!=null&&station.m_craftingSkill==Skills.SkillType.Cooking;
+        internal static bool FoodAction(Recipe recipe,CraftingStation selected,int quality)=>FoodStation(selected)||
+            FoodStation(recipe?.m_craftingStation)||FoodStation(recipe?.GetRequiredStation(Math.Max(1,quality)));
         internal static bool TryOutcome(Recipe recipe,ItemDrop.ItemData target,bool forge,bool shift,
             out int operation,out int quality,out int quantity,out string reason)
         {
             operation=quality=quantity=0;reason="";var item=recipe?.m_item?.m_itemData;
             if(item?.m_shared==null)return false;
+            if(FoodAction(recipe,null,target==null?1:target.m_quality+1))
+            {reason=GoldUiLocalization.Text("Völundr's gift is reserved for the workshop.","Дар Вьолундра належить майстерні.");return false;}
             operation=forge?3:target==null?1:2;
             if(forge)
             {
@@ -94,6 +99,7 @@ namespace ValheimMastery
             {
                 if(!Context()||player.IsDead()||player.IsTeleporting()||action?.WireVersion!=2||
                     !Guid.TryParseExact(action.Token,"N",out _)||currentPermit?.Invoke()!=true||inventory.m_inventory.Count>4096||
+                    FoodAction(recipe,player.GetCurrentCraftingStation(),action.NewQuality)||
                     !TryOutcome(recipe,target,action.Operation==3,action.Shift,out int op,out int quality,out int quantity,out _)||
                     op!=action.Operation||quality!=action.NewQuality||quantity!=action.OutputAmount)return Reject(persistRejected);
                 if(op==1)

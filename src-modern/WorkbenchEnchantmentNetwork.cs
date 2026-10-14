@@ -151,7 +151,10 @@ namespace ValheimMastery
             {if(r.Kind==0)success=true;else if(r.Kind==1)success=WorkbenchEnchantmentRuntime.Service.Learn(context,r.ReceiptOp,r.Choice,clock);else if(r.Kind==2)success=WorkbenchEnchantmentRuntime.Service.Switch(context,r.Choice,WorkbenchEnchantmentRuntime.NetworkAllows);}
             finally{}
             var pendingRow=WorkbenchEnchantmentRuntime.Journal.ReadPending(context.Station);bool pending=r.Kind!=0&&pendingRow?.Actor==r.Actor&&pendingRow.Operation==r.ReceiptOp;
-            Reply(r,success,pending,success?"":pending?"pending":r.Kind==2?"network":"capacity");
+            string reason=success?"":pending?"pending":r.Kind==2?"network":"capacity";
+            if(!success&&!pending&&r.Kind==2&&WorkbenchEnchantmentRules.Known(r.Choice)&&
+                !WorkbenchEnchantmentRuntime.NetworkAllows(context.Station,r.Choice,WorkbenchEnchantmentRuntime.Journal.Snapshot()))reason="world-type-busy";
+            Reply(r,success,pending,reason);
         }
         static void Reply(ServerRequest r,bool success,bool pending,string reason)
         {

@@ -9,6 +9,9 @@ namespace ValheimMastery
         internal float GroundContactSince = -1f, IneligibleSince = -1f;
         internal int Stacks;
         internal bool WaterActive;
+        internal float LastMaxRunAt = -1f, MaxGraceUntil;
+        internal ZNet GraceSession;
+        internal long GraceWorld;
     }
     internal static class Stride70Service
     {
@@ -17,13 +20,19 @@ namespace ValheimMastery
             if (player == null || player != Player.m_localPlayer) return;
             Run70PoiDiscovery.Update(player);
             Stride70State state = MasteryStateStore.GetPlayerState<Stride70State>(player);
+            EnsureGraceContext(player, state);
+            if (!GraceEligible(player))
+            {
+                ClearGrace(state);
+                if (state.WaterActive) EndWater(player, state, "hard eligibility lost");
+                ResetRhythm(player, state);
+            }
             if (!MovementPerkService.OwnerReady(player)) state.EmergencyUntil = 0f;
             bool sprint = MovementPerkService.Valid(player) && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 35) && player.m_run && player.GetMoveDir().sqrMagnitude > .01f && player.GetStamina() > 0f && !player.IsCrouching() && !player.InAttack() && !player.InDodge();
             if (sprint && player.IsRunning())
             {
                 state.LastRunningAt = Time.time;
-                if (state.Stacks == 3 && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70))
-                    state.WaterEntryUntil = Time.time + 1.25f;
+                RefreshMaxRun(player, state);
             }
             if (state.WaterActive)
             {
@@ -45,13 +54,17 @@ namespace ValheimMastery
                 !HasSolidGround(player) && Time.time - state.LastRunningAt < .8f) return;
             // UpdateSwimming runs before this postfix. Keep the fully built rhythm
             // alive while the shoreline changes from walking to swimming.
-            if (state.Stacks == 3 && Time.time <= state.WaterEntryUntil && sprint && !HasSolidGround(player) &&
+            if (state.Stacks == 3 && Time.time <= state.WaterEntryUntil && (sprint || MovingGrace(player, state)) && !HasSolidGround(player) &&
                 player.m_waterLevel > player.m_tarLevel)
                 return;
+            // Holding MAX is separate from accumulating rhythm. Idle never refreshes
+            // the deadline; only a subsequent legitimate grounded run can do that.
+            if (MaxGrace(player, state)) return;
             if (!sprint || (!player.IsRunning() && !state.WaterActive && !player.InLiquidSwimDepth()))
             {
                 state.StartedAt = -1f; state.Stacks = 0;
                 state.WaterEntryUntil = 0f;
+                ClearGrace(state);
                 RoadRhythmPhaseVisual.Clear(player);
                 if (state.EmergencyUntil > Time.time) RoadRhythmVisual.Set(player, 0);
                 else RoadRhythmVisual.Clear(player);
@@ -68,8 +81,7 @@ namespace ValheimMastery
             int stacks = RhythmTier(Time.time - state.StartedAt);
             if (stacks == state.Stacks) return;
             state.Stacks = stacks;
-            if (stacks == 3 && PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70))
-                state.WaterEntryUntil = Time.time + 1.25f;
+            if (stacks == 3) RefreshMaxRun(player, state);
             if (MasteryPlugin.Settings.VerboseLogging.Value)
                 MasteryPlugin.Log.LogInfo("[RunRhythm] phase=" + stacks + " run70=" + PerkRuntimeService.HasPerk(player, Skills.SkillType.Run, 70));
             RoadRhythmVisual.Set(player, stacks);
@@ -79,6 +91,35 @@ namespace ValheimMastery
                 PerkFeedbackService.Play(player, "run_70_stack" + stacks, player.transform.position, false);
         }
         internal static int RhythmTier(float elapsed) => elapsed >= 7f ? 3 : elapsed >= 5f ? 2 : elapsed >= 3f ? 1 : 0;
+        private static void ClearGrace(Stride70State s) { s.LastMaxRunAt = -1f; s.MaxGraceUntil = 0f; s.WaterEntryUntil = 0f; }
+        private static void ResetRhythm(Player p, Stride70State s)
+        {
+            ClearGrace(s); s.Stacks = 0; s.StartedAt = -1f;
+            RoadRhythmPhaseVisual.Clear(p); RoadRhythmVisual.Clear(p);
+        }
+        private static void EnsureGraceContext(Player p, Stride70State s)
+        {
+            var net = ZNet.instance; long world = net?.GetWorld() != null ? net.GetWorldUID() : 0L;
+            if (net == null || world == 0 || !ReferenceEquals(s.GraceSession, net) || s.GraceWorld != world ||
+                (s.LastMaxRunAt >= 0f && Time.time < s.LastMaxRunAt))
+            { ResetRhythm(p, s); s.GraceSession = net; s.GraceWorld = world; }
+        }
+        private static bool GraceEligible(Player p) => MovementPerkService.Valid(p) &&
+            PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 35) && p.GetStamina() > 0f &&
+            !p.IsCrouching() && !p.InAttack() && !p.InDodge() && !p.IsBlocking() && !p.IsDrawingBow() && !p.IsEncumbered() &&
+            !p.AboveOrInLava() && !(p.m_tarLevel > p.m_waterLevel && p.transform.position.y - p.m_tarLevel < p.m_swimDepth);
+        internal static bool MaxGrace(Player p, Stride70State s) => GraceEligible(p) && s.Stacks == 3 &&
+            s.LastMaxRunAt >= 0f && Time.time >= s.LastMaxRunAt && Time.time < s.MaxGraceUntil &&
+            ReferenceEquals(s.GraceSession, ZNet.instance) && s.GraceWorld != 0 && s.GraceWorld == ZNet.instance.GetWorldUID();
+        private static bool MovingGrace(Player p, Stride70State s) => MaxGrace(p, s) &&
+            p.GetMoveDir().sqrMagnitude > .01f && new Vector2(p.m_body.linearVelocity.x, p.m_body.linearVelocity.z).sqrMagnitude > .16f;
+        private static void RefreshMaxRun(Player p, Stride70State s)
+        {
+            if (s.Stacks != 3 || s.WaterActive || !GraceEligible(p) || !p.m_run || !p.IsRunning() ||
+                p.GetMoveDir().sqrMagnitude <= .01f || p.InLiquidSwimDepth() || !HasSolidGround(p) || s.GraceWorld == 0) return;
+            s.LastMaxRunAt = Time.time; s.MaxGraceUntil = Time.time + 3f;
+            if (PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70)) s.WaterEntryUntil = s.MaxGraceUntil;
+        }
         internal static Stride70State State(Player p) => MasteryStateStore.GetPlayerState<Stride70State>(p);
         internal static bool Trail(Player p) => MovementPerkService.Valid(p) && p.m_run && GetStacks(p) == 3 && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70);
         internal static float EmergencySpeed(Player p) => p != null && MasteryStateStore.TryGetPlayerState<Stride70State>(p, out var s) && s.EmergencyUntil > Time.time ? .15f : 0f;
@@ -96,6 +137,7 @@ namespace ValheimMastery
             if (!s.WaterActive) return;
             s.WaterActive = false;
             s.WaterEntryUntil = 0f;
+            ClearGrace(s);
             s.GroundContactSince = -1f;
             s.IneligibleSince = -1f;
             if (MasteryPlugin.Settings.VerboseLogging.Value)
@@ -107,13 +149,16 @@ namespace ValheimMastery
         internal static bool WaterMotion(Player p, float dt)
         {
             var s = State(p);
+            EnsureGraceContext(p, s);
+            if (!GraceEligible(p)) { ClearGrace(s); if (s.WaterActive) EndWater(p, s, "hard eligibility lost"); ResetRhythm(p, s); return false; }
             float offset = p.transform.position.y - p.m_waterLevel;
             // UpdateSwimming may be called before actually reaching water. Do not
             // erase the running rhythm on dry land or above the entry window.
             bool solidGround = HasSolidGround(p);
             if (!s.WaterActive && (solidGround || offset >= 1.5f || p.m_waterLevel <= p.m_tarLevel)) return false;
-            bool entryReady = MovementPerkService.Valid(p) && p.m_run && s.Stacks == 3 && Time.time <= s.WaterEntryUntil && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70);
-            bool eligible = MovementPerkService.Valid(p) && p.m_run && s.Stacks == 3 && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70) &&
+            bool runIntent = p.m_run || MovingGrace(p, s);
+            bool entryReady = MovementPerkService.Valid(p) && runIntent && s.Stacks == 3 && Time.time < s.WaterEntryUntil && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70);
+            bool eligible = MovementPerkService.Valid(p) && runIntent && s.Stacks == 3 && PerkRuntimeService.HasPerk(p, Skills.SkillType.Run, 70) &&
                 p.GetStamina() > 0f && p.GetMoveDir().sqrMagnitude > .01f && !p.InAttack() && !p.InDodge() && !p.IsBlocking() && !p.IsDrawingBow() && !p.IsEncumbered() &&
                 p.m_waterLevel > p.m_tarLevel && !p.AboveOrInLava() && offset > -p.m_swimDepth - .35f && offset < 1.5f && p.m_body.linearVelocity.y > -5f;
             if (s.WaterActive)

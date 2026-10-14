@@ -55,6 +55,8 @@ namespace ValheimMastery
         {
             if (!Prefab(body, TrollName) && !Prefab(body, RootName)) return;
             if (body.GetComponent<Ashlands35SummonLife>() == null) body.gameObject.AddComponent<Ashlands35SummonLife>();
+            if (!Application.isBatchMode && Prefab(body, RootName) && body.GetComponent<Ashlands35RootBuffVisual>() == null)
+                body.gameObject.AddComponent<Ashlands35RootBuffVisual>();
         }
         internal static void Damage(Character body, ref HitData hit)
         {

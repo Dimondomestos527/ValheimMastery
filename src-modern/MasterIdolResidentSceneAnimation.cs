@@ -64,7 +64,7 @@ namespace ValheimMastery
         {
             return Actor!=null&&Ai!=null&&Ai.m_timeSinceHurt>=8&&!MasterIdolSocialSeats.Battle(Ai,Actor)&&!Ai.IsSleeping()&&!Actor.InDodge()&&!Actor.InEmote()&&
                 GetComponent<MasterIdolSocialSeats>()?.Active!=true&&GetComponent<MasterIdolWelcome>()?.IsPresenting!=true&&
-                GetComponent<MasterIdolResidentPresentation>()?.BlocksWork!=true&&!MasterIdolResidentWork.Busy(Actor);
+                GetComponent<MasterIdolResidentPresentation>()?.BlocksWork!=true&&!MasterIdolResidentWork.Busy(Actor)&&!MasterIdolResidentBirthPresentation.Playing(Actor);
         }
         private bool Source(out MasterIdolEffectZone zone)
         {
@@ -200,7 +200,7 @@ namespace ValheimMastery
             if(kind==MasterIdolResidentSceneKind.OccupiedSeat&&!SeatSight(chair))return false;
             MasterIdolSocialScenes.CancelHome(zone.Id);
             MasterIdolVisibleGesture.Cancel(Actor);
-            if(HasGraphics()&&GraphicsScenes+MasterIdolVisibleGesture.GraphicsCount>=MasterIdolResidentSceneRules.MaxGraphicsScenes)return false;
+            if(HasGraphics()&&GraphicsScenes+MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentBirthPresentation.GraphicsCount>=MasterIdolResidentSceneRules.MaxGraphicsScenes)return false;
             var target=kind==MasterIdolResidentSceneKind.Pet?player.m_nview:kind==MasterIdolResidentSceneKind.OccupiedSeat?chair.GetComponentInParent<ZNetView>():fire.m_nview;
             var targetData=target.GetZDO();var other=occupant?.m_nview?.GetZDO();long started=Session.GetTime().Ticks;
             var packet=new ZPackage();packet.Write(World);MasterIdolResidentWork.WriteUid(packet,Data.m_uid);packet.Write((int)Revision);
@@ -237,7 +237,7 @@ namespace ValheimMastery
                 if(!Target(sceneKind,player,chair,other,fire,zone,out var seatKey))return;
                 var clock=ClockFor(home,Session.GetTimeSeconds());if(clock==null||clock.Active!=null)return;
                 MasterIdolVisibleGesture.Cancel(Actor);
-                if(HasGraphics()&&GraphicsScenes+MasterIdolVisibleGesture.GraphicsCount>=MasterIdolResidentSceneRules.MaxGraphicsScenes)return;
+                if(HasGraphics()&&GraphicsScenes+MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentBirthPresentation.GraphicsCount>=MasterIdolResidentSceneRules.MaxGraphicsScenes)return;
                 Kind=sceneKind;Home=home;Clock=clock;SlotKey=seatKey;Started=started;TargetData=targetData;TargetOwner=targetOwner;TargetRevision=(ushort)targetRevision;
                 OtherData=otherData;OtherOwner=otherOwner;OtherRevision=(ushort)otherRevision;PetPlayer=player;Seat=chair;Occupant=other;Fire=fire;
                 float elapsed=MasterIdolResidentSceneRules.Elapsed(started,Session.GetTime().Ticks);double now=Session.GetTimeSeconds();

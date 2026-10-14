@@ -1,95 +1,61 @@
 using UnityEngine;
-
 namespace ValheimMastery
 {
-    // Visual-only: borrows native cluster-bomb particles, never their prefab
-    // scripts, audio, lights, network view or full-screen bubble.
+    // Cosmetic vanilla Ruby mesh only: never instantiate its item/pickup prefab.
     internal sealed class Ashlands35ChargeVisual : MonoBehaviour
     {
-        private const int Capacity = 144;
-        private readonly ParticleSystem.Particle[] Particles = new ParticleSystem.Particle[Capacity];
-        private ParticleSystem Effect;
+        private const string RubyPath = "Assets/GameElements/Items/valuables/Ruby.prefab";
+        private readonly Transform[] Gems = new Transform[Ashlands35VisualRules.RubyCapacity];
         private Vector3 ShaftStart, ShaftEnd;
+        private float Angle;
+        private int Visible = -1;
         private bool Ending;
-        private ParticleSystem.MinMaxGradient NativeColors;
+        private float NativeSize;
+        private Vector3 NativeScale;
 
         internal static Ashlands35ChargeVisual Create(Transform weapon)
         {
-            if (weapon == null || !ResolveShaft(weapon, out Vector3 start, out Vector3 end)) return null;
-            ParticleSystem source = null;
-            foreach (string name in new[] { "fx_clusterbombstaff_splinter_hit", "fx_clusterbombstaff_hit" })
-            {
-                var native = NativePerkAssetResolver.Resolve(name);
-                if (native == null) continue;
-                foreach (var renderer in native.GetComponentsInChildren<ParticleSystemRenderer>(true))
-                    if (renderer.renderMode != ParticleSystemRenderMode.Mesh && renderer.sharedMaterial != null)
-                    {
-                        // The native root is pixel_unlit_red with no MainTex:
-                        // valid for impact pixels, but opaque squares in an orbit.
-                        // Keep the same cluster donor, use its textured fire layer.
-                        Material material = renderer.sharedMaterial;
-                        if (!material.name.StartsWith("flameball_flipbook_gradient", System.StringComparison.Ordinal) ||
-                            material.mainTexture == null || material.mainTexture == Texture2D.whiteTexture ||
-                            material.mainTexture == Texture2D.blackTexture) continue;
-                        source = renderer.GetComponent<ParticleSystem>();
-                        if (source != null) break;
-                    }
-                if (source != null) break;
-            }
-            if (source == null) return null;
-            ParticleSystemRenderer original = source.GetComponent<ParticleSystemRenderer>();
-            var root = new GameObject("VM_Ashlands35Cluster_CoreOrbit");
+            if (weapon == null || Application.isBatchMode || Player.m_localPlayer == null ||
+                !MasteryPlugin.Settings.EnablePerkProcVFX.Value || !ResolveShaft(weapon, out Vector3 start, out Vector3 end)) return null;
+            GameObject native = ObjectDB.instance?.GetItemPrefab("Ruby") ?? NativeSoftVisualAssets.Get<GameObject>(RubyPath);
+            Transform model = native != null ? native.transform.Find("attach/model") : null;
+            MeshFilter source = model != null ? model.GetComponent<MeshFilter>() : null;
+            MeshRenderer renderer = model != null ? model.GetComponent<MeshRenderer>() : null;
+            if (source?.sharedMesh == null || renderer?.sharedMaterial == null) return null;
+            Vector3 scale = model.localScale;
+            Vector3 extent = Vector3.Scale(source.sharedMesh.bounds.size, scale);
+            float size = Mathf.Max(Mathf.Abs(extent.x), Mathf.Max(Mathf.Abs(extent.y), Mathf.Abs(extent.z)));
+            if (!float.IsFinite(size) || size <= .0001f) return null;
+            var root = new GameObject("VM_Ashlands35Cluster_RubyOrbit");
+            root.SetActive(false); root.layer = weapon.gameObject.layer;
             root.transform.SetParent(weapon, false);
             var visual = root.AddComponent<Ashlands35ChargeVisual>();
-            visual.ShaftStart = start; visual.ShaftEnd = end; visual.NativeColors = source.main.startColor;
-            visual.Effect = root.AddComponent<ParticleSystem>();
-            visual.Effect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            var main = visual.Effect.main;
-            main.loop = true; main.maxParticles = Capacity;
-            main.simulationSpace = ParticleSystemSimulationSpace.Local;
-            main.scalingMode = ParticleSystemScalingMode.Shape;
-            main.startSpeed = 0f;
-            var emission = visual.Effect.emission; emission.enabled = false;
-            var shape = visual.Effect.shape; shape.enabled = false;
-            var particles = root.GetComponent<ParticleSystemRenderer>();
-            particles.sharedMaterial = original.sharedMaterial;
-            particles.renderMode = ParticleSystemRenderMode.Billboard;
-            particles.alignment = original.alignment;
-            var streams = new System.Collections.Generic.List<ParticleSystemVertexStream>();
-            original.GetActiveVertexStreams(streams); particles.SetActiveVertexStreams(streams);
-            NativeSnowVisualAssets.CopySheet(source, visual.Effect);
-            CopyNativeBindings(source, visual.Effect, original, particles);
-            particles.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            particles.receiveShadows = false;
-            visual.Effect.Play();
-            if (MasteryPlugin.Settings.VerboseLogging.Value)
-                MasteryPlugin.Log.LogInfo("[Ashlands35ClusterCore] native=" + source.name + " material=" + original.sharedMaterial.name +
-                    " shaft=" + start + " -> " + end);
-            return visual;
+            visual.ShaftStart = start; visual.ShaftEnd = end;
+            visual.NativeSize = size; visual.NativeScale = scale;
+            for (int i = 0; i < visual.Gems.Length; i++)
+            {
+                var pivot = new GameObject("VM_RubyOrbitPivot"); pivot.layer = root.layer;
+                pivot.transform.SetParent(root.transform, false);
+                var gem = new GameObject("VM_RubyModel"); gem.layer = root.layer;
+                gem.transform.SetParent(pivot.transform, false);
+                gem.transform.localRotation = model.localRotation;
+                gem.transform.localScale = scale;
+                // Native gem mesh is not centered around its origin.
+                gem.transform.localPosition = -(model.localRotation * Vector3.Scale(source.sharedMesh.bounds.center, scale));
+                gem.AddComponent<MeshFilter>().sharedMesh = source.sharedMesh;
+                var copy = gem.AddComponent<MeshRenderer>();
+                copy.sharedMaterials = renderer.sharedMaterials;
+                var block = new MaterialPropertyBlock();
+                renderer.GetPropertyBlock(block); copy.SetPropertyBlock(block);
+                block.Clear(); renderer.GetPropertyBlock(block, 0); copy.SetPropertyBlock(block, 0);
+                copy.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+                copy.receiveShadows = false; copy.lightProbeUsage = UnityEngine.Rendering.LightProbeUsage.Off;
+                copy.reflectionProbeUsage = UnityEngine.Rendering.ReflectionProbeUsage.Off;
+                visual.Gems[i] = pivot.transform; pivot.SetActive(false);
+            }
+            root.SetActive(true); return visual;
         }
-        private static void CopyNativeBindings(ParticleSystem source, ParticleSystem target,
-            ParticleSystemRenderer original, ParticleSystemRenderer renderer)
-        {
-            // The gradient shader consumes Custom1 color. Copy its native module
-            // together with UV streams/flipbook rather than inventing shader data.
-            var from = source.customData; var to = target.customData;
-            to.enabled = from.enabled;
-            if (from.enabled)
-                foreach (ParticleSystemCustomData stream in new[] { ParticleSystemCustomData.Custom1, ParticleSystemCustomData.Custom2 })
-                {
-                    ParticleSystemCustomDataMode mode = from.GetMode(stream);
-                    to.SetMode(stream, mode);
-                    if (mode == ParticleSystemCustomDataMode.Color) to.SetColor(stream, from.GetColor(stream));
-                    else if (mode == ParticleSystemCustomDataMode.Vector)
-                    {
-                        int count = from.GetVectorComponentCount(stream); to.SetVectorComponentCount(stream, count);
-                        for (int i = 0; i < count; i++) to.SetVector(stream, i, from.GetVector(stream, i));
-                    }
-                }
-            var block = new MaterialPropertyBlock();
-            original.GetPropertyBlock(block); renderer.SetPropertyBlock(block);
-            block.Clear(); original.GetPropertyBlock(block, 0); renderer.SetPropertyBlock(block, 0);
-        }
+
         private static bool ResolveShaft(Transform weapon, out Vector3 start, out Vector3 end)
         {
             start = end = Vector3.zero;
@@ -142,43 +108,38 @@ namespace ValheimMastery
             { Vector3 swap = start; start = end; end = swap; }
             return true;
         }
+
         internal void Draw(float held)
         {
-            if (Ending || Effect == null) return;
-            if (!MasteryPlugin.Settings.EnablePerkProcVFX.Value) { Effect.Clear(); return; }
+            if (Ending) return;
+            bool enabled = MasteryPlugin.Settings.EnablePerkProcVFX.Value;
+            int count = enabled ? Ashlands35VisualRules.Rubies(held) : 0;
+            if (count != Visible)
+            {
+                for (int i = 0; i < Gems.Length; i++) Gems[i].gameObject.SetActive(i < count);
+                Visible = count;
+            }
+            if (count == 0) return;
+            // Integrate speed rather than time*speed: a charging change cannot jump the orbit.
+            Angle = Mathf.Repeat(Angle + Time.deltaTime * Ashlands35VisualRules.OrbitSpeed(held), Mathf.PI * 2f);
             Vector3 axis = (ShaftEnd - ShaftStart).normalized;
             Vector3 reference = Mathf.Abs(Vector3.Dot(axis, Vector3.up)) < .9f ? Vector3.up : Vector3.right;
             Vector3 side = Vector3.Cross(axis, reference).normalized, normal = Vector3.Cross(axis, side);
-            float charge = MagicPresentationRules.FireCharge(held);
-            int count = Mathf.Min(Capacity, MagicPresentationRules.FireParticles(held));
-            float time = Time.time;
-            float orbitRadius = MagicPresentationRules.FireOrbitRadius(held);
-            float size = MagicPresentationRules.FireOrbitSize(held);
-            Color color = NativeColors.Evaluate(charge, .5f);
-            color.a = MagicPresentationRules.FireParticleAlpha(held);
+            float radius = Ashlands35VisualRules.Radius(held);
+            float scale = Ashlands35VisualRules.RubySize(held) / NativeSize;
             for (int i = 0; i < count; i++)
             {
-                float along = MagicPresentationRules.FireOrbitPosition(i, time, held);
-                float direction = (i & 1) == 0 ? 1f : -1f;
-                float angle = i * 2.39996f + direction * time * (.8f + charge * 4f) +
-                    along * Mathf.PI * (2.5f + charge * 2f) + Mathf.Sin(time * 1.3f + i) * .3f;
-                float radius = orbitRadius * (.85f + .15f * Mathf.Sin(time * 1.7f + i * .91f));
-                // Two irregular counter-turning streams along the whole body.
-                // Small separated embers keep the charge readable beside the core.
-                Particles[i].position = Vector3.Lerp(ShaftStart, ShaftEnd, along) +
+                float angle = i * 2.39996f + ((i & 1) == 0 ? Angle : -Angle);
+                Gems[i].localPosition = Vector3.Lerp(ShaftStart, ShaftEnd, Ashlands35VisualRules.Along(i)) +
                     (side * Mathf.Cos(angle) + normal * Mathf.Sin(angle)) * radius;
-                Particles[i].velocity = Vector3.zero;
-                Particles[i].startSize = size;
-                Particles[i].startColor = color;
-                Particles[i].startLifetime = Particles[i].remainingLifetime = .25f;
+                Gems[i].localRotation = Quaternion.AngleAxis(angle * Mathf.Rad2Deg, axis);
+                Gems[i].localScale = Vector3.one * scale;
             }
-            Effect.SetParticles(Particles, count);
         }
         internal void Finish()
         {
             if (Ending) return;
-            Ending = true;
-            Destroy(gameObject, .3f);
+            Ending = true; gameObject.SetActive(false); Destroy(gameObject);
         }
     }
 }

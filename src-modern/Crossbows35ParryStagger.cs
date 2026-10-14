@@ -9,29 +9,35 @@ namespace ValheimMastery
 {
     internal static class Crossbows35ParryStagger
     {
-        internal const float TimedBlockCoefficient = 5f;
-        internal const float StaggerDamageMultiplier = 1.75f;
+        // Legacy type/file names retained; these two bonuses are skill progression,
+        // not level-35 perks. Both gameplay and presentation consume these formulas.
+        internal static float NormalizeLevel(float raw)
+            => float.IsNaN(raw) || float.IsInfinity(raw) ? 0f : Math.Max(0f, Math.Min(100f, raw));
+        internal static float LearnedLevel(Player player)
+            => MasteryPlugin.Settings?.Enabled.Value == true && player != null
+                ? NormalizeLevel(PerkRuntimeService.GetActualSkillLevel(player, Skills.SkillType.Crossbows)) : 0f;
+        internal static float ParryAddition(float level) => .04f * NormalizeLevel(level);
+        internal static float StaggerTargetMultiplier(float level) => 1f + .01f * NormalizeLevel(level);
+        internal static bool IsActualCrossbow(ItemDrop.ItemData item)
+            => item?.m_shared?.m_skillType == Skills.SkillType.Crossbows && item.IsWeapon() &&
+                item.m_shared.m_itemType != ItemDrop.ItemData.ItemType.Tool && !Crossbows35ReloadGuard.IsTraversalHook(item);
 
         internal static float TimedBlockBonus(float native, Humanoid actor)
         {
             Player player = actor as Player;
             ItemDrop.ItemData blocker = player?.GetCurrentBlocker();
             if (MasteryPlugin.Settings?.Enabled.Value != true || player == null || player.IsDead() ||
-                player.m_nview?.IsOwner() != true || blocker?.m_shared == null ||
-                blocker.m_shared.m_skillType != Skills.SkillType.Crossbows || Crossbows35ReloadGuard.IsTraversalHook(blocker) ||
-                !ReferenceEquals(blocker, player.GetCurrentWeapon()) ||
-                !PerkRuntimeService.HasPerk(player, Skills.SkillType.Crossbows, 35)) return native;
-            float raw = PerkRuntimeService.GetActualSkillLevel(player, Skills.SkillType.Crossbows);
-            if (float.IsNaN(raw) || float.IsInfinity(raw) || raw < 35f || raw > 100f) return native;
-            return TimedBlockCoefficient;
+                player.m_nview?.IsOwner() != true || !IsActualCrossbow(blocker) ||
+                !ReferenceEquals(blocker, player.GetCurrentWeapon())) return native;
+            return native + ParryAddition(LearnedLevel(player));
         }
 
         // Only invoked in the unchanged target-owner non-player stagger branch.
         internal static void ApplyStaggerModifier(HitData hit, float native, Character target)
         {
             hit.ApplyModifier(native);
-            if (Crossbows35ShotMetadata.Consume(target, hit))
-                hit.ApplyModifier(StaggerDamageMultiplier);
+            if (Crossbows35ShotMetadata.TryConsume(target, hit, out float level) && level > 0f)
+                hit.ApplyModifier(StaggerTargetMultiplier(level));
         }
     }
 

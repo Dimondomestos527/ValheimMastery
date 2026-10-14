@@ -15,7 +15,7 @@ namespace ValheimMastery
     }
     [HarmonyPatch(typeof(MonsterAI),nameof(MonsterAI.HuntPlayer))]
     internal static class MasterIdolResidentHuntPatch
-    {private static void Postfix(MonsterAI __instance,ref bool __result){if(MasterIdolNativeTaming.Friend(__instance.GetComponent<Character>()))__result=false;}}
+    {private static void Postfix(MonsterAI __instance,ref bool __result){if(MasterIdolNativeTaming.Friend(__instance.GetComponent<Character>())||MasterIdolForestGuests.Peaceful(__instance.GetComponent<Character>()))__result=false;}}
     [HarmonyPatch(typeof(BaseAI),nameof(BaseAI.HaveFriendInRange),new[]{typeof(float)})]
     internal static class MasterIdolResidentHealingPatch
     {private static bool Prefix(BaseAI __instance,ref Character __result){if(!MasterIdolResidents.Resident(__instance)&&!MasterIdolNativeTaming.Friend(__instance.GetComponent<Character>()))return true;__result=null;return false;}}

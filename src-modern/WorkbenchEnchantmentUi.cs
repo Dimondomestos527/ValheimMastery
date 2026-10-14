@@ -20,7 +20,11 @@ namespace ValheimMastery
         private Button _tab;
         private GameObject _panel, _priorSelection;
         private TMP_Text _detail;
-        private Image _detailIcon;
+        private Image _detailIcon, _requirementIcon;
+        private TMP_Text _requirementText;
+        private Color _requirementBaseColor;
+        private bool _requirementMissing;
+        private ZNet _requirementSession;
         private ScrollRect _detailScroll;
         private RectTransform _detailViewport;
         private Button _learn, _switch;
@@ -101,10 +105,17 @@ namespace ValheimMastery
                 case "materials": case "insufficient-materials": return Text("Бракує матеріалів.", "Not enough materials.");
                 case "capacity": return Text("Потрібний вищий рівень верстака.", "A higher workbench level is required.");
                 case "network": return Text("Це зачарування зараз недоступне в мережі майстерні.", "This enchantment is unavailable in the workshop network.");
+                case "world-type-busy": return Text("Цей дар уже пробуджено в іншому верстаку цього світу.", "This gift is already awakened at another workbench in this world.");
                 case "access": return Text("Немає доступу до верстака.", "No access to this workbench.");
                 case "unconfirmed": return Text("Стан не підтверджено.", "State not confirmed.");
                 default: return Text("Дія поки недоступна.", "Action unavailable for now.");
             }
+        }
+        private static string CapacityReason(WorkbenchEnchantmentSnapshot snapshot, string selected, bool blocked)
+        {
+            if (blocked || snapshot?.Learned == null || snapshot.NativeLevel < 1 ||
+                Contains(snapshot.Learned, selected) || snapshot.Learned.Length < Math.Min(6, snapshot.NativeLevel)) return "";
+            return Text("Щоб відкрити ще один дар, підвищ рівень верстака.", "Upgrade the workbench to unlock another gift.");
         }
         private static bool Bench(CraftingStation station) => station != null && station.m_name == "$piece_workbench";
         private static string ChoiceLabel(string id)
@@ -188,7 +199,7 @@ namespace ValheimMastery
             var viewportObject = new GameObject("VM_EnchantmentDetailViewport", typeof(RectTransform), typeof(Image), typeof(RectMask2D), typeof(ScrollRect));
             _detailViewport = viewportObject.GetComponent<RectTransform>(); _detailViewport.SetParent(panel, false);
             _detailViewport.anchorMin = new Vector2(.43f, 0); _detailViewport.anchorMax = Vector2.one;
-            _detailViewport.offsetMin = new Vector2(0, 98); _detailViewport.offsetMax = new Vector2(-6, -78);
+            _detailViewport.offsetMin = new Vector2(0, 98); _detailViewport.offsetMax = new Vector2(-6, -102);
             viewportObject.GetComponent<Image>().color = Color.clear;
             _detail = Instantiate(gui.m_recipeDecription, _detailViewport, false);
             _detail.gameObject.SetActive(true); _detail.enabled = true;
@@ -205,7 +216,8 @@ namespace ValheimMastery
             _detailIcon.preserveAspect = true; _detailIcon.raycastTarget = false;
             _detailIcon.color = Color.white; _detailIcon.type = Image.Type.Simple;
             var iconRect = _detailIcon.rectTransform; iconRect.anchorMin = iconRect.anchorMax = new Vector2(.7f, 1);
-            iconRect.pivot = new Vector2(.5f, 1); iconRect.sizeDelta = new Vector2(64, 64); iconRect.anchoredPosition = new Vector2(0, -6);
+            iconRect.pivot = new Vector2(.5f, 1); iconRect.sizeDelta = new Vector2(64, 64); iconRect.anchoredPosition = new Vector2(0, -30);
+            CreateRequirement(panel);
             _learn = NewButton(panel, Text("Зачарувати", "Enchant"), new Vector2(190, -320), new Vector2(145, 32));
             _switch = NewButton(panel, Text("Активувати", "Activate"), new Vector2(190, -358), new Vector2(145, 32));
             PlaceAction(_learn, 70); PlaceAction(_switch, 32);
@@ -213,6 +225,62 @@ namespace ValheimMastery
             _switch.onClick.AddListener(() => ActionClick(_snapshot?.Active == _selected ? WorkbenchOperationKind.Disable : WorkbenchOperationKind.Switch));
             if (!_traceBound) { _traceBound = true; ActionTrace(0, "actions-bound"); }
             _panel.SetActive(false);
+        }
+        private void CreateRequirement(RectTransform panel)
+        {
+            var nativeIcon = _gui.m_minStationLevelIcon;
+            var nativeText = _gui.m_minStationLevelText;
+            if (nativeIcon == null || nativeText == null || nativeIcon.sprite == null) return;
+            var size = nativeIcon.rectTransform.rect.size;
+            var field = AccessTools.Field(typeof(InventoryGui), "m_minStationLevelBasecolor");
+            if (size.x <= 0 || size.y <= 0 || !(field?.GetValue(_gui) is Color color)) return;
+            _requirementBaseColor = color;
+            _requirementIcon = new GameObject("VM_EnchantmentRequiredLevel", typeof(RectTransform), typeof(Image)).GetComponent<Image>();
+            var rect = _requirementIcon.rectTransform; rect.SetParent(panel, false);
+            rect.anchorMin = rect.anchorMax = new Vector2(1, 1); rect.pivot = Vector2.one;
+            rect.sizeDelta = size; rect.anchoredPosition = new Vector2(-8, -30);
+            _requirementIcon.sprite = nativeIcon.sprite; _requirementIcon.material = nativeIcon.material;
+            _requirementIcon.color = nativeIcon.color; _requirementIcon.type = nativeIcon.type;
+            _requirementIcon.preserveAspect = nativeIcon.preserveAspect; _requirementIcon.raycastTarget = false;
+            _requirementText = Instantiate(nativeText, rect, false);
+            _requirementText.name = "VM_EnchantmentRequiredLevelText";
+            foreach (var component in _requirementText.GetComponentsInChildren<Component>(true))
+                if (component != null && (component.GetType().Name == "Localize" || component.GetType().Name == "Localization"))
+                { if (component is Behaviour behavior) behavior.enabled = false; Destroy(component); }
+            _requirementText.enabled = true; _requirementText.gameObject.SetActive(true);
+            _requirementText.raycastTarget = false; _requirementText.alignment = TextAlignmentOptions.Center;
+            var label = _requirementText.rectTransform; label.anchorMin = Vector2.zero; label.anchorMax = Vector2.one;
+            label.offsetMin = label.offsetMax = Vector2.zero;
+            _requirementIcon.gameObject.SetActive(false);
+        }
+        private static int RequiredLearnLevel(WorkbenchEnchantmentSnapshot snapshot, string selected, bool blocked)
+        {
+            if (blocked || snapshot?.Learned == null || snapshot.NativeLevel < 1 ||
+                snapshot.Learned.Length >= 6 || Array.IndexOf(Choices, selected) < 0 ||
+                Contains(snapshot.Learned, selected)) return 0;
+            return snapshot.Learned.Length + 1;
+        }
+        private void RenderRequirement(bool blocked)
+        {
+            if (_requirementIcon == null || _requirementText == null) return;
+            int required = RequiredLearnLevel(_snapshot, _selected, blocked ||
+                !ReferenceEquals(_requirementSession, ZNet.instance) || _snapshot?.World != Run70MapMarkerState.World);
+            _requirementIcon.gameObject.SetActive(required > 0);
+            _requirementMissing = required > 0 && _snapshot.NativeLevel < required && CooldownReady(SelectedCooldown());
+            if (required > 0) _requirementText.text = required.ToString();
+            UpdateRequirementBlink();
+        }
+        private void UpdateRequirementBlink()
+        {
+            if (_requirementText == null) return;
+            if (!ReferenceEquals(_requirementSession, ZNet.instance) || _snapshot?.World != Run70MapMarkerState.World)
+            {
+                _requirementMissing = false;
+                if (_requirementIcon != null) _requirementIcon.gameObject.SetActive(false);
+            }
+            bool flash = _requirementMissing && Mathf.Sin(Time.time * 10f) > 0f &&
+                ZoneSystem.instance != null && !ZoneSystem.instance.GetGlobalKey(GlobalKeys.NoCraftCost);
+            _requirementText.color = flash ? Color.red : _requirementBaseColor;
         }
         private static void PlaceAction(Button button, float bottom)
         {
@@ -289,6 +357,7 @@ namespace ValheimMastery
             var player = Player.m_localPlayer; var station = player?.GetCurrentCraftingStation();
             if (!InventoryGui.IsVisible() || !Bench(station) || _gui.m_craftTimer >= 0) return;
             _player = player; _station = station; _epoch++; _revision = -1; _snapshot = null;
+            _requirementSession = ZNet.instance;
             _priorSelection = EventSystem.current?.currentSelectedGameObject;
             ActivateCraftingGroup();
             _open = true; _pending = false; _message = ""; SelectOwnedTab(); _panel.SetActive(true);
@@ -324,6 +393,7 @@ namespace ValheimMastery
             if (!_open) return;
             if (!visible || player != _player || station != _station || _gui.m_craftTimer >= 0) { Close(); return; }
             HideNative(); SelectOwnedTab();
+            UpdateRequirementBlink();
             if (Time.unscaledTime < _nextRefresh) return;
             _nextRefresh = Time.unscaledTime + .2f;
             try
@@ -350,6 +420,7 @@ namespace ValheimMastery
             if (!_open) return;
             bool known = _snapshot != null;
             bool blocked = _pending || !known || Request == null || !string.IsNullOrEmpty(_snapshot.Reason);
+            RenderRequirement(blocked || !string.IsNullOrEmpty(_message));
             _learn.GetComponentInChildren<TMP_Text>(true).text = Contains(_snapshot?.Learned, _selected) ?
                 Text("Вже відкрито", "Already unlocked") : Text("Зачарувати", "Enchant");
             _switch.GetComponentInChildren<TMP_Text>(true).text = _snapshot?.Active == _selected ? Text("Вимкнути", "Disable") : Text("Активувати", "Activate");
@@ -373,6 +444,7 @@ namespace ValheimMastery
             string reason = _pending ? Text("Дію ще не підтверджено.", "Action not confirmed yet.") : !known || Request == null ?
                 Text("Стан не підтверджено.", "State not confirmed.") : !string.IsNullOrEmpty(_snapshot.Reason) ?
                 ReasonText(_snapshot.Reason) : _message;
+            if (string.IsNullOrEmpty(reason)) reason = CapacityReason(_snapshot, _selected, blocked);
             string description = "";
             try
             {
@@ -488,6 +560,10 @@ namespace ValheimMastery
         {
             if (!_open) return;
             _open = false; _epoch++; _pending = false; _snapshot = null;
+            _requirementMissing = false;
+            _requirementSession = null;
+            if (_requirementIcon != null) _requirementIcon.gameObject.SetActive(false);
+            if (_requirementText != null) _requirementText.color = _requirementBaseColor;
             if (_panel != null) _panel.SetActive(false);
             foreach (var pair in _hidden) if (pair.Key != null) pair.Key.SetActive(pair.Value);
             _hidden.Clear();

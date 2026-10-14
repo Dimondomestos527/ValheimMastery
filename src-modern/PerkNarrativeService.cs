@@ -85,7 +85,8 @@ namespace ValheimMastery
 #if MASTERY_RELEASE_SAFE
             if (perk.Id == "crossbows_70") return ukrainian ? "Вторинна атака з арбалетом — особиста платформа. Поклади свій арбалет і запас болтів у контейнер; порожні руки + вторинна атака — запуск / зупинка. Турель шукає ворожих істот у передньому секторі, без гравців і приручених. Забери ту саму зброю та решту болтів із зупиненого контейнера, потім прибери порожню платформу." : "Crossbow secondary deploys one personal platform. Supply your crossbow and a reserve of bolts through the container; empty hands + secondary starts / stops it. It searches the forward sector for hostile creatures, never players or tames. Retrieve the same weapon and remaining bolts from the stopped turret, then clear the empty platform.";
 #endif
-            if (perk.Id == "crossbows_35") return ukrainian ? "Під час активної перезарядки арбалета: +20 броні, +40% поточної броні та подвоєна межа оглушення. Після завершення або переривання захист зникає. Штатний внесок навички у шкоду збережено на 85%." : "While actively reloading a crossbow: +20 armor, +40% current armor and double stagger capacity. Protection ends when the reload ends or is interrupted. The native skill-derived damage contribution is retained at 85%.";
+            if (perk.Id == "crossbows_35") return CrossbowsHookSecretText.ReloadDescription(ukrainian) +
+                CrossbowsHookSecretText.Section(Player.m_localPlayer, ukrainian);
 #if MASTERY_CLUBS70_EXPERIMENT
             if (perk.Id == "clubs_70") return ukrainian ? "Затисни блок із булавою чи молотом, накопичуючи заряд. Сильний удар булави отримує більше шкоди й відкидання, а добитий малий ворог летить швидше та завдає значно більше шкоди при зіткненні; ехо булави немає. Повний заряд молота залишає два слабші ехо з інтервалом 1,25 с." : "Hold block with a mace or hammer to gather a charge. A mace secondary gains damage and pushback, and a slain small foe flies faster and deals much greater collision damage; no mace echo. A full hammer charge leaves two weaker echoes at 1.25-second intervals.";
 #endif
@@ -111,6 +112,8 @@ namespace ValheimMastery
                 string.Equals(Localization.instance.GetSelectedLanguage(), "Ukrainian", System.StringComparison.OrdinalIgnoreCase);
             string lead = ukrainian && UaSkillLead.TryGetValue(skill, out string line)
                 ? "<color=#B7A781>" + line + "</color>\n\n" : "";
+            if (skill == Skills.SkillType.Crossbows)
+                return lead + CrossbowsHookSecretText.Progression(player, ukrainian) + "\n\n";
             if (ukrainian && skill == Skills.SkillType.ElementalMagic)
                 return lead + "<color=#B9C5CE>Бонус навички:</color> швидший базовий реген ейтру без зміни затримки його відновлення.\n\n";
             if (ukrainian && skill == Skills.SkillType.BloodMagic)

@@ -4,130 +4,138 @@ using System.Linq;
 using UnityEngine;
 namespace ValheimMastery
 {
-    // One server scheduler. Existing arrivals occupy ordinary authoritative roster slots.
+    // Four stable WORLD slots; only empty or verified-dead eligible slots may spawn.
     internal static class MasterIdolRecruitment
     {
-        private sealed class Vacancy{internal readonly Queue<double> Times=new Queue<double>();internal double Since=>Times.Count>0?Times.Peek():0;internal float Next;}
-        private static readonly string[] Families={"Greyling","Greydwarf","Greydwarf_Elite","Greydwarf_Shaman"};
-        private static readonly Dictionary<string,Vacancy> Vacancies=new Dictionary<string,Vacancy>(StringComparer.Ordinal);
-        private static readonly Dictionary<string,HashSet<string>> PreviousMembers=new Dictionary<string,HashSet<string>>(StringComparer.Ordinal);
-        private static readonly Dictionary<string,Dictionary<string,string>> Arrivals=new Dictionary<string,Dictionary<string,string>>(StringComparer.Ordinal);
-        private static ZNet Session;private static long World;private static float Next,NextSave;private static int Cursor;private static MasterIdolRecruitmentStore Store;private static bool Dirty;
-        internal static IEnumerable<MasterIdolResidentCandidate> Pending(MasterIdolEffectZone zone)
+        private const int CheapProbes=48,TerrainCandidates=12,NativePaths=4;
+        private static ZNet Session;private static ZDOMan Manager;private static ulong Generation;private static long World;private static float Next;private static int Cursor;private static string SearchHome;private static bool CadenceStarted;
+        private static readonly float[] Retry=new float[4];
+        private static readonly ulong[] Probes=new ulong[4];
+        private readonly struct SpawnShape
         {
-            if(Session!=ZNet.instance||ZNet.instance?.GetWorld()==null||World!=ZNet.instance.GetWorldUID())yield break;
-            if(Arrivals.TryGetValue(zone.Id,out var arrivals))foreach(var member in arrivals.ToArray())
-            {
-                if(!MasterIdolNetworkQuota.TryUid(member.Key,out long user,out uint id))continue;
-                var zdo=ZDOMan.instance?.GetZDO(new ZDOID(user,id));
-                if(zdo==null||zdo.GetPrefab()!=member.Value.GetStableHashCode()||zdo.GetFloat(ZDOVars.s_health,1)<=0||zdo.GetBool(ZDOVars.s_tamed,false)&&!MasterIdolNativeTaming.SameHome(zdo.GetString("vm.idol.home.v1",""),zone.Id)){arrivals.Remove(member.Key);continue;}
-                yield return new MasterIdolResidentCandidate(member.Key,member.Value,true,zone.Id);
-            }
+            internal readonly Vector3 Center;internal readonly float Radius,HalfLine,Margin;
+            internal SpawnShape(Vector3 center,float radius,float halfLine)
+            {Center=center;Radius=radius+.1f;HalfLine=halfLine;Margin=Radius+new Vector3(center.x,0,center.z).magnitude;}
         }
+        internal static IEnumerable<MasterIdolResidentCandidate> Pending(MasterIdolEffectZone zone)=>MasterIdolForestGuardState.Candidates(zone);
+        private static bool Finite(Vector3 point)=>float.IsFinite(point.x)&&float.IsFinite(point.y)&&float.IsFinite(point.z);
+        private static bool Shape(BaseAI prototype,out SpawnShape shape)
+        {
+            shape=default;var capsule=prototype.GetComponent<CapsuleCollider>();var scale=prototype.transform.lossyScale;
+            if(capsule==null||capsule.isTrigger||!capsule.enabled||capsule.direction!=1||!Finite(scale)||!Finite(capsule.center))return false;
+            float radius=capsule.radius*Mathf.Max(Mathf.Abs(scale.x),Mathf.Abs(scale.z)),height=capsule.height*Mathf.Abs(scale.y);
+            if(!float.IsFinite(radius)||!float.IsFinite(height)||radius<=.05f||radius>3||height<radius*2||height>8)return false;
+            shape=new SpawnShape(Vector3.Scale(capsule.center,scale),radius,Mathf.Max(0,height*.5f-radius));return true;
+        }
+        // Visit every actual network circle; later sweeps change both angle and radius.
+        private static bool Sample(MasterIdolEffectZone zone,int family,ref ulong cursor,out Vector3 point,out Vector3 endpoint)
+        {
+            point=endpoint=default;var circles=zone.Circles;if(circles==null||circles.Length==0||circles.Length>4096||family<0||family>3)return false;
+            ulong ordinal=cursor++;int index=(int)(ordinal%(ulong)circles.Length);var circle=circles[index];
+            if(!Finite(circle.Point)||!float.IsFinite(circle.Radius)||circle.Radius<=0)return false;
+            double sweep=(ordinal/(ulong)circles.Length)%1048576UL;
+            double angle=(sweep*.618033988749895+family*.25+index*.381966011250105)*Math.PI*2;
+            double radial=(sweep+1)*.754877666246693;radial-=Math.Floor(radial);
+            float distance=circle.Radius*(float)Math.Sqrt(.01+.95*radial);
+            point=circle.Point+new Vector3((float)Math.Cos(angle),0,(float)Math.Sin(angle))*distance;
+            endpoint=point-new Vector3((float)Math.Cos(angle),0,(float)Math.Sin(angle))*4;
+            return Finite(point)&&Finite(endpoint);
+        }
+        private static bool Ground(MasterIdolEffectZone zone,SpawnShape shape,ref Vector3 point)
+        {
+            if(!Finite(point)||!zone.Contains(point,-shape.Margin)||!ZoneSystem.instance.IsZoneLoaded(point))return false;
+            ZoneSystem.instance.GetGroundData(ref point,out var normal,out var biome,out var area,out var heightmap);
+            if(heightmap==null||!Finite(point)||!Finite(normal)||normal.y<.7f||!float.IsFinite(ZoneSystem.instance.m_waterLevel)||point.y<ZoneSystem.instance.m_waterLevel+.3f)return false;
+            var center=point+shape.Center;var line=Vector3.up*shape.HalfLine;
+            return !Physics.CheckCapsule(center-line,center+line,shape.Radius,LayerMask.GetMask("piece","static_solid","Default","character","character_net"),QueryTriggerInteraction.Ignore);
+        }
+        private static bool FindPoint(MasterIdolEffectZone zone,BaseAI prototype,int family,out Vector3 point)
+        {
+            point=default;if(!Shape(prototype,out var shape))return false;int terrain=0,paths=0;
+            for(int attempt=0;attempt<CheapProbes;attempt++)
+            {
+                if(!Sample(zone,family,ref Probes[family],out var candidate,out var endpoint)||!zone.Contains(candidate,-shape.Margin)||!ZoneSystem.instance.IsZoneLoaded(candidate))continue;
+                if(terrain++>=TerrainCandidates)return false;
+                endpoint=zone.Inside(endpoint,-shape.Margin);
+                var horizontal=endpoint-candidate;horizontal.y=0;
+                if(horizontal.sqrMagnitude<4||horizontal.sqrMagnitude>16.01f||!Ground(zone,shape,ref candidate)||!Ground(zone,shape,ref endpoint))continue;
+                if(paths++>=NativePaths||!MasterIdolResidentBudget.Path())return false;
+                if(!Pathfinding.instance.HavePath(candidate,endpoint,prototype.m_pathAgentType))continue;
+                point=candidate;return true;
+            }
+            return false;
+        }
+        private static bool Context(ZNet net)
+            =>net==Session&&ZNet.instance==Session&&ZDOMan.instance==Manager&&MasterIdolLoadIdentity.Generation==Generation&&net?.GetWorld()!=null&&net.GetWorldUID()==World&&net.IsServer()&&WorkbenchEnchantmentRuntime.Ready&&MasterIdolForestGuardState.Ready;
         internal static void Tick(List<MasterIdolEffectZone> zones,ISet<string> assigned,Func<bool> publishable)
         {
-            var net=ZNet.instance;if(net?.IsServer()!=true||net.GetWorld()==null||!WorkbenchEnchantmentRuntime.Ready)return;
-            if(Session!=net||World!=net.GetWorldUID()){Session=net;World=net.GetWorldUID();Vacancies.Clear();Arrivals.Clear();PreviousMembers.Clear();Next=NextSave=0;Cursor=0;Store=new MasterIdolRecruitmentStore(System.IO.Path.Combine(BepInEx.Paths.ConfigPath,"ValheimMastery","Idols",World+".residents.vmi"),World);foreach(var saved in Store.Load().OrderBy(x=>x.Key,StringComparer.Ordinal)){string group=saved.Key.Substring(0,saved.Key.LastIndexOf('|'));if(!Vacancies.TryGetValue(group,out var entry)){entry=new Vacancy();Vacancies[group]=entry;}entry.Times.Enqueue(saved.Value);}foreach(var saved in Store.Members)PreviousMembers[saved.Key]=new HashSet<string>(saved.Value,StringComparer.Ordinal);Dirty=false;}
-            Store.Poll();
-            var forest=zones.Where(x=>x.Type=="BlackForest").OrderBy(x=>x.Id,StringComparer.Ordinal).ToArray();
-            if(forest.Length>128){return;}
-            var active=new HashSet<string>(forest.Select(x=>x.Id),StringComparer.Ordinal);
-            foreach(string id in Arrivals.Keys.Where(x=>!active.Contains(x)).ToArray())Arrivals.Remove(id);
-            foreach(string stale in PreviousMembers.Keys.Where(x=>!active.Contains(x.Substring(0,x.LastIndexOf('|')))).ToArray()){PreviousMembers.Remove(stale);Dirty=true;}
-            foreach(string stale in Vacancies.Keys.Where(x=>!active.Contains(x.Substring(0,x.LastIndexOf('|')))).ToArray()){Vacancies.Remove(stale);Dirty=true;}
-                        double now=net.GetTimeSeconds();if(now<=0||double.IsNaN(now)||double.IsInfinity(now))return;
-            foreach(var home in forest)foreach(string type in Families)
+            var net=ZNet.instance;if(net?.IsServer()!=true||net.GetWorld()==null||!WorkbenchEnchantmentRuntime.Ready||!MasterIdolForestGuardState.Ready)return;
+            if(Session!=net||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||World!=net.GetWorldUID())
+            {Session=net;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=net.GetWorldUID();Next=0;Cursor=0;SearchHome=null;CadenceStarted=false;Array.Clear(Retry,0,4);Array.Clear(Probes,0,4);}
+            var forest=zones.Where(z=>z.Type=="BlackForest").Take(2).ToArray();if(forest.Length!=1)return;var zone=forest[0];
+            if(SearchHome!=zone.Id){SearchHome=zone.Id;Array.Clear(Probes,0,4);}
+            MasterIdolForestGuardState.Observe(zone);
+            if(!CadenceStarted){if(!MasterIdolActivity.Near(zone)||!publishable())return;CadenceStarted=true;Next=Time.unscaledTime+2;return;}
+            if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+2;
+            int family=Cursor;Cursor=(Cursor+1)%4;string type=MasterIdolForestRules.Families[family];var slots=MasterIdolForestGuardState.Slots;
+            slots.TryGetValue(type,out var previous);
+            if(previous!=null&&previous.Death==0)return; // Missing/unloaded is not death; never re-create occupied slots.
+            long now=net.GetTime().Ticks;
+            if(previous!=null&&(!previous.Valid()||now<previous.Respawn))return;
+            if(Time.unscaledTime<Retry[family]||!MasterIdolActivity.Near(zone)||!publishable())return;Retry[family]=Time.unscaledTime+30;
+            var prefab=ZNetScene.instance?.GetPrefab(type);var prototype=prefab?.GetComponent<BaseAI>();if(prototype==null||ZoneSystem.instance==null||Pathfinding.instance==null)return;
+            if(!FindPoint(zone,prototype,family,out var point)||!Context(net)||!publishable()||slots.TryGetValue(type,out var current)&&!ReferenceEquals(current,previous))return;
+            var created=UnityEngine.Object.Instantiate(prefab,point,Quaternion.identity);var view=created.GetComponent<ZNetView>();var actor=created.GetComponent<Character>();var data=view?.GetZDO();
+            if(view?.IsValid()!=true||!view.IsOwner()||actor==null||data?.Persistent!=true||data.GetPrefab()!=type.GetStableHashCode()||!ReferenceEquals(ZDOMan.instance.GetZDO(data.m_uid),data))
+            {if(view?.IsValid()==true&&view.IsOwner())ZNetScene.instance.Destroy(created);else UnityEngine.Object.Destroy(created);return;}
+            MasterIdolForestGuardRecord record=null;
+            try
             {
-                string vacancyKey=home.Id+"|"+type;
-                                var members=new HashSet<string>(home.Residents.Where(x=>x.Value==type).Select(x=>x.Key),StringComparer.Ordinal);
-                if(!Vacancies.TryGetValue(vacancyKey,out var record)){record=new Vacancy();}
-                var prior=record.Times.ToArray();
-                var slots=PreviousMembers.TryGetValue(vacancyKey,out var oldMembers)
-                    ?MasterIdolRecruitmentRules.Reconcile(prior,oldMembers,members,MasterIdolResidentRoster.Limit(type),now)
-                    :MasterIdolRecruitmentRules.Slots(prior,MasterIdolResidentRoster.Limit(type)-members.Count,now);
-                if(oldMembers==null||!oldMembers.SetEquals(members)){PreviousMembers[vacancyKey]=members;Dirty=true;}
-                if(!prior.SequenceEqual(slots)){record.Times.Clear();foreach(double time in slots)record.Times.Enqueue(time);Dirty=true;}
-                if(slots.Length==0)Vacancies.Remove(vacancyKey);else Vacancies[vacancyKey]=record;
+                if(created.GetComponent<MonsterAI>() is MonsterAI ai){ai.m_eventCreature=false;ai.m_despawnInDay=false;data.Set(ZDOVars.s_eventCreature,false);data.Set(ZDOVars.s_despawnInDay,false);}
+                record=new MasterIdolForestGuardRecord{Home=zone.Id,Family=type,Uid=data.m_uid.ToString(),Nonce=Guid.NewGuid().ToString("N"),Born=net.GetTime().Ticks,Name=previous?.Name??MasterIdolForestGuardState.DefaultKey(type)};
+                MasterIdolForestGuardState.Stamp(actor,record);MasterIdolForestGuardState.Added(record);zone.Residents[record.Uid]=type;assigned.Add(record.Uid);MasterIdolWorldIndex.Observe(data);
+                MasterIdolResidentMetrics.Count("guard.native-birth");return;
             }
-            if(Dirty&&Time.unscaledTime>=NextSave&&Store.Queue(State(),PreviousMembers)){Dirty=false;NextSave=Time.unscaledTime+60f;}
-            if(!Store.Ready||Time.unscaledTime<Next||forest.Length==0)return;Next=Time.unscaledTime+2f;
-            // Maximum ONE home/family and THREE terrain/path candidates per scheduler tick.
-            int index=Cursor++%(forest.Length*Families.Length);var zone=forest[index/Families.Length];string family=Families[index%Families.Length];
-            if(!MasterIdolActivity.Near(zone))return;
-            string key=zone.Id+"|"+family;int count=zone.Residents.Count(x=>x.Value==family);
-            if(!MasterIdolRecruitmentRules.Needs(family,count)){Vacancies.Remove(key);return;}
-            if(!Vacancies.TryGetValue(key,out var vacancy)||vacancy.Times.Count==0)return;
-            int stage=MasterIdolRecruitmentRules.Stage(now,vacancy.Since,EnvMan.instance?.m_dayLengthSec??0);
-            if(stage==0||Time.unscaledTime<vacancy.Next)return;vacancy.Next=Time.unscaledTime+30f;
-            int paths=0;
-            foreach(var zdo in MasterIdolWorldIndex.NearbyForestResidents(zone.Home,320f,family).OrderBy(x=>(x.GetPosition()-zone.Home).sqrMagnitude))
+            catch
             {
-                if(assigned.Contains(zdo.m_uid.ToString())||active.Contains(zdo.GetString("vm.idol.home.v1",""))||WorldGenerator.instance?.GetBiome(zdo.GetPosition())!=Heightmap.Biome.BlackForest)continue;
-                var instance=ZNetScene.instance?.FindInstance(zdo.m_uid);var creature=instance?.GetComponent<Character>();var ai=instance?.GetComponent<BaseAI>();
-                if(creature==null||ai==null||MasterIdolSocialSeats.Battle(ai,creature))continue;
-                if(ai is MonsterAI monster&&(zdo.GetBool(ZDOVars.s_eventCreature,monster.m_eventCreature)||zdo.GetBool(ZDOVars.s_despawnInDay,monster.m_despawnInDay)))continue;
-                if(paths>=(stage==2?2:3))break;paths++;
-                if(!Safe(zdo.GetPosition(),zone,ai.m_pathAgentType,out _))continue;
-                if(!publishable())return;Admit(zone,zdo,family,assigned);Trace("lured",zone,family,zdo.m_uid);return;
-            }
-            if(stage<2)return;
-            var prefab=ZNetScene.instance?.GetPrefab(family);var prototype=prefab?.GetComponent<BaseAI>();if(prototype==null)return;
-            for(int n=paths;n<3;n++)
-            {
-                float angle=UnityEngine.Random.value*Mathf.PI*2;var circle=zone.Circles[UnityEngine.Random.Range(0,zone.Circles.Length)];float radius=circle.Radius+UnityEngine.Random.Range(80f,140f);
-                var point=circle.Point+new Vector3(Mathf.Cos(angle)*radius,0,Mathf.Sin(angle)*radius);
-                if(zone.Contains(point,25)||!Safe(point,zone,prototype.m_pathAgentType,out point))continue;
-                // Native prefab Awake establishes prefab/type/persistence/rotation/health; never naked CreateNewZDO.
-                if(!publishable())return;
-                var created=UnityEngine.Object.Instantiate(prefab,point,Quaternion.identity);
-                var view=created.GetComponent<ZNetView>();var creature=created.GetComponent<Character>();
-                if(view?.IsValid()!=true||!view.IsOwner()||creature==null){UnityEngine.Object.Destroy(created);return;}
-                if(created.GetComponent<MonsterAI>() is MonsterAI resident){resident.m_eventCreature=false;resident.m_despawnInDay=false;view.GetZDO().Set(ZDOVars.s_eventCreature,false);view.GetZDO().Set(ZDOVars.s_despawnInDay,false);}
-                Admit(zone,view.GetZDO(),family,assigned);view.GetZDO().Set("vm.idol.home.v1",zone.Id);MasterIdolWorldIndex.Observe(view.GetZDO());
-                Trace("spawned",zone,family,view.GetZDO().m_uid);return;
+                MasterIdolForestGuardState.CancelBirth(record,previous);
+                if(record!=null){zone.Residents.Remove(record.Uid);assigned.Remove(record.Uid);}
+                if(view.IsValid()&&view.IsOwner())ZNetScene.instance.Destroy(created);return;
             }
         }
-        private static bool Safe(Vector3 point,MasterIdolEffectZone zone,Pathfinding.AgentType agent,out Vector3 ground)
+        internal static string Describe()=>"recruitment=world-four native guards; ready="+MasterIdolForestGuardState.Ready+" slots="+(MasterIdolForestGuardState.Slots?.Count??0)+" search=whole-network fair bounded; initial=one four-slot cycle ~8s; wild recruitment=off; respawn=verified death+one game-day";
+    }
+
+    internal sealed class MasterIdolForestGuardTravel:MonoBehaviour
+    {
+        private readonly List<Vector3> Route=new List<Vector3>(32);private Vector3 Goal;private string Home;private float Next,Until;private int Step;
+        internal static bool Move(Character actor,MasterIdolEffectZone zone,float dt,out bool processed)
         {
-            ground=point;if(ZoneSystem.instance==null||Pathfinding.instance==null||!ZoneSystem.instance.IsZoneLoaded(point)||!ZoneSystem.instance.IsZoneLoaded(zone.Inside(point)))return false;
-            ZoneSystem.instance.GetGroundData(ref ground,out var normal,out var biome,out var area,out var heightmap);
-            if(heightmap==null||normal.y<.7f||ground.y<ZoneSystem.instance.m_waterLevel+.3f||Physics.CheckSphere(ground+Vector3.up, .5f,LayerMask.GetMask("piece","static_solid"),QueryTriggerInteraction.Ignore))return false;
-            if(!MasterIdolWorkBudget.Path())return false;var from=ground;return MasterIdolTiming.Measure("recruitment.path",()=>Pathfinding.instance.HavePath(from,zone.Inside(from),agent));
+            processed=false;if(actor==null||zone==null||actor.m_nview?.IsOwner()!=true||!MasterIdolForestGuardState.ModuleBorn(actor.m_nview.GetZDO()))return false;
+            var travel=actor.GetComponent<MasterIdolForestGuardTravel>()??actor.gameObject.AddComponent<MasterIdolForestGuardTravel>();return travel.StepTo(actor,zone,dt,out processed);
         }
-        private static void Admit(MasterIdolEffectZone zone,ZDO zdo,string family,ISet<string> assigned)
+        private bool StepTo(Character actor,MasterIdolEffectZone zone,float dt,out bool processed)
         {
-            string uid=zdo.m_uid.ToString();
-            if(!Arrivals.TryGetValue(zone.Id,out var arrivals)){arrivals=new Dictionary<string,string>(StringComparer.Ordinal);Arrivals[zone.Id]=arrivals;}
-            arrivals[uid]=family;zone.Residents[uid]=family;assigned.Add(uid);
-            if(PreviousMembers.TryGetValue(zone.Id+"|"+family,out var members))members.Add(uid);
-            if(Vacancies.TryGetValue(zone.Id+"|"+family,out var vacancy)&&vacancy.Times.Count>0){vacancy.Times.Dequeue();Dirty=true;}
-            // Same missing-family batch can fill remaining slots after its first wait, at most one per tick.
+            processed=false;var ai=actor.GetBaseAI();if(ai==null)return false;
+            if(Home!=zone.Id){Home=zone.Id;Route.Clear();Next=Until=0;}
+            if(!MasterIdolActivity.Near(actor.transform.position))return true;
+            if(Route.Count==0||Time.unscaledTime>=Until||(actor.transform.position-Goal).sqrMagnitude<1)
+            {
+                Route.Clear();if(Time.unscaledTime>=Next){Next=Time.unscaledTime+10;Plan(actor,zone,ai);}
+            }
+            processed=MasterIdolBaseUpdateBridge.Run(ai,dt);if(!processed)return true;
+            if(Route.Count==0){ai.StopMoving();return true;}
+            while(Step<Route.Count&&(actor.transform.position-Route[Step]).sqrMagnitude<1.44f)Step++;
+            ai.MoveTo(dt,Step<Route.Count?Route[Step]:Goal,1f,false);return true;
         }
-                        internal static string Describe()
+        private void Plan(Character actor,MasterIdolEffectZone zone,BaseAI ai)
         {
-            double now=ZNet.instance?.GetTimeSeconds()??0;double day=EnvMan.instance?.m_dayLengthSec??0;
-            string header="recruitment ready="+(Store?.Ready==true)+" world="+World+" slots="+Vacancies.Values.Sum(x=>x.Times.Count)+" arrivals="+Arrivals.Values.Sum(x=>x.Count)+" daySeconds="+day;
-            return header+"\n"+string.Join("\n",State().Take(32).Select(x=>x.Key+" vacantGameSeconds="+Math.Max(0,now-x.Value).ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+" stage="+MasterIdolRecruitmentRules.Stage(now,x.Value,day)));
+            if(ZoneSystem.instance==null||Pathfinding.instance==null)return;Vector3 direction=zone.Home-actor.transform.position;direction.y=0;
+            if(direction.sqrMagnitude<1)return;Vector3 point=actor.transform.position+direction.normalized*Math.Min(24,direction.magnitude);
+            if(!ZoneSystem.instance.IsZoneLoaded(point))return;ZoneSystem.instance.GetGroundData(ref point,out var normal,out var biome,out var area,out var heightmap);
+            if(heightmap==null||normal.y<.7f||point.y<ZoneSystem.instance.m_waterLevel+.3f||Physics.CheckSphere(point+Vector3.up,.5f,LayerMask.GetMask("piece","static_solid"),QueryTriggerInteraction.Ignore)||!MasterIdolResidentBudget.Path())return;
+            if(!Pathfinding.instance.GetPath(actor.transform.position,point,Route,ai.m_pathAgentType,true,false,false)||Route.Count>128){Route.Clear();return;}
+            Goal=point;Step=0;Until=Time.unscaledTime+30;
         }
-        private static Dictionary<string,double> State()
-        {
-            var result=new Dictionary<string,double>(StringComparer.Ordinal);
-            foreach(var entry in Vacancies){int slot=0;foreach(double time in entry.Value.Times)result.Add(entry.Key+"|"+slot++,time);}
-            return result;
-        }
-        private static void Trace(string action,MasterIdolEffectZone zone,string family,ZDOID id)
-        {if(MasteryPlugin.Settings.UIDebugLogging.Value)MasteryPlugin.Log.LogInfo("[IdolTest] recruitment "+action+" family="+family+" npc="+id+" home="+zone.Id);}
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-

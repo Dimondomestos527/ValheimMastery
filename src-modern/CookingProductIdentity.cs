@@ -34,6 +34,7 @@ namespace ValheimMastery
             item.m_customData[VersionKey] = "1";
             item.m_customData[Cooking35Service.CookMasteryKey] = tier.ToString(CultureInfo.InvariantCulture);
             item.m_crafterID = producer.GetPlayerID(); item.m_crafterName = producer.GetPlayerName();
+            Cooking70FeastRetrofit.MarkBorn(item);
         }
         internal static bool Compatible(ItemDrop.ItemData a, ItemDrop.ItemData b)
         {

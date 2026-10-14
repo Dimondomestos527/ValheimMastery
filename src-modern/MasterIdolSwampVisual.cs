@@ -58,14 +58,14 @@ namespace ValheimMastery
         internal static void Cleanup(){foreach(var shell in Shells.Values)Destroy(shell);Shells.Clear();Seen.Clear();Remove.Clear();Scene=null;Next=0;}
         private static void Destroy(Shell shell)
         {if(shell.Object!=null)UnityEngine.Object.Destroy(shell.Object);if(shell.Material!=null)UnityEngine.Object.Destroy(shell.Material);}
-        internal static float Opening(float age)=>Mathf.SmoothStep(.02f,1f,Mathf.Clamp01(age));
+        internal static float Opening(float age)=>Mathf.SmoothStep(.02f,1f,Mathf.Clamp01(age/2f));
         private static void Reveal(Shell shell)
         {
             if(shell.Object==null)return;
             float age=Time.time-shell.Born;var scale=shell.TargetScale*Opening(age);
             shell.Object.transform.localScale=scale;
             shell.Object.transform.position=shell.Center-Vector3.Scale(shell.Offset,scale);
-            shell.Opened=age>=1f;
+            shell.Opened=age>=2f;
         }
         internal static void Tick()
         {
@@ -78,10 +78,11 @@ namespace ValheimMastery
             if(player!=null&&Scene!=null)
             {
                 // Asynchronous exact native donor. No prefab instantiation, trigger, controller or light.
-                var donor=NativeSoftVisualAssets.Get<GameObject>("Assets/Characters/TraderHaldor/ForceField.prefab");
-                var mesh=donor?.GetComponent<MeshFilter>()?.sharedMesh;var renderer=donor?.GetComponent<MeshRenderer>();
+                var donor=NativeSoftVisualAssets.Get<GameObject>("Assets/GameElements/Pieces/_res/guardstone/fx_guardstone_activate.prefab");
+                var renderer=donor?.transform.Find("Dome")?.GetComponent<ParticleSystemRenderer>();
+                var mesh=renderer?.renderMode==ParticleSystemRenderMode.Mesh?renderer.mesh:null;
                 var nativeMaterial=renderer?.sharedMaterial;
-                if(mesh!=null&&nativeMaterial!=null&&nativeMaterial.name=="ForceField")foreach(var dome in domes)
+                if(mesh!=null&&nativeMaterial!=null&&nativeMaterial.name=="shield"&&nativeMaterial.shader?.name=="Particles/Standard Unlit2"&&nativeMaterial.HasProperty("_TintColor"))foreach(var dome in domes)
                 {
                     if((dome.Center-player.transform.position).sqrMagnitude>120*120||Seen.Count>=4)continue;Seen.Add(dome.Id);
                     if(!Shells.TryGetValue(dome.Id,out var shell))
@@ -89,11 +90,13 @@ namespace ValheimMastery
                         var bounds=mesh.bounds;if(bounds.size.x<=0||bounds.size.y<=0||bounds.size.z<=0)continue;
                         var obj=new GameObject("VM_SwampSanctuaryShell");obj.SetActive(false);obj.layer=donor.layer;
                         obj.AddComponent<MeshFilter>().sharedMesh=mesh;var visual=obj.AddComponent<MeshRenderer>();
-                        var material=new Material(nativeMaterial);visual.sharedMaterial=material;visual.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;visual.receiveShadows=false;
+                        var material=new Material(nativeMaterial);material.SetColor("_TintColor",new Color(.64f,1f,.25f,.55f));visual.sharedMaterial=material;visual.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;visual.receiveShadows=false;
                         shell=new Shell{Object=obj,Material=material,Offset=bounds.center,Scale=bounds.size,Born=Time.time};Shells.Add(dome.Id,shell);
                     }
                     var scale=new Vector3(dome.Radius*2/shell.Scale.x,dome.Radius*2/shell.Scale.y,dome.Radius*2/shell.Scale.z);
-                    shell.TargetScale=scale;shell.Center=dome.Center;Reveal(shell);
+                    if((shell.TargetScale-scale).sqrMagnitude!=0||(shell.Center-dome.Center).sqrMagnitude!=0)
+                    {shell.Born=Time.time;shell.Opened=false;shell.TargetScale=scale;shell.Center=dome.Center;}
+                    Reveal(shell);
                     if(!shell.Object.activeSelf)shell.Object.SetActive(true);
                 }
             }

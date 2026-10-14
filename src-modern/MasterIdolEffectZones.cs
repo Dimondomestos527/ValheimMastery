@@ -50,7 +50,7 @@ namespace ValheimMastery
                 foreach(var zone in zones.Where(z=>z.Type=="BlackForest").OrderBy(z=>z.Id,StringComparer.Ordinal))
                 {
                     var previous=Geometry.ById.TryGetValue(zone.Id,out var prior)?new HashSet<string>(prior.Residents.Keys,StringComparer.Ordinal):new HashSet<string>(StringComparer.Ordinal);
-                    zone.Residents=MasterIdolResidentRoster.Select(MasterIdolWorldIndex.ResidentCandidates(zone,previous).Concat(MasterIdolRecruitment.Pending(zone)).Where(c=>MasterIdolResidentRoster.MayJoin(c,zone.Id,activeHomes,previousHomes)),previous,assigned);
+                    MasterIdolForestGuardState.Observe(zone);zone.Residents=MasterIdolResidentRoster.Select(MasterIdolForestGuardState.Candidates(zone),previous,assigned);
                 }
                 MasterIdolRecruitment.Tick(zones,assigned,()=>CanRecruit(zones,wards));
                 if(!Available||!Same(zones,wards)){

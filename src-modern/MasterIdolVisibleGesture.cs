@@ -36,7 +36,7 @@ namespace ValheimMastery
         }
         private bool Peace() => Actor != null && Ai != null && !MasterIdolSocialSeats.Battle(Ai, Actor) && Ai.m_timeSinceHurt >= 8 && !Ai.IsSleeping() && !Actor.InDodge() && !Actor.InEmote() &&
             GetComponent<MasterIdolSocialSeats>()?.Active != true && GetComponent<MasterIdolWelcome>()?.IsPresenting != true && !MasterIdolResidentWork.Busy(Actor) &&
-            GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentSceneAnimation.Playing(Actor);
+            GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentSceneAnimation.Playing(Actor)&&!MasterIdolResidentBirthPresentation.Playing(Actor);
         internal static bool Playing(Character actor) => actor?.GetComponent<MasterIdolVisibleGesture>()?.Active == true;
         internal static void Start(Character actor) => Start(actor, true, MasterIdolResidentIdleRules.SlotSeconds);
         internal static void Start(Character actor, bool vibe, float duration)
@@ -72,7 +72,7 @@ namespace ValheimMastery
                     vibe && Utils.GetPrefabName(gameObject) != "Greydwarf") return;
                 LastStamp = stamp; // A denied/offscreen cue is never replayed when the viewer returns.
                 if (Active || !MasterIdolResidentVisibility.Local(Actor) || !Peace() ||
-                    GraphicsCount + MasterIdolResidentSceneAnimation.GraphicsCount >= MasterIdolResidentIdleRules.MaxGraphics) return;
+                    GraphicsCount + MasterIdolResidentSceneAnimation.GraphicsCount + MasterIdolResidentBirthPresentation.GraphicsCount >= MasterIdolResidentIdleRules.MaxGraphics) return;
                 Animator = GetComponentInChildren<Animator>(); Original = Animator?.runtimeAnimatorController;
                 if (Original == null || Original is AnimatorOverrideController || !Animator.HasState(0, Movement) || Animator.IsInTransition(0) ||
                     Animator.GetCurrentAnimatorStateInfo(0).fullPathHash != Movement) return;

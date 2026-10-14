@@ -59,6 +59,7 @@ namespace ValheimMastery
             var recipe = gui?.m_selectedRecipe.Recipe;
             var item = gui?.m_selectedRecipe.ItemData;
             var station = player?.GetCurrentCraftingStation();
+            if(Crafting100ActionApplication.FoodAction(recipe,station,item==null?1:item.m_quality+1))return null;
             bool forge=station?.m_upgrader==true;
             if (!Crafting100ActionApplication.TryOutcome(recipe,item,forge,shift,out int operation,out int quality,out int amount,out _)) return null;
             var action = new GoldAction { WireVersion=2, Operation=operation, Shift=operation==3?false:shift,
@@ -100,7 +101,8 @@ namespace ValheimMastery
         internal static Crafting100ActionPreview Preview(InventoryGui gui,Player player)
         {
             bool shift=ShiftHeld;var recipe=gui?.m_selectedRecipe.Recipe;var item=gui?.m_selectedRecipe.ItemData;
-            bool visible=Visible(player)&&gui!=null&&InventoryGui.IsVisible()&&Eligible(recipe?.m_item?.m_itemData)&&gui.m_craftTimer<0;
+            bool visible=Visible(player)&&gui!=null&&InventoryGui.IsVisible()&&Eligible(recipe?.m_item?.m_itemData)&&gui.m_craftTimer<0&&
+                !Crafting100ActionApplication.FoodAction(recipe,player?.GetCurrentCraftingStation(),item==null?1:item.m_quality+1);
             bool forge=player?.GetCurrentCraftingStation()?.m_upgrader==true;
             var status=ButtonStatus(forge,item);string reason="";
             var action=visible?Build(gui,player,false,shift):null;
@@ -225,6 +227,7 @@ namespace ValheimMastery
         }
         private static bool LocalValid(Player player, GoldAction action, Recipe recipe, ItemDrop.ItemData target, bool identity)
         {
+            if(action?.WireVersion==2&&Crafting100ActionApplication.FoodAction(recipe,player?.GetCurrentCraftingStation(),action.NewQuality))return false;
             if(action?.WireVersion==1||action?.Operation==3)return LegacyLocalValid(player,action,recipe,target,identity);
             if(!Visible(player)||action?.WireVersion!=2||player.IsDead()||player.IsTeleporting()||recipe?.m_enabled!=true||
                 !Eligible(recipe.m_item?.m_itemData)||!player.m_knownRecipes.Contains(recipe.m_item.m_itemData.m_shared.m_name))return false;
@@ -329,6 +332,8 @@ namespace ValheimMastery
             if(action?.WireVersion!=2||!MasteryPlugin.Settings.Enabled.Value||actor?.Available!=true||actor.IsDead()||actor.IsTeleporting()||!GoldCraftingService.HasGold(actor)||
                 !float.IsFinite(actor.Position.x)||!float.IsFinite(actor.Position.y)||!float.IsFinite(actor.Position.z))return 0;
             var recipe=RecipeFor(action);var item=recipe?.m_item?.m_itemData;var shared=item?.m_shared;
+            if(Crafting100ActionApplication.FoodAction(recipe,null,action.NewQuality)||
+                action.Station!=ZDOID.None&&Crafting100ActionApplication.FoodStation(WorkshopWorldRecords.Find(action.Station)?.Station))return 0;
             if(recipe?.m_enabled!=true||!Eligible(item)||shared.m_icons==null||action.Variant<0||action.Variant>=shared.m_icons.Length)return 0;
             if(action.Operation==3)return !action.Shift&&action.Kind==2&&action.OutputAmount==0&&action.NewQuality==(long)action.OldQuality+3?
                 LegacyServerDuration(actor,action,environment):0;

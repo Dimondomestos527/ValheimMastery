@@ -14,6 +14,7 @@ namespace ValheimMastery
         LinkedListNode<WorkbenchEnchantmentBenchVisual> node;ZNetView view;ZDO identity;ZDOID uid;
         string marker,home,choice;SpriteRenderer symbol;float RetryAsset;Coroutine pulse;static int Pulses;bool pulseSlot;
         MaterialPropertyBlock pulseProperties;
+        GameObject burst;
         static bool Graphics=>!Application.isBatchMode&&SystemInfo.graphicsDeviceType!=GraphicsDeviceType.Null;
         internal static void Attach(CraftingStation station)
         {
@@ -30,7 +31,7 @@ namespace ValheimMastery
                 (Player.m_localPlayer.transform.position-station.transform.position).sqrMagnitude>64)return;
             Attach(station);var visual=station.GetComponent<WorkbenchEnchantmentBenchVisual>();
             if(visual==null||!visual.isActiveAndEnabled||visual.pulse!=null)return;
-            PerkAudioService.Play("enchantment_accepted", "sfx_gui_craftitem_workbench_end",station.transform.position, .6f,.7f,1f);
+            PerkAudioService.Play("enchantment_accepted",WorkbenchEnchantmentThematicBurst.Sound,station.transform.position,.6f,.6f,1f);
             if(!MasteryPlugin.Settings.EnablePerkProcVFX.Value)return;
             Pulses++;visual.pulseSlot=true;
             try{visual.pulse=visual.StartCoroutine(visual.Pulse(type,firstLearn));}
@@ -43,33 +44,39 @@ namespace ValheimMastery
         void ReleasePulse()
         {
             if(pulseSlot){pulseSlot=false;Pulses=Math.Max(0,Pulses-1);}
+            var owned=burst;burst=null;try{if(owned!=null)Destroy(owned);}catch{}
             try{if(symbol!=null){symbol.SetPropertyBlock(null);var sprite=symbol.sprite;if(sprite!=null){float size=Math.Max(sprite.bounds.size.x,sprite.bounds.size.y);if(size>0)symbol.transform.localScale=Vector3.one*(.28f/size);}}}catch{}
         }
         IEnumerator Pulse(string type,bool firstLearn)
         {
             try
             {
+            float cueStart=Time.unscaledTime;
+            burst=WorkbenchEnchantmentThematicBurst.Create(transform,type,firstLearn,Palette(type));
             // Wait only for this accepted action's local projection, never for a later query.
             float deadline=Time.unscaledTime+.75f;
             while(Time.unscaledTime<deadline&&(symbol==null||!symbol.enabled||choice!=type)){Refresh();yield return null;}
             if(symbol!=null&&symbol.enabled&&choice==type)
             {
                 float start=Time.unscaledTime;Vector3 scale=symbol.transform.localScale;
+                float duration=Mathf.Min(.6f,Mathf.Max(.1f,WorkbenchEnchantmentThematicBurst.Lifetime-(start-cueStart)));
                 if(pulseProperties==null)pulseProperties=new MaterialPropertyBlock();
-                while(Time.unscaledTime-start<.6f&&symbol!=null&&symbol.enabled&&choice==type)
+                while(Time.unscaledTime-start<duration&&symbol!=null&&symbol.enabled&&choice==type)
                 {
-                    float wave=Mathf.Sin(Mathf.Clamp01((Time.unscaledTime-start)/.6f)*Mathf.PI);
+                    float wave=Mathf.Sin(Mathf.Clamp01((Time.unscaledTime-start)/duration)*Mathf.PI);
                     symbol.transform.localScale=scale*(1f+wave*(firstLearn ? .22f : .12f));
                     pulseProperties.SetColor("_EmissionColor",Palette(type)*(2.4f+wave*(firstLearn?3f:1.8f)));symbol.SetPropertyBlock(pulseProperties);
                     yield return null;
                 }
             }
+            while(burst!=null&&Time.unscaledTime-cueStart<WorkbenchEnchantmentThematicBurst.Lifetime)yield return null;
             }
             finally{pulse=null;ReleasePulse();}
         }
         internal static void Tick()
         {
             if(!Graphics||Time.unscaledTime<Next)return;Next=Time.unscaledTime+.1f;
+            WorkbenchEnchantmentThematicBurst.Prepare();
             int budget=Math.Min(16,Loaded.Count);
             for(int i=0;i<budget;i++){var entry=Loaded.First;var item=entry.Value;Loaded.Remove(entry);Loaded.AddLast(entry);if(item!=null)item.Refresh();}
         }

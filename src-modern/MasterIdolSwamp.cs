@@ -27,9 +27,8 @@ namespace ValheimMastery
                 MasterIdolSanctuary dome;
                 if(Previous.TryGetValue(zone.Id,out var saved)&&Same(saved.Coverage,zone.Circles))dome=saved;
                 else{
-                var center=Vector3.zero;foreach(var circle in zone.Circles)center+=circle.Point;center/=zone.Circles.Length;
-                float radius=0;foreach(var circle in zone.Circles)radius=Mathf.Max(radius,Vector3.Distance(center,circle.Point)+circle.Radius);
-                dome=new MasterIdolSanctuary{Id=zone.Id,Center=center,Radius=Mathf.Min(MasterIdolSanctuaryRules.MaximumRadius,radius),Coverage=zone.Circles};
+                if(!MasterIdolSanctuaryRules.TryGeometry(zone.Circles,out var center,out float radius))continue;
+                dome=new MasterIdolSanctuary{Id=zone.Id,Center=center,Radius=radius,Coverage=zone.Circles};
                 }Domes.Add(dome);var location=dome.Center;
                 for(int x=Cell(location.x-dome.Radius-2);x<=Cell(location.x+dome.Radius+2);x++)for(int z=Cell(location.z-dome.Radius-2);z<=Cell(location.z+dome.Radius+2);z++)
                 {long key=Key(x,z);if(!Cells.TryGetValue(key,out var list)){list=new List<MasterIdolSanctuary>();Cells[key]=list;}list.Add(dome);}

@@ -73,6 +73,7 @@ namespace ValheimMastery
             view.GetZDO().Set(Cooking70Service.FeastTierZdoKey,tier);
             view.GetZDO().Set(Cooking70Service.AuthorNameKey,state.Source.AuthorName);
             view.GetZDO().Set(Cooking70Service.FeastPrefabKey,state.Created.gameObject.name.Replace("(Clone)",""));
+            Cooking70FeastRetrofit.TransferPaid(view.GetZDO(),state.Source);
         }
         internal static CookingProductRecord Read(Feast feast)
         {

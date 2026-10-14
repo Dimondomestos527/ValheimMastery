@@ -1,0 +1,32 @@
+{
+  "sourceGateSha256": "8D9A89AABAEE31CFD7D19E96576107D433038173E38E039C3519F4DE1D415C8C",
+  "coreFrozenManifest": "F5CFDBCD7B04BE16D5C6D953D4FF2CC0132EC79B89EAD8B97B7A1C18D87A914B",
+  "sourceCount": 436,
+  "version": "1.4.123-test-ready-fixes-20261014",
+  "installed": false,
+  "resources": 88,
+  "live": "UNTESTED",
+  "wire": "1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes",
+  "utilityReview": "validation/utility-hook35-discovery-provider-20261014/FROZEN_V2_REVIEW_UA.md",
+  "foreignMethodsPreserved": 7129,
+  "variants": [
+    {
+      "variant": "Client",
+      "dll": "24363A06B8826205B60991173C025014D7F57A6AB5700F63566A1A447C3958E7",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "errors": 0
+    },
+    {
+      "variant": "Server",
+      "dll": "33FF52D3E5FED8B31EB64DA2712CF539B51A8BC186678D549FC836F0D5490B18",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "errors": 0
+    }
+  ],
+  "combatReview": "validation/combat-crossbow-core-consumer-v2-review-20261014/VERDICT.json",
+  "inputs": 525,
+  "contractsPerVariant": 802,
+  "status": "ROOT_COMBINED_SOURCE_BUILD_CONTRACT_PRESERVATION_ACCEPT"
+}

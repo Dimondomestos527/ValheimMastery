@@ -32,7 +32,7 @@ namespace ValheimMastery
         private void Refresh()
         {
             if(Ai==null||Creature==null||View?.IsValid()!=true)return;
-            MasterIdolNativeTaming.SyncOwner(Creature);
+            MasterIdolForestGuardState.RehomeOwner(Creature);MasterIdolNativeTaming.SyncOwner(Creature);
             if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+1f;using var aggregate=new MasterIdolPerf.Scope("leash.refresh");Permissions.Clear();
             Forest=MasterIdolResidents.Family(Creature);
             string type=Forest?"BlackForest":Creature.IsTamed()?"Meadows":null;
@@ -79,6 +79,7 @@ namespace ValheimMastery
             processed=false;
             if(!MasterIdolEffectZones.Ready)return false;Refresh();if(!Owned||Zone==null||Zone.Contains(transform.position))return false;
             if(CombatExcursion)return false;
+            if(MasterIdolForestGuardState.ModuleBorn(View.GetZDO()))return MasterIdolForestGuardTravel.Move(Creature,Zone,dt,out processed);
             if(Ai is MonsterAI monster){monster.m_targetCreature=null;monster.m_targetStatic=null;}
             processed=MasterIdolBaseUpdateBridge.Run(Ai,dt);
             if(processed)Ai.MoveTo(dt,Zone.Inside(transform.position),1f,true);return true;

@@ -20,7 +20,7 @@ namespace ValheimMastery
         internal MasterIdolEffectZone SceneHome => Leash?.SocialHome;
         internal bool SceneAvailable => !Moving && Creature != null && Ai != null && View?.IsValid() == true && View.IsOwner() &&
             MasterIdolResidentPolicy.TryHome(Creature, out var home) && home.Contains(transform.position) &&
-            !MasterIdolResidentWork.Busy(Creature) && GetComponent<MasterIdolResidentPresentation>()?.Playing != true &&
+            !MasterIdolResidentWork.Busy(Creature) && GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentBirthPresentation.Playing(Creature) &&
             !MasterIdolResidentSceneAnimation.Playing(Creature) && GetComponent<MasterIdolSocialSeats>()?.Active != true &&
             GetComponent<MasterIdolWelcome>()?.IsPresenting != true && !MasterIdolSocialSeats.Battle(Ai, Creature) &&
             Ai.m_timeSinceHurt >= 8 && !Ai.IsSleeping() && !Creature.InDodge() && !Creature.InEmote();
@@ -40,6 +40,7 @@ namespace ValheimMastery
         }
         private void Update()
         {
+            if (MasterIdolResidentBirthPresentation.Playing(Creature)) return;
             if (!Context() || !MasterIdolResidentPolicy.TryHome(Creature, out var home) || !home.Contains(transform.position) ||
                 !MasterIdolActivity.Near(transform.position) || MasterIdolSocialSeats.Battle(Ai, Creature) ||
                 MasterIdolResidentWork.Busy(Creature) || GetComponent<MasterIdolWelcome>()?.IsPresenting == true) { Reset(); return; }
@@ -48,6 +49,7 @@ namespace ValheimMastery
         internal bool Idle(float dt)
         {
             using var scope = new MasterIdolPerf.Scope("social.idle");
+            if (MasterIdolResidentBirthPresentation.Playing(Creature)) return false;
             if (!Context() || !MasterIdolResidentPolicy.TryHome(Creature, out var home) || !home.Contains(transform.position) ||
                 MasterIdolSocialSeats.Battle(Ai, Creature) || GetComponent<MasterIdolWelcome>()?.IsPresenting == true) return false;
             if (MasterIdolResidentWork.Idle(Creature, dt)) { StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }

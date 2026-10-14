@@ -20,7 +20,12 @@ namespace ValheimMastery
             AddUkrainianPerkWords(words);
             if (!string.Equals(language, "Ukrainian", StringComparison.OrdinalIgnoreCase))
             {
-                words["vm_perk_run_70_desc"] = "At full rhythm, slopes, rough ground and shallows hinder you less. In deep water you can briefly run over the waves before the gift needs rest. Running near important dungeons and fortresses marks them on your map.";
+                words["vm_perk_run_35_desc"] = "Continuous sprinting builds rhythm after 3, 5 and 7 seconds; at maximum, speed rises by 20% and sprint stamina costs fall by 40%. When you stop sprinting, partial rhythm resets, but maximum rhythm lasts for up to 3 seconds. Exhaustion, severe stagger or invalid movement resets rhythm immediately. If an enemy hit leaves you below 50% of maximum health, restore 35% of maximum stamina and gain 15% speed for 10 seconds. Cooldown: 5 minutes.";
+                words["vm_bf_guard_greyling"] = "Twiggy Fidget";
+                words["vm_bf_guard_greydwarf"] = "Mossbeard";
+                words["vm_bf_guard_shaman"] = "Resinomancer";
+                words["vm_bf_guard_elite"] = "Oakbreaker";
+                words["vm_perk_run_70_desc"] = "At full rhythm, slopes, rough ground and shallows hinder you less. In deep water you can briefly run over the waves before the gift needs rest. A brief pause in sprinting still allows entry onto water while you keep moving and retain maximum rhythm. Running near important dungeons and fortresses marks them on your map.";
                 words["vm_perk_fists_100_name"] = "Tyr's Oath";
                 words["vm_perk_fists_100_desc"] = "Tyr honours a will that does not break under blows. His recognition lets you equip two compatible trinkets together: when the shared adrenaline bar fills, both activate at once.";
                 words["vm_perk_fists_100_flavor"] = "Two gifts. One unbroken oath.";
@@ -28,7 +33,7 @@ namespace ValheimMastery
                 words["vm_perk_polearms_100_desc"] = "The All-Father saw in your whirlwind a will capable of turning the tide of battle. Only while continuously spinning your atgeir, you reflect hostile arrows and other supported projectiles.";
                 words["vm_perk_polearms_100_flavor"] = "A hostile shot does not have the final word.";
                 words["vm_perk_crossbows_35_name"] = "Iron Composure";
-                words["vm_perk_crossbows_35_desc"] = "While reloading, your crossbow grants extra armor and stagger resistance—even while sprinting. Its parries withstand much stronger blows, and its bolts hit staggered creatures harder. The skill's contribution to crossbow damage remains reduced.";
+                words["vm_perk_crossbows_35_desc"] = "Preparing a heavy shot, you stand firm. Reloading grants +20 armor and another 40% of your current armor, doubles stagger capacity, and keeps its protection while sprinting. Finishing or interrupting the reload ends that protection.";
                 words["vm_perk_crossbows_35_flavor"] = "A heavy shot rewards the one who survives preparing it.";
                 words["vm_perk_crossbows_70_name"] = "Personal Field Turret";
                 words["vm_perk_crossbows_70_desc"] = "Deploy one personal turret with crossbow secondary attack. Supply your crossbow and as many compatible bolts as fit in its container. Empty hands + secondary starts or stops it. It searches the forward firing sector for hostile creatures while its owner is alive and online; never players or tames. Retrieve the same weapon and remaining bolts from the stopped container, then clear the empty platform.";

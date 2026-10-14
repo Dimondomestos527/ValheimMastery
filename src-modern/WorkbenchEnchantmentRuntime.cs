@@ -17,6 +17,10 @@ namespace ValheimMastery
         static readonly Dictionary<string,ZDO> NativeStations=new Dictionary<string,ZDO>(StringComparer.Ordinal);
         static readonly HashSet<string> Duplicates=new HashSet<string>(StringComparer.Ordinal);
         static uint IndexedRevision=uint.MaxValue;static bool IndexDirty=true,Failed;
+        // Derived from the committed journal only; unloaded/dormant owners keep their claim.
+        static readonly Dictionary<string,HashSet<string>> ActiveOwners=new Dictionary<string,HashSet<string>>(StringComparer.Ordinal);
+        static long ActiveRevision=-1;
+        static string RestoreCursor="";
         // Root owns the independent authenticated cooldown protocol lifecycle.
         static IWorkbenchEnchantmentCooldownAuthority Authority;
         internal static void Initialize(string directory){WorkbenchEnchantmentNetwork.Shutdown();Initialize(directory,WorkbenchEnchantmentCooldownProtocol.Authority);WorkbenchEnchantmentUiBinding.Initialize();}
@@ -28,7 +32,7 @@ namespace ValheimMastery
         {
             try{WorkbenchEnchantmentBenchVisual.Clear();}
             catch(Exception error){try{MasteryPlugin.Log?.LogWarning("[WorkbenchEnchantments] Optional visual cleanup: "+error.Message);}catch(Exception){}}
-            finally{Journal=null;Service=null;Session=null;Manager=null;World=0;NativeStations.Clear();Duplicates.Clear();IndexedRevision=uint.MaxValue;IndexDirty=true;Failed=false;}
+            finally{Journal=null;Service=null;Session=null;Manager=null;World=0;NativeStations.Clear();Duplicates.Clear();ActiveOwners.Clear();ActiveRevision=-1;RestoreCursor="";IndexedRevision=uint.MaxValue;IndexDirty=true;Failed=false;}
         }
         internal static bool Ready=>MasteryPlugin.Settings?.Enabled?.Value==true&&Service!=null&&Journal?.Ready==true&&Current();
         static bool Current()=>ReferenceEquals(Session,ZNet.instance)&&ReferenceEquals(Manager,ZDOMan.instance)&&World!=0&&Session?.GetWorldUID()==World&&Generation==MasterIdolLoadIdentity.Generation&&MasterIdolLoadIdentity.LoadReady;
@@ -141,17 +145,24 @@ namespace ValheimMastery
             }
             return context;
         }
-        // Existing topology cache; no entire-world enumeration per choice/row.
+        // Called on the same main-thread journal.Commit preimage as Switch.
+        // A failed commit cannot publish a claim; a committed revision invalidates this cache.
         internal static bool NetworkAllows(string selected,string choice,WorkbenchEnchantmentState state)
         {
-            if(choice.Length==0)return true;Index();if(!NativeStations.TryGetValue(selected,out var source)||!MasterIdolNetworkCache.TryKey(source.GetPosition(),out var group))return false;
-            int count=0;foreach(var b in state.Stations.Values)
+            if(!Ready||state==null||choice==null)return false;if(choice.Length==0)return true;
+            if(!WorkbenchEnchantmentRules.Known(choice))return false;
+            if(ActiveRevision!=Journal.Revision)
             {
-                if(b.Id==selected||b.Removed||b.Active.Length==0||Journal.HasPending(b.Id)||!NativeStations.TryGetValue(b.Id,out var data)||Duplicates.Contains(b.Id)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var other)||other!=group)continue;
-                if(!TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),level,out var available)||!available.Contains(b.Active))continue;
-                if(b.Active==choice)return false;count++;
+                ActiveOwners.Clear();
+                foreach(var b in state.Stations.Values)
+                {
+                    if(b.Removed||!WorkbenchEnchantmentRules.Known(b.Active))continue;
+                    if(!ActiveOwners.TryGetValue(b.Active,out var owners))ActiveOwners[b.Active]=owners=new HashSet<string>(StringComparer.Ordinal);
+                    owners.Add(b.Id);
+                }
+                ActiveRevision=Journal.Revision;
             }
-            return count<2;
+            return !ActiveOwners.TryGetValue(choice,out var occupied)||occupied.All(id=>id==selected);
         }
         internal static WorkbenchCooldownContext CooldownContext(WorkbenchEnchantmentContext domain,ZRpc rpc)
         {
@@ -262,13 +273,20 @@ namespace ValheimMastery
         internal static List<MasterIdolEffectZone> ProjectCommittedZones()
         {
             var zones=new List<MasterIdolEffectZone>();if(!Ready)return zones;Index();
-            var groups=new Dictionary<string,HashSet<string>>(StringComparer.Ordinal);
-            foreach(string id in NativeStations.Keys.OrderBy(x=>x,StringComparer.Ordinal))
+            int restoreAttempts=0;
+            // Rotate only attempted aliases so repeated proof failures cannot starve another bench.
+            foreach(string id in NativeStations.Keys.OrderBy(x=>string.CompareOrdinal(x,RestoreCursor)<=0?1:0).ThenBy(x=>x,StringComparer.Ordinal))
             {
                 if(Duplicates.Contains(id)||Journal.HasPending(id))continue;var b=Journal.ReadStation(id);var data=NativeStations[id];
-                if(b==null||b.Removed||b.NativeUid!=data.m_uid.ToString()||b.Active.Length==0)continue;
+                if(b==null||b.Removed||!WorkbenchEnchantmentRules.Known(b.Active)||b.NativeWitness!=Witness(data))continue;
+                if(b.NativeUid!=data.m_uid.ToString())
+                {
+                    if(restoreAttempts>=6)continue;restoreAttempts++;RestoreCursor=id;
+                    try{if(!BindLoadedNative(data))continue;}catch(Exception){continue;}
+                    b=Journal.ReadStation(id);
+                    if(!Ready||Journal.HasPending(id)||b==null||b.Removed||b.NativeUid!=data.m_uid.ToString()||b.NativeWitness!=Witness(data)||!WorkbenchEnchantmentRules.Known(b.Active))continue;
+                }
                 if(!TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(b),level,out var available)||!available.Contains(b.Active)||!MasterIdolNetworkCache.TryKey(data.GetPosition(),out var group))continue;
-                if(!groups.TryGetValue(group,out var types))groups[group]=types=new HashSet<string>(StringComparer.Ordinal);if(types.Count>=2||!types.Add(b.Active))continue;
                 var circles=MasterIdolNetworkCache.EffectCoverage(data.GetPosition());if(circles.Length==0)continue;
                 string home=data.m_uid+"/"+id;
                 zones.Add(new MasterIdolEffectZone{Id=home,Type=b.Active,Home=data.GetPosition(),Circles=circles});

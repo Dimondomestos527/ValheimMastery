@@ -42,6 +42,7 @@ namespace ValheimMastery
         internal static bool HasCookMastery(Player eater, ItemDrop.ItemData item, int milestone)
         {
             if (milestone == 35 && !EffectsEnabled) return false;
+            if (milestone == 70 && Cooking70FeastRetrofit.HasGrant(item)) return true;
             if (CookingProductIdentity.Fresh(item))
                 return CookingProductIdentity.TryTier(item, out int tier) && tier >= milestone;
             // Preserve existing historical stored grants without guessing an unknown

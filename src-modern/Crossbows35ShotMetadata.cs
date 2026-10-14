@@ -10,8 +10,8 @@ namespace ValheimMastery
     // no persistence/ACK and no reuse of the gathering XP codec or mutable scopes.
     internal static class Crossbows35ShotMetadata
     {
-        internal const string Rpc = "VM_Crossbow35ShotV1";
-        internal const int MaximumEntries = 128, PacketBytes = 72;
+        internal const string Rpc = "VM_CrossbowCombatShotV2";
+        internal const int MaximumEntries = 128, PacketBytes = 76;
         internal const float Lifetime = 8f;
         internal static readonly int RpcHash = Rpc.GetStableHashCode();
         internal static readonly int DamageHash = "RPC_Damage".GetStableHashCode();
@@ -29,6 +29,7 @@ namespace ValheimMastery
             internal Envelope Key;
             internal long Owner, Author;
             internal ZDOID Character;
+            internal float Level;
         }
         private sealed class Shot
         {
@@ -36,6 +37,7 @@ namespace ValheimMastery
             internal ZNet Net;
             internal ZNetScene Scene;
             internal long World;
+            internal float Level;
         }
         internal sealed class Emission
         {
@@ -105,15 +107,15 @@ namespace ValheimMastery
             Player player = owner as Player;
             if (!Enabled || player == null || player != Player.m_localPlayer || player.IsDead() ||
                 player.m_nview?.IsOwner() != true || projectile.m_nview?.IsOwner() != true ||
-                item?.m_shared?.m_skillType != Skills.SkillType.Crossbows || Crossbows35ReloadGuard.IsTraversalHook(item) ||
+                !Crossbows35ParryStagger.IsActualCrossbow(item) ||
                 hit == null || hit.m_skill != Skills.SkillType.Crossbows || !hit.m_ranged ||
                 PerkRuntimeService.IsPerkGenerated(hit) || projectile.m_hitVariant == CrossbowTurretProjectile.Variant ||
-                projectile.m_aoe != 0f || !PerkRuntimeService.HasPerk(player, Skills.SkillType.Crossbows, 35)) return;
-            float raw = PerkRuntimeService.GetActualSkillLevel(player, Skills.SkillType.Crossbows);
-            if (float.IsNaN(raw) || float.IsInfinity(raw) || raw < 35f || raw > 100f) return;
+                projectile.m_aoe != 0f) return;
+            float raw = Crossbows35ParryStagger.LearnedLevel(player);
+            if (raw <= 0f) return; // Zero learned level has no bonus, so no sidecar traffic.
             Ensure(); Register();
             if (World == 0 || Session == null || Scene == null || player.GetPlayerID() == 0 || player.GetZDOID() == ZDOID.None) return;
-            Shots.Add(projectile, new Shot { Actor = player, Net = Session, Scene = Scene, World = World });
+            Shots.Add(projectile, new Shot { Actor = player, Net = Session, Scene = Scene, World = World, Level = raw });
         }
         internal static bool NativeHit(HitData hit) => hit != null && hit.m_ranged && hit.m_skill == Skills.SkillType.Crossbows &&
             hit.GetAttacker() is Player && !PerkRuntimeService.IsPerkGenerated(hit);
@@ -132,7 +134,7 @@ namespace ValheimMastery
                         Shots.TryGetValue(projectile, out Shot shot) && shot.Actor == hit.GetAttacker() && shot.Actor == Player.m_localPlayer &&
                         shot.Actor.m_nview?.IsOwner() == true && ReferenceEquals(shot.Net, Session) && ReferenceEquals(shot.Scene, Scene) && shot.World == World)
                     {
-                        Impact = new Emission { Hit = hit, Target = target, Author = new Proof { Author = shot.Actor.GetPlayerID(), Character = shot.Actor.GetZDOID() } };
+                        Impact = new Emission { Hit = hit, Target = target, Author = new Proof { Author = shot.Actor.GetPlayerID(), Character = shot.Actor.GetZDOID(), Level = shot.Level } };
                     }
                 }
                 catch { Impact = null; } // Metadata cannot prevent native impact.
@@ -156,7 +158,7 @@ namespace ValheimMastery
             if (emission == null || emission.Bound || target != emission.Target || !ReferenceEquals(Impact, emission) ||
                 !Enabled || !NativeHit(emission.Hit) || data.m_senderPeerID != ZNet.GetUID() || !ValidKey(Key(data))) return null;
             emission.Bound = true;
-            return new Proof { Key = Key(data), Owner = target.m_nview.GetZDO().GetOwner(), Author = emission.Author.Author, Character = emission.Author.Character };
+            return new Proof { Key = Key(data), Owner = target.m_nview.GetZDO().GetOwner(), Author = emission.Author.Author, Character = emission.Author.Character, Level = emission.Author.Level };
         }
         internal static bool Allow(ZRoutedRpc.RoutedRPCData data)
         {
@@ -193,19 +195,20 @@ namespace ValheimMastery
         }
         internal static ZPackage Encode(Proof proof)
         {
-            var p = new ZPackage(); p.Write(1); p.Write(proof.Key.World); p.Write(proof.Key.Sender); p.Write(proof.Key.Message);
-            p.Write(proof.Key.Target); p.Write(proof.Key.Method); p.Write(proof.Owner); p.Write(proof.Author); p.Write(proof.Character); return p;
+            var p = new ZPackage(); p.Write(2); p.Write(proof.Key.World); p.Write(proof.Key.Sender); p.Write(proof.Key.Message);
+            p.Write(proof.Key.Target); p.Write(proof.Key.Method); p.Write(proof.Owner); p.Write(proof.Author); p.Write(proof.Character); p.Write(proof.Level); return p;
         }
         internal static void Receive(long sender, ZPackage p)
         {
             try
             {
                 Ensure();
-                if (!Enabled || p == null || p.Size() != PacketBytes || p.ReadInt() != 1 ||
+                if (!Enabled || p == null || p.Size() != PacketBytes || p.ReadInt() != 2 ||
                     !(Sending > 0 && sender == ZNet.GetUID()) && !TrustedSender(sender)) return;
-                var proof = new Proof { Key = new Envelope { World = p.ReadLong(), Sender = p.ReadLong(), Message = p.ReadLong(), Target = p.ReadZDOID(), Method = p.ReadInt() }, Owner = p.ReadLong(), Author = p.ReadLong(), Character = p.ReadZDOID() };
+                var proof = new Proof { Key = new Envelope { World = p.ReadLong(), Sender = p.ReadLong(), Message = p.ReadLong(), Target = p.ReadZDOID(), Method = p.ReadInt() }, Owner = p.ReadLong(), Author = p.ReadLong(), Character = p.ReadZDOID(), Level = p.ReadSingle() };
                 Character target = Target(proof.Key.Target);
-                if (sender != proof.Key.Sender || !ValidKey(proof.Key) || proof.Author == 0 || proof.Character == ZDOID.None ||
+                if (float.IsNaN(proof.Level) || float.IsInfinity(proof.Level) || proof.Level < 0f || proof.Level > 100f ||
+                    sender != proof.Key.Sender || !ValidKey(proof.Key) || proof.Author == 0 || proof.Character == ZDOID.None ||
                     proof.Owner != ZNet.GetUID() || target == null || target.IsPlayer() || target.m_nview?.IsOwner() != true ||
                     target.m_nview.GetZDO().GetOwner() != proof.Owner || Entries.ContainsKey(proof.Key) || Entries.Count >= MaximumEntries) return;
                 if (Seen.TryGetValue(SourceKey(sender, proof.Character), out long previous) && proof.Key.Message <= previous) return;
@@ -269,18 +272,21 @@ namespace ValheimMastery
                 else frame.Proof = null; // Bounded state, native hit is never blocked.
             }
         }
-        internal static bool Consume(Character target, HitData hit)
+        internal static bool TryConsume(Character target, HitData hit, out float level)
         {
+            level = 0f;
             Frame frame = Current;
             if (!Enabled || frame == null || frame.Proof == null || frame.Used) return false;
             frame.Used = true;
             Player author = hit?.GetAttacker() as Player;
-            return NativeHit(hit) && ReferenceEquals(frame.Hit, hit) && ReferenceEquals(frame.Net, ZNet.instance) &&
+            bool valid = NativeHit(hit) && ReferenceEquals(frame.Hit, hit) && ReferenceEquals(frame.Net, ZNet.instance) &&
                 ReferenceEquals(frame.Scene, ZNetScene.instance) && frame.Target == target && target.m_nview?.IsOwner() == true &&
                 target.GetZDOID() == frame.Proof.Key.Target && frame.Proof.Key.World == World &&
                 target.m_nview.GetZDO().GetOwner() == frame.Proof.Owner &&
                 author != null && author.m_nview?.IsValid() == true && author.m_nview.GetZDO().GetOwner() == frame.Proof.Key.Sender &&
                 author.GetPlayerID() == frame.Proof.Author && author.GetZDOID() == frame.Proof.Character;
+            if (valid) level = frame.Proof.Level;
+            return valid;
         }
     }
     [HarmonyPatch(typeof(Projectile), nameof(Projectile.Setup))]

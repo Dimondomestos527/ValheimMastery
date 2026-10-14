@@ -4,7 +4,29 @@ namespace ValheimMastery
 {
     internal static class MasterIdolSanctuaryRules
     {
-        internal const float MaximumRadius=50f;
+        internal const float MaximumRadius=35f;
+        // Centre of the horizontal union envelope, independent of station density.
+        // Keep the existing mean native Y datum; this is a sphere, not a cylinder or terrain sample.
+        internal static bool TryGeometry(System.Collections.Generic.IReadOnlyList<MasterIdolEffectCircle> circles,out Vector3 center,out float radius)
+        {
+            center=Vector3.zero;radius=0;if(circles==null||circles.Count==0)return false;
+            float minX=float.PositiveInfinity,maxX=float.NegativeInfinity,minZ=float.PositiveInfinity,maxZ=float.NegativeInfinity,y=0;
+            foreach(var circle in circles)
+            {
+                var point=circle.Point;float reach=circle.Radius;
+                if(!Finite(point.x)||!Finite(point.y)||!Finite(point.z)||!Finite(reach)||reach<=0)return false;
+                minX=Math.Min(minX,point.x-reach);maxX=Math.Max(maxX,point.x+reach);
+                minZ=Math.Min(minZ,point.z-reach);maxZ=Math.Max(maxZ,point.z+reach);y+=point.y;
+            }
+            center=new Vector3((minX+maxX)*.5f,y/circles.Count,(minZ+maxZ)*.5f);
+            if(!Finite(center.x)||!Finite(center.y)||!Finite(center.z))return false;
+            foreach(var circle in circles)
+            {
+                float x=circle.Point.x-center.x,z=circle.Point.z-center.z;
+                radius=Math.Max(radius,(float)Math.Sqrt((double)x*x+(double)z*z)+circle.Radius);
+            }
+            radius=Math.Min(MaximumRadius,radius);return Finite(radius)&&radius>0;
+        }
         internal static bool Contains(Vector3 center,float radius,Vector3 point)=>(point-center).sqrMagnitude<radius*radius;
         internal static Vector3 Outside(Vector3 center,float radius,Vector3 point)
         {var direction=point-center;if(direction.sqrMagnitude<.0001f)direction=Vector3.forward;return center+direction.normalized*(radius+.15f);}

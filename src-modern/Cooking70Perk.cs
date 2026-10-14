@@ -74,7 +74,7 @@ namespace ValheimMastery
             Cooking70Service.EnsurePlacedRecord(__instance);
             ZDO zdo = __instance?.m_nview?.GetZDO();
             if (zdo == null) return;
-            if (zdo.GetInt(Cooking70Service.FeastTierZdoKey, 0) < 70) return;
+            if (zdo.GetInt(Cooking70Service.FeastTierZdoKey, 0) < 70 && !Cooking70FeastRetrofit.HasGrant(zdo)) return;
 
             FeastTheme theme = MasterFeastService.GetThemeForPrefab(zdo.GetString(Cooking70Service.FeastPrefabKey, ""));
             string authorName = zdo.GetString(Cooking70Service.AuthorNameKey, "");
@@ -126,6 +126,7 @@ namespace ValheimMastery
             string feastPrefab = __instance.m_nview?.GetZDO()?.GetString(Cooking70Service.FeastPrefabKey, "") ?? "";
             if (!string.IsNullOrEmpty(feastPrefab)) item.m_customData[Cooking70Service.FeastPrefabKey] = feastPrefab;
             else item.m_customData.Remove(Cooking70Service.FeastPrefabKey);
+            Cooking70FeastRetrofit.CopyServing(__instance.m_nview?.GetZDO(), item);
             int tier = __instance.m_nview?.GetZDO()?.GetInt(Cooking70Service.FeastTierZdoKey, 0) ?? 0;
             if (product == null)
             {

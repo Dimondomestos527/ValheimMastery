@@ -1,0 +1,45 @@
+{
+  "version": "1.4.123-test-ready-fixes-20261014",
+  "wireIdentity": "1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes",
+  "sourceRoot": "artifacts/build-workspaces/ready-fixes-20261014",
+  "sourceGate": "artifacts/release-candidates/ready-fixes-test-20261014/PUBLICATION_SOURCE_GATE.json",
+  "sourceGateSha256": "8787E7C6095BB8F30079838074DB405C5824E396CD06BCF17215A119A7F18B34",
+  "rootAcceptance": "validation/ready-fixes-root-20261014/FINAL_OWNER_ACCEPTANCE.json",
+  "rootAcceptanceSha256": "1252966C569E2D388EF3B63CED7066E922E2F4692C4D06572D9379F1C1AC04EE",
+  "rootSourceGate": "artifacts/build-workspaces/ready-fixes-20261014/ROOT_SOURCE_GATE.json",
+  "rootSourceGateSha256": "8D9A89AABAEE31CFD7D19E96576107D433038173E38E039C3519F4DE1D415C8C",
+  "variants": [
+    {
+      "variant": "Client",
+      "dll": "24363A06B8826205B60991173C025014D7F57A6AB5700F63566A1A447C3958E7",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "errors": 0
+    },
+    {
+      "variant": "Server",
+      "dll": "33FF52D3E5FED8B31EB64DA2712CF539B51A8BC186678D549FC836F0D5490B18",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "errors": 0
+    },
+    {
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "variant": "Steam",
+      "dll": "7C9B0C8987F50D04D73D7C032EFCB09111B68866A71F8C12A0CBAF34E1594704",
+      "errors": 0,
+      "native": "25A0A107DCE4D834C44C2B72D0EAFD5CB7793933BDA81816ACCFA1EA9543DACE"
+    }
+  ],
+  "knownIssues": [
+    "Requires paired client/server wire1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes. Earlier installed or public cohorts are incompatible; package readiness does not authorize installation/publication.",
+    "Resident reader accepts3/4 and writes4; after schema4/gameplay writes old425 downgrade is unsupported. Preserve coherent current/old world and store snapshots; no automatic migration or state rollback.",
+    "Völund V2 private character receipt phase4 remains unresolved outcome fencing; maximum8100seconds shared cooldown; installer schema/helpers/paths unchanged.",
+    "Four unfinished Gold100 perks, event topology and unselected ritual5second/audio changes excluded.",
+    "Actual Unity PatchAll/gameplay/rendering/transport remain LIVE UNTESTED. Native compile, contracts and semantic preservation are not gameplay acceptance."
+  ],
+  "rootPreservation": "validation/ready-fixes-root-20261014/COMBINED_PRESERVATION.json",
+  "rootTranspilerReuse": "validation/ready-fixes-root-20261014/TRANSPILE_EVIDENCE_REUSE.json",
+  "localOnly": true,
+  "remotePushAllowed": false
+}

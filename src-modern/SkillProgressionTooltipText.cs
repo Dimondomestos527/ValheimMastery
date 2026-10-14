@@ -13,6 +13,8 @@ namespace ValheimMastery
             string native = PerkLocalization.Localize(skill.m_info.m_description)?.Trim() ?? string.Empty;
             string added = AddedPassive(skill.m_info.m_skill, Ukrainian());
             if (string.IsNullOrWhiteSpace(added)) return native;
+            if (skill.m_info.m_skill == Skills.SkillType.Crossbows)
+                return native + (native.Length > 0 ? "\n\n" : string.Empty) + added;
             string label = Ukrainian() ? "Додатково від рівня:" : "Additional level effect:";
             return native + (native.Length > 0 ? "\n\n" : string.Empty) +
                 "<color=#B9C5CE>" + label + "</color> " + added;
@@ -59,9 +61,7 @@ namespace ValheimMastery
                         ? "вищий рівень додатково посилює удар у спину ножем."
                         : "higher skill further strengthens knife backstabs.";
                 case Skills.SkillType.Crossbows:
-                    return ua
-                        ? "вищий рівень пришвидшує заряджання й подовжує політ лише гака; звичайні арбалети не змінюються."
-                        : "higher skill charges and sends only the grappling hook farther; ordinary crossbows are unchanged.";
+                    return CrossbowsHookSecretText.Progression(Player.m_localPlayer, ua);
                 case Skills.SkillType.Unarmed:
                     return ua
                         ? "вищий рівень підсилює бонус до адреналіну під час бою кулаками й ефекти стусана, а без зброї — шкоду та швидкість атак."
@@ -80,4 +80,3 @@ namespace ValheimMastery
         }
     }
 }
-

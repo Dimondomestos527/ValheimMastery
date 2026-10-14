@@ -175,10 +175,10 @@ namespace ValheimMastery
         internal static void Clear()
         { RestoreOwnedIcons(); Owned.Clear(); Stale.Clear(); _capture = null; _map = null; _session = null; _player = null; _world = 0; }
     }
-    [HarmonyPatch(typeof(Character), nameof(Character.Message), new[] { typeof(MessageHud.MessageType), typeof(string), typeof(int), typeof(Sprite), typeof(bool) })]
+    [HarmonyPatch(typeof(Player), nameof(Player.Message), new[] { typeof(MessageHud.MessageType), typeof(string), typeof(int), typeof(Sprite), typeof(bool) })]
     internal static class Run70DiscoveryNotificationIconPatch
     {
-        private static void Prefix(Character __instance, MessageHud.MessageType __0, string __1, ref Sprite __3)
+        private static void Prefix(Player __instance, MessageHud.MessageType __0, string __1, ref Sprite __3)
             => Run70MapMarkerPresentation.NotificationIcon(__instance, __0, __1, ref __3);
     }
     [HarmonyPatch(typeof(Minimap), "AddPin")]

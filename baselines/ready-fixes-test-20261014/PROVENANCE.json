@@ -1,0 +1,2145 @@
+{
+  "status": "EXACT_ROOT_ACCEPTED_SOURCE_EXPORT_STATIC_TEST",
+  "ready_sha256": "1C97E2D7E2146E73DCD29D5FDA39FA29891B716A45F7F12515038F210A417164",
+  "source_gate_sha256": "8787E7C6095BB8F30079838074DB405C5824E396CD06BCF17215A119A7F18B34",
+  "root_acceptance_sha256": "1252966C569E2D388EF3B63CED7066E922E2F4692C4D06572D9379F1C1AC04EE",
+  "source_stage": "artifacts/build-workspaces/ready-fixes-20261014",
+  "source_files": 436,
+  "resource_files": 88,
+  "version": "1.4.123-test-ready-fixes-20261014",
+  "wireIdentity": "1.4.123+rpc-20261014-crossbow-progress-v2-ready-fixes",
+  "variants": [
+    {
+      "variant": "Client",
+      "dll": "24363A06B8826205B60991173C025014D7F57A6AB5700F63566A1A447C3958E7",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "96CFC004F7F4A6F30D070BEF39EAFD79C466A137121C4665A2F19FB9C15C6127",
+      "errors": 0
+    },
+    {
+      "variant": "Server",
+      "dll": "33FF52D3E5FED8B31EB64DA2712CF539B51A8BC186678D549FC836F0D5490B18",
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "native": "0DFC7E81436F822121148EFED859BA1E661D58B9484BD45E3B6F33B6DD86BFAD",
+      "errors": 0
+    },
+    {
+      "sourceGate": "FINAL_OWNER_ACCEPTANCE.json",
+      "variant": "Steam",
+      "dll": "7C9B0C8987F50D04D73D7C032EFCB09111B68866A71F8C12A0CBAF34E1594704",
+      "errors": 0,
+      "native": "25A0A107DCE4D834C44C2B72D0EAFD5CB7793933BDA81816ACCFA1EA9543DACE"
+    }
+  ],
+  "exported_files": [
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/blackforest.png",
+      "sha256": "92BD23E09FF94C616043D868292D5572037B21A7C456B59211C98C8DA4E7D73A"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/meadows.png",
+      "sha256": "42BE6930C709F7F0A82DAA78ED4E6A0492375765047B868BEE2A482A6A810B24"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/mistlands.png",
+      "sha256": "6D4CA08484C34444D2310B8CE9DD1A0DEC2F11C53EEA6B2BEFA2864F15EF7DCE"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/mountains.png",
+      "sha256": "3E55A30112AAB38E575BD3641E21F1E1E6ADF35BFBE638AC8D59F0535BBCE130"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/plains.png",
+      "sha256": "4B001102FCB1CD96B0AB39FB429788319E602A6BD574556005CB14B28E8D6088"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Enchantments/swamp.png",
+      "sha256": "D5A81750E1DFA3C4EF676FF705891BBF7E1337A43E4BC5E1CF19D2A8A5143832"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/ashlands_fortress.png",
+      "sha256": "28AAADA6F8F681AB33994951F52436744DBF12C853B79A3A7F6517616B752C90"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/bear_cave.png",
+      "sha256": "612AD6962FFDC6076999AD4682AA32C2B51F32B39D485DE8074BA4290B3D17D8"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/burial_chambers.png",
+      "sha256": "FCF30E984888066241E7C7A11F758DA28BB45FD21C7B9033B396C93600890DED"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/frost_cave.png",
+      "sha256": "41A56E9A9D6E324DC017F8FD4739E6E53D98822E7EDF8AF9418F5EEC8C123F6C"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/infested_mine.png",
+      "sha256": "B0DC73B436508EBF17A60F0C1B11BE03B31803E1DA4D7930EFA8042CABF1AB9C"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/morkborg.png",
+      "sha256": "EC3A0745B5B6060C92AEEAC8FF5DE39096976E24D83B53F75D98F911FE2CF0C4"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/sunken_crypt.png",
+      "sha256": "AF868AEE53087B375227F8473E40A5F39FF162E51E8FBD62C073C885AA6E7029"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/the_hole.png",
+      "sha256": "A29182C00EEF610DBC9CD28EB900391E000B6A9210DCA775160F36F95E726FE8"
+    },
+    {
+      "path": "ApprovedUiAssets/resources/Run70/troll_cave.png",
+      "sha256": "7EDA5911EF85014BAB8BAD9BFBDA43731AD4C08DB0DBA5F35D349189D921D0FF"
+    },
+    {
+      "path": "RuntimeResources/resource000.bin",
+      "sha256": "50A9D3EE2909224B141C252EC45712E55A5D31FA343B3327B8B8647FE1E8F553"
+    },
+    {
+      "path": "RuntimeResources/resource001.bin",
+      "sha256": "CAC663E1AC3AC23CC4EDD486C8E7910D2B9026B7F8B495340CD80DE3E8D720CD"
+    },
+    {
+      "path": "RuntimeResources/resource002.bin",
+      "sha256": "4C433738A734B614293578931B4A4D9E5F73682A4552D8F0A9B8DF4D52E74CD1"
+    },
+    {
+      "path": "RuntimeResources/resource003.bin",
+      "sha256": "83FFF590901F2BCA27AD47AAC6C3EB6CCD398FD08BE718803B0983CAE301EE5C"
+    },
+    {
+      "path": "RuntimeResources/resource004.bin",
+      "sha256": "ECCB915D4981ACBD45E1DA00A3E6F2D5221DEB14BB8EFC9EF9E7CE04A28293DA"
+    },
+    {
+      "path": "RuntimeResources/resource005.bin",
+      "sha256": "985285913C051C86BD838779F5A77E09AB9DE301DAE1ADB9A3416027A1102E2C"
+    },
+    {
+      "path": "RuntimeResources/resource006.bin",
+      "sha256": "E604E67971E11AB86211E0D46298F8038ECA09E239D21E41FB347E5E5A76422A"
+    },
+    {
+      "path": "RuntimeResources/resource007.bin",
+      "sha256": "F79BA4030A23E465B887426F317FC0692C734D0AB833E5B8898A261D9EB8067C"
+    },
+    {
+      "path": "RuntimeResources/resource008.bin",
+      "sha256": "8F56DC421D1A093209BE30FFF764170F0EC06C1BD97CCD3CE47DA90EE9AB0024"
+    },
+    {
+      "path": "RuntimeResources/resource009.bin",
+      "sha256": "1E259A9AC92999D1AC234150EA06CF61D770B6394A76F3809348B67A1643E7E7"
+    },
+    {
+      "path": "RuntimeResources/resource010.bin",
+      "sha256": "C78C4EAC4B7105FF4A5ED06A869A875C66024BC0E13DC8997FE406BD0F768962"
+    },
+    {
+      "path": "RuntimeResources/resource011.bin",
+      "sha256": "8B0400831E0E931B1BD7382489D4687F6804969C8E90B9B158AEA2B3F50CEBE9"
+    },
+    {
+      "path": "RuntimeResources/resource012.bin",
+      "sha256": "20874C0C4DCACB7B2E57D83BA409B42814C8ADB3C2D725E0700C38972A6A59B1"
+    },
+    {
+      "path": "RuntimeResources/resource013.bin",
+      "sha256": "1814D6E532D8A33FF58F3C68054BF53436049D2ED606C57DB31D8BCE7E93A42F"
+    },
+    {
+      "path": "RuntimeResources/resource014.bin",
+      "sha256": "6A05370FD8E39E465CD2BE8D24EA0378EEF895550D44265503D9B0DD4FEF6A5D"
+    },
+    {
+      "path": "RuntimeResources/resource015.bin",
+      "sha256": "8F10DCC4C96A7DEF5452A5DFABB6532FBEC24131D3AE1252E0B373EBAEB065C6"
+    },
+    {
+      "path": "RuntimeResources/resource016.bin",
+      "sha256": "C94D8C9C55CA75E331F0190FD9DBDCDFCB6BF0A963317FAE33E82A98395CE301"
+    },
+    {
+      "path": "RuntimeResources/resource017.bin",
+      "sha256": "A9577F0DB959C2D37CBF6E2949664AF0473CE3CFD02759F3EEE1F07E59E43844"
+    },
+    {
+      "path": "RuntimeResources/resource018.bin",
+      "sha256": "F76551BE344EB4BE5BC9F2BCEFDE0DB28964E1E2D5A37D34A84DFFEF87557428"
+    },
+    {
+      "path": "RuntimeResources/resource019.bin",
+      "sha256": "95285BEEBF32089FA33AA32C28083B301549D165FA2A590868491BF12DA40CEB"
+    },
+    {
+      "path": "RuntimeResources/resource020.bin",
+      "sha256": "0B46669CAE0BBAB16A86F8D203965C1748FE790D45215FA1F23809AFF53AD7F1"
+    },
+    {
+      "path": "RuntimeResources/resource021.bin",
+      "sha256": "DA17DA8A4085CE8A3AE1F4FBE488A3DAF3BA054D0E14965B38B726C276E4AE75"
+    },
+    {
+      "path": "RuntimeResources/resource022.bin",
+      "sha256": "141655940FF348FEB83DF6DC3E281E151202BFC67A8217B7E5DC47EF8A25B8D6"
+    },
+    {
+      "path": "RuntimeResources/resource023.bin",
+      "sha256": "6189E2B86EA4D7C2338C22D0CA1E18AB2CAE0788676CEDF0BCB24D2EDBB4A526"
+    },
+    {
+      "path": "RuntimeResources/resource024.bin",
+      "sha256": "C5F505B490B1D76F64952C4489206A687ADEC5F5A5D992B66515C9E33F3B7ACE"
+    },
+    {
+      "path": "RuntimeResources/resource025.bin",
+      "sha256": "783EEB7F9C7CF619376F85D44D15D9D654503CD19CFCB903648486A11CE6A4D4"
+    },
+    {
+      "path": "RuntimeResources/resource026.bin",
+      "sha256": "5F5BA08826D7F510BD80AA600C0474465571A88A13EE6AF88CF1D459E51A9104"
+    },
+    {
+      "path": "RuntimeResources/resource027.bin",
+      "sha256": "B9B2E3AD7EF53D58EE19A9894F5AA86F29989BF14F5508091F53DF5607FDFF32"
+    },
+    {
+      "path": "RuntimeResources/resource028.bin",
+      "sha256": "C46B9C7430F2A26149435894AAA3261EBDC76D093CC8B0E0BBD6340AB7631BEA"
+    },
+    {
+      "path": "RuntimeResources/resource029.bin",
+      "sha256": "025B440C82EF365895F849A07EA3B253089F943F2E4C2691D06ABF519CBB0DDF"
+    },
+    {
+      "path": "RuntimeResources/resource030.bin",
+      "sha256": "4AD6C0D693819A45BF8549E41696DC833FE6045CB30AA77EB49A581219B0AF40"
+    },
+    {
+      "path": "RuntimeResources/resource031.bin",
+      "sha256": "043F639934F44741B7DF8854D56E76620279603672A09C55F9823174400423F0"
+    },
+    {
+      "path": "RuntimeResources/resource032.bin",
+      "sha256": "65CBB22759CE3A8BF5FBDB27665E9C6F69134861A884A729EDFE0A9088675864"
+    },
+    {
+      "path": "RuntimeResources/resource033.bin",
+      "sha256": "7B503D08CDBAE175CB89778ADFEDAAF1F8FABEC452CE5D2C51F618D6C9E01C57"
+    },
+    {
+      "path": "RuntimeResources/resource034.bin",
+      "sha256": "EA44DCD51BDDA61B0477AD7382C8649422026724168F38B15231FBCF79E8EEDF"
+    },
+    {
+      "path": "RuntimeResources/resource035.bin",
+      "sha256": "7D61722C04F09194B44DBFED310EC31D2774006AA0AFF29080B7C25C46A72B53"
+    },
+    {
+      "path": "RuntimeResources/resource036.bin",
+      "sha256": "C108915322D023516197861CBBF83D2AEDF8244DF9E61C3D865553CC15EE75BC"
+    },
+    {
+      "path": "RuntimeResources/resource037.bin",
+      "sha256": "369D52C79B2A4E89588DDAF93DD8507408D82B9283B92946D40A5BF793450CF7"
+    },
+    {
+      "path": "RuntimeResources/resource038.bin",
+      "sha256": "E97DBC1D7738CF3E9CB06C1A5A31A883F564B3B8D3CC129868A87217806A7C03"
+    },
+    {
+      "path": "RuntimeResources/resource039.bin",
+      "sha256": "9092B2CD3CBEC168239819BAACFC5DC7C691CB0A46D3722243FE3FBBD690D26D"
+    },
+    {
+      "path": "RuntimeResources/resource040.bin",
+      "sha256": "C31C706C017F1432E79C3F46D874702C41C1420D4CC8EDFB416DE4A5AF916078"
+    },
+    {
+      "path": "RuntimeResources/resource041.bin",
+      "sha256": "121CC684AD8258F1DC4CEC4BB17795F3518D7874F8EE8112E9E2C83771C35BE0"
+    },
+    {
+      "path": "RuntimeResources/resource042.bin",
+      "sha256": "1ECD3BC608D136BB1B36B17E0FF84EBE4B7BCB1EEEFFA8ABCEC85DEDE7DE96AE"
+    },
+    {
+      "path": "RuntimeResources/resource043.bin",
+      "sha256": "AC0AEC8EA39CA02EFB723C1B90F63AFBD062293BB0168C831EA26587776790B1"
+    },
+    {
+      "path": "RuntimeResources/resource044.bin",
+      "sha256": "2B3E6F0B7735027C158F4C2A979EC172937C8126620B57562F300E15D1B96A7F"
+    },
+    {
+      "path": "RuntimeResources/resource045.bin",
+      "sha256": "6D6C8CCE6718F385EC066A4CBA186C04A9214C2C4A164BF4AFDD310EBB9EB112"
+    },
+    {
+      "path": "RuntimeResources/resource046.bin",
+      "sha256": "98BBDA77BDE382BEFA96AF19ECEF87F8800C6E96376C55A577CD3DB7F66ACF7F"
+    },
+    {
+      "path": "RuntimeResources/resource047.bin",
+      "sha256": "DF5609EAB6C4394708F3FF6F3F664731B99A3CB71DA761604D9C42AB5C6D02F5"
+    },
+    {
+      "path": "RuntimeResources/resource048.bin",
+      "sha256": "305C738B7C6DF4407463A224AC93A908D47AE8AA285CF1A36BFF8D269902E68C"
+    },
+    {
+      "path": "RuntimeResources/resource049.bin",
+      "sha256": "D1DFFD5230D9888DA5A5C24DF53F15DC740086654DEDFAD76768F0626D91DD5A"
+    },
+    {
+      "path": "RuntimeResources/resource050.bin",
+      "sha256": "F69493CFCE5D12BB2DCAF963DF5ECFAD52D2A63D10CE5B05031EF154140B2B40"
+    },
+    {
+      "path": "RuntimeResources/resource051.bin",
+      "sha256": "D8CDB911C600E63BB75ECC7488C5F88551FC2BF6AC470532A62307E97FE02949"
+    },
+    {
+      "path": "RuntimeResources/resource052.bin",
+      "sha256": "A49B43D61108B026A282BABE3C89370909CB08714F6BA9613BC99421CA5476D1"
+    },
+    {
+      "path": "RuntimeResources/resource053.bin",
+      "sha256": "6A1D24054BFA148DCC071132F8F1099B578FF5C4A369AB624F792DDF0EED1245"
+    },
+    {
+      "path": "RuntimeResources/resource054.bin",
+      "sha256": "DBB3D5B26B47B9EDA12BD1DA88404837CB1DF688FD4DA7FE318088D6C37B1730"
+    },
+    {
+      "path": "RuntimeResources/resource055.bin",
+      "sha256": "7A3E1B56515DAD69F9AFC78BC63BC8CAD2EADFB5CF17623ACF3025D93F3FB01A"
+    },
+    {
+      "path": "RuntimeResources/resource056.bin",
+      "sha256": "9A556C5A41FCD3133402E46987B9358D494CAB5291F2E4AC1EB7C67A5727086E"
+    },
+    {
+      "path": "RuntimeResources/resource057.bin",
+      "sha256": "62231BEED48BE069C1CC8B7DB75EE4BD0F599A2FC53C0DC9B64C7317D6B56D68"
+    },
+    {
+      "path": "RuntimeResources/resource058.bin",
+      "sha256": "81B7994E949827414110F7F55EA3E8E8B5F1C5528D373C200DC5325F0FFA3BBA"
+    },
+    {
+      "path": "RuntimeResources/resource059.bin",
+      "sha256": "8B111C00FD29C03543FBB228B4F09EAF3FE524EAFB16837B88E67ADB71A2CA30"
+    },
+    {
+      "path": "RuntimeResources/resource060.bin",
+      "sha256": "01A3B345253DC27DBAD051AFBC608B6FCC12E203F2C9E0B1F22FC64B7FE36152"
+    },
+    {
+      "path": "RuntimeResources/resource061.bin",
+      "sha256": "A94D9CA351A5CBBB5B9096AA11E9AA7A61CD4A70FE5BF4820337A694340D44D7"
+    },
+    {
+      "path": "RuntimeResources/resource062.bin",
+      "sha256": "772D88A751A72E0887180E4E5727D4585C1E5275A86EB83D17D58A6382BDAAA1"
+    },
+    {
+      "path": "RuntimeResources/resource063.bin",
+      "sha256": "B9405DC2ECA91E54BB0869FB29DC1C1F53C741ADD6DCB0D2028C2D2F7FE447D9"
+    },
+    {
+      "path": "RuntimeResources/resource064.bin",
+      "sha256": "4AB94C60B1E9762861FC10F5234B213C8FF690FCA581ECB734C3B49634B449BF"
+    },
+    {
+      "path": "RuntimeResources/resource065.bin",
+      "sha256": "C85EC934A5F759BFD84B4EF36511E0B90DC61A19F5E614D2EA111BF287F44E67"
+    },
+    {
+      "path": "RuntimeResources/resource066.bin",
+      "sha256": "BEBA1D7DCF4F2130A55B76E756BDECD6F920B8D7E02F8C9F23860029B33DE2E0"
+    },
+    {
+      "path": "RuntimeResources/resource067.bin",
+      "sha256": "ACA5BCB0C0B2FDE07A98E7508E0724D3FF3E09EBE632D0CB08845CB1D397D014"
+    },
+    {
+      "path": "RuntimeResources/resource068.bin",
+      "sha256": "86AB0FD632211B905D8F247221F662785E0AF9960596F256BFDACC872E7C1888"
+    },
+    {
+      "path": "RuntimeResources/resource069.bin",
+      "sha256": "7398009F00C64A4A43EAD5FC8B2774AE860717DC14D9FE5ECCC1AD7D45199305"
+    },
+    {
+      "path": "RuntimeResources/resource070.bin",
+      "sha256": "0F3EC13E6FDD66E14870DD3385B595C89CAA3CF429640D5BF3E39D5E5CFE8C62"
+    },
+    {
+      "path": "RuntimeResources/resource071.bin",
+      "sha256": "F646A2D741395A6BD414F11F67462CE2432B7AA4CF814FBAD236DC771DE3E036"
+    },
+    {
+      "path": "RuntimeResources/resource072.bin",
+      "sha256": "EB1DB95BBA88ACB6583FD1B2720FFB0F86578AA162AE8E21D34B5B8006B21D64"
+    },
+    {
+      "path": "ValheimMasteryPoC.csproj",
+      "sha256": "FAE50CD0D22694C0DFD529AA4FDA5B0392E19D34D38C717E70A511374FEB0712"
+    },
+    {
+      "path": "src-modern/ApprovedUiAssetBank.cs",
+      "sha256": "AD2182C925E516430E63D030330D094DD9B25ECE5929A3131179CD58D19277BD"
+    },
+    {
+      "path": "src-modern/Ashlands35ChargeVisual.cs",
+      "sha256": "542B464C427799E1AE38D23D1791C747EF3767FD20A5F4E80DE01A8D9F36D4FA"
+    },
+    {
+      "path": "src-modern/Ashlands35ClusterCharge.cs",
+      "sha256": "C23E172385225BAF4556260E56F2FE6D5D340A69BB6046AA5E2CAEADAA817B9B"
+    },
+    {
+      "path": "src-modern/Ashlands35ClusterPose.cs",
+      "sha256": "1F10FFAE5D649C1A90EAD7EF66D002B028B58063EAB0D250C9A51583DC7F5493"
+    },
+    {
+      "path": "src-modern/Ashlands35ClusterSpread.cs",
+      "sha256": "4A31CAC2058DFB7D0F389E659214A3C4CBDA922A80F03731CB0222EED837B6B8"
+    },
+    {
+      "path": "src-modern/Ashlands35Dundr.cs",
+      "sha256": "F76434E94C2DA9D04232C95D5CC6ECE848DFE3E8E46A49B6A39B5E5B65FBA57B"
+    },
+    {
+      "path": "src-modern/Ashlands35NativeBindings.cs",
+      "sha256": "9012BB0A7D8BE462FE88D2C353C3D0E19E1EE568766DB12075EDD33FFCC0C041"
+    },
+    {
+      "path": "src-modern/Ashlands35Presentation.cs",
+      "sha256": "E21EAFFCDDDDA5998C3181E75E8F32579C6262E861518F272A8264CFC404AC8E"
+    },
+    {
+      "path": "src-modern/Ashlands35RootBuffVisual.cs",
+      "sha256": "1CBBD574D00F6835319F5614C828DF855D6F24D07B93B44304606FC04353FDAD"
+    },
+    {
+      "path": "src-modern/Ashlands35Rules.cs",
+      "sha256": "43C81B677F6897CCE12F50A70E73195B03640AA34865C9367D2A35A9B67AC4C0"
+    },
+    {
+      "path": "src-modern/Ashlands35Summons.cs",
+      "sha256": "7053F673DADD9215A56F7011F4C1F78DD50411860D734F592FCCCAC6A4785305"
+    },
+    {
+      "path": "src-modern/Ashlands35VisualRules.cs",
+      "sha256": "4C2E15C55F7682F9287D8263A11DFAE6FDEF339C34B2444271CF9AC947DFB20F"
+    },
+    {
+      "path": "src-modern/AssassinBlink70.cs",
+      "sha256": "BA995D817EB68C8BD76CE756BB0A2734C034007C311A9340F33DC5155596ADDE"
+    },
+    {
+      "path": "src-modern/AttackIntentService.cs",
+      "sha256": "93A35291B0B2163724C8943CB077CB210553A807219F03D869E3CFC5F0D358CC"
+    },
+    {
+      "path": "src-modern/AxeGeometryAudit.cs",
+      "sha256": "C39FE95FCC507E90027D4496E51E69703A6A4E6E7787C1CBB135630017FD091E"
+    },
+    {
+      "path": "src-modern/Blocking35CorrelatedProjectiles.cs",
+      "sha256": "81697FCF5A7393C30C9FE594EA7FE6556FA7075C17648B973C99CBA07399FF39"
+    },
+    {
+      "path": "src-modern/Blocking35GuardBreakFallback.cs",
+      "sha256": "381DC4797B90F22883EAED926556831EB9717CB82CA16B000165EDDE5000A570"
+    },
+    {
+      "path": "src-modern/Blocking35ProjectileDraft.cs",
+      "sha256": "139792224CA12CE626FD3FC8E133B0E3702AAA60F07CD0201FAD97E20E70E6DD"
+    },
+    {
+      "path": "src-modern/Blocking70Reflection.cs",
+      "sha256": "AFDEECDF50B7D67B60F8C87EA1AD9ACA8AF64C1644138201A19EE5F4C86DC3DA"
+    },
+    {
+      "path": "src-modern/BlockingStoredPressure.cs",
+      "sha256": "DF5D84943B9E29BCAA0B720354B1345EC82488EEE80405441EE02988ED3DE296"
+    },
+    {
+      "path": "src-modern/BloodMagic35Perk.cs",
+      "sha256": "7EB9CD300299C1E6D72BB1166ABEE2C0CC569A6F4BF5ADCEBCD9B8AB07C77F0A"
+    },
+    {
+      "path": "src-modern/BloodMagicCombatXp.cs",
+      "sha256": "A94CFCC45B37243F1131DBABEC05074D1406BD9F1E98AF0442917D8E89BF2476"
+    },
+    {
+      "path": "src-modern/BloodMagicXpRules.cs",
+      "sha256": "92046067FFF5629A36B6480500F16C5608EF7B5B2A92D98E7F3743DD2E8B978C"
+    },
+    {
+      "path": "src-modern/BloodSkeleton35Service.cs",
+      "sha256": "1634A289DBA0CDE4AAB0551E4EDEF3CA69899813B6527BA18F7E828065C1BF97"
+    },
+    {
+      "path": "src-modern/Bow70ArrowProfileService.cs",
+      "sha256": "FB101EF958C093EC4633CDB7D423C6314C109EF343F7BC8C4B7003B6B3D99B26"
+    },
+    {
+      "path": "src-modern/Bows70WeakPointPerk.cs",
+      "sha256": "33B57A57D6CC4A759D6C8224C97E5B3D205EEE7D542B1D8B1C02C47358B9A407"
+    },
+    {
+      "path": "src-modern/BuildAuthorHoverCleanup.cs",
+      "sha256": "896CC8C353B45C1026A613A413BBDCE0963CBE0A99BA2AB00C44B05CB13DF50E"
+    },
+    {
+      "path": "src-modern/CarrierBirthVisual.cs",
+      "sha256": "AF19CEDE4A49CC8D93310802F7659B21B0E246B2BAF25639CB753C4DF9460263"
+    },
+    {
+      "path": "src-modern/CarrierPackVisual.cs",
+      "sha256": "8F0673839156CE9D5C525DFC0F7D02C9769ECB09BA8C337C580A417A5EBDB810"
+    },
+    {
+      "path": "src-modern/CarrierSurvival.cs",
+      "sha256": "166552AF0114AB5F1D5178CB3359100D8E450DCD1FA308A4216BB29056EF90DA"
+    },
+    {
+      "path": "src-modern/CarrierSurvivalRules.cs",
+      "sha256": "9E1F87CEAC2DC84C9D4EC4803A3D38AA671C90E9CEEADE5AE854E2055A2EC397"
+    },
+    {
+      "path": "src-modern/ClubWeaponClasses.cs",
+      "sha256": "16E84536C6DB83032F9ECB60F13D99AC2B7ADB157822429DBC211A2BF75A1C9B"
+    },
+    {
+      "path": "src-modern/Clubs35Counterblow.cs",
+      "sha256": "3C0F8F89304F91EFE33A6D285DBCCF93EC4ABCAE942EB944E645647C852A343B"
+    },
+    {
+      "path": "src-modern/Clubs70ChargeHud.cs",
+      "sha256": "B30335CE446B3824F5006B1E988DB3FB4C867BB17086695C2D16665AD769B595"
+    },
+    {
+      "path": "src-modern/Clubs70ChargePresentation.cs",
+      "sha256": "996CBF225D25707EDF6A455B05544DBE5D4045C2C1E6E6801215DE38E29F4D85"
+    },
+    {
+      "path": "src-modern/Clubs70EchoService.cs",
+      "sha256": "35E2245312FFB9308711AE518A37BA36BD729FB53E60030E62FA24322E23A156"
+    },
+    {
+      "path": "src-modern/Clubs70Reservation.cs",
+      "sha256": "583719D42D28E596401AEB88B5B751902B3B665AE53206980F587FBD75EED037"
+    },
+    {
+      "path": "src-modern/ClubsMasteryTooltip.cs",
+      "sha256": "BCF936D158B9F216D2024E93335986A562BD1A637036DE46DD4D855F2F428186"
+    },
+    {
+      "path": "src-modern/ClubsReserveRules.cs",
+      "sha256": "44F76E51F11FA7CACF8879EB1A24E664FDA8D0031536D5E3E11C605EDAB77960"
+    },
+    {
+      "path": "src-modern/Combat100AtgeirReflection.cs",
+      "sha256": "FCB79ED94291B15168E604A8F11921E1D6AE1D44A56E8FA9F30D5BAEDCB40628"
+    },
+    {
+      "path": "src-modern/Combat100DualTrinkets.cs",
+      "sha256": "6D4CB4A6F319D6B189811BAC7145110EE5090AF1A3100FEBE7E2FF605B954FE0"
+    },
+    {
+      "path": "src-modern/Combat100PassiveTestCommands.cs",
+      "sha256": "8C6A66610C59957FBD7FFDD518E4809110EDBC0AF77FB64914B62735160B97F4"
+    },
+    {
+      "path": "src-modern/Combat100RecognitionParticles.cs",
+      "sha256": "E08B56BAB762330A6EA89DA0B0474084E79A89E39642EBAB7046E2E41F40ACD1"
+    },
+    {
+      "path": "src-modern/Cooking35Perk.cs",
+      "sha256": "28485FB5F923B07E208EBF30A967FCC00C5B6C517E071784434FBBD95A9F8B97"
+    },
+    {
+      "path": "src-modern/Cooking70FeastRetrofit.cs",
+      "sha256": "A27536194E251D7DE26583379B5631409B5182E7E15023BB43137A990819F006"
+    },
+    {
+      "path": "src-modern/Cooking70FeastRetrofitRuntime.cs",
+      "sha256": "8E3F1EAEDF29A2D4240420728266F948D3DBB8E92522D9B7693204CE203B8C4B"
+    },
+    {
+      "path": "src-modern/Cooking70Perk.cs",
+      "sha256": "B0AD519BD71CC39CD3F22C06E6AEC7DC981E2D1D1A2DC78C57273ED81CE69B8A"
+    },
+    {
+      "path": "src-modern/CookingAuthorNetwork.cs",
+      "sha256": "BED4DD8D982C7BFA76D1DE086E03F8BAEF01102F785DB9B7E99165D9BF8DDFBF"
+    },
+    {
+      "path": "src-modern/CookingConsumedFood.cs",
+      "sha256": "C95E4BC2196B2F12988089A0B6613E5993EE11DCA74B70C9E2F0D7AECAF34EFF"
+    },
+    {
+      "path": "src-modern/CookingCraftingProgression.cs",
+      "sha256": "D32742350C777BD76B5C16C350E07ABC55FF44337C9EE34867A3617F56959FE2"
+    },
+    {
+      "path": "src-modern/CookingDebitProvenance.cs",
+      "sha256": "A727FC1D3D5B1275580006E86F965FDBB402E3029476433D79DA955B07D0D815"
+    },
+    {
+      "path": "src-modern/CookingFeastExperience.cs",
+      "sha256": "02A1790FA61845E03E964AC7F0A9CF73AAEF24738EFFBD23ECF3FF075BC31D21"
+    },
+    {
+      "path": "src-modern/CookingFeastProvenance.cs",
+      "sha256": "5DF974842355528D826A508C1957B2A9BF70592D1281B5FD671AFC332DA34D86"
+    },
+    {
+      "path": "src-modern/CookingFermenterOutput.cs",
+      "sha256": "6F02B48BFCFEB5DAA889FB9BE4577539B48F6E50F4C5D1C3A58FDB30CA8CDBB2"
+    },
+    {
+      "path": "src-modern/CookingFermenterProtocol.cs",
+      "sha256": "D4CC246EC542DC368D0A944B4CF22F3554338CD198FED56014430619563031A2"
+    },
+    {
+      "path": "src-modern/CookingFermenterReceipts.cs",
+      "sha256": "E33DFAA2989DF16BB52461133A5A01E66381AC2469DE61DF4D24A063DB72316A"
+    },
+    {
+      "path": "src-modern/CookingInventoryCompatibility.cs",
+      "sha256": "A2641FB512754AE9A11A151519CF07DF1D57DA696835F43A31145694403C3D73"
+    },
+    {
+      "path": "src-modern/CookingMeadConsumptionTrace.cs",
+      "sha256": "33C440278AA0D6A641DA2D12D7BE31ECC632277C41B263510B3CFFA9922A329F"
+    },
+    {
+      "path": "src-modern/CookingMeadTiming.cs",
+      "sha256": "0D128CD89E82C2E62F44B32DA4401365D7750E2BE396E0641740A3749C4A537F"
+    },
+    {
+      "path": "src-modern/CookingPlateExperience.cs",
+      "sha256": "5E965DC02DEA43ACDD312EF9249C1084CD376BA1DEBCAF8E759D6F8633DEF0A6"
+    },
+    {
+      "path": "src-modern/CookingPlateRecipeLineage.cs",
+      "sha256": "67DAE4A64410B3A1CD84BD0A7D831B4F78D8478B5C37906793E0C16C363665EB"
+    },
+    {
+      "path": "src-modern/CookingProductIdentity.cs",
+      "sha256": "6D4C55DC3D120EF0ACB62EA84EB593942E43539960BC0669657AA6A502AAB27D"
+    },
+    {
+      "path": "src-modern/CookingProductTrace.cs",
+      "sha256": "6EB0A5BDCF564002DAD9DD7E6775BC22801A6F1085288D0866CA509C58F1A8A4"
+    },
+    {
+      "path": "src-modern/CookingRecipeProgression.cs",
+      "sha256": "236B2AF3177AA7F8A6DB9F8AA89634E817421DC26E325E9D86ACF7D3B5542656"
+    },
+    {
+      "path": "src-modern/CookingStationProductProvenance.cs",
+      "sha256": "DF28019C28167C8A139ED746458EED3010BDC6D0C3F164786F41D0D0B183283D"
+    },
+    {
+      "path": "src-modern/Crafting100ActionApplication.cs",
+      "sha256": "6D0F855191261C8A87A7757769CFDDE1060A583BFE4DE02DA3225B510464A417"
+    },
+    {
+      "path": "src-modern/Crafting100ActionController.cs",
+      "sha256": "DD2D1609A204DC8F332B079596711DC4679DC3E74D46921B2B372FD175B3FFC5"
+    },
+    {
+      "path": "src-modern/Crafting100AttemptTrace.cs",
+      "sha256": "52938EED2F077599605F6ABA1580217851AD4549EF91D520E5BFBB4418969A3B"
+    },
+    {
+      "path": "src-modern/Crafting100CooldownRules.cs",
+      "sha256": "D8FDE0BF26956048DCAB778A4A157FE7B1E432ED68FC3325C6450C18AB3B780B"
+    },
+    {
+      "path": "src-modern/Crafting100ForgeItemRules.cs",
+      "sha256": "D20F82E09FB4E0DA57927E1DF5670E3660F9198E5017D71F0D3C171585169C89"
+    },
+    {
+      "path": "src-modern/Crafting100LegacyItemApplication.cs",
+      "sha256": "21281DB74FC34152B962FA980D0C336EF20F79E9A37A5AC7E63E6B68A0CF6469"
+    },
+    {
+      "path": "src-modern/Crafting100LegacyItemRules.cs",
+      "sha256": "8456181269EDC25C30BCCB8E9DF108DEAF6524A5F03A70BC92DCC143BFD2A3DA"
+    },
+    {
+      "path": "src-modern/Crafting100LegacySaveProof.cs",
+      "sha256": "F477964B5023FD023EFD3DD630D4D6AC22DBDAD4F534C486098D311183213A17"
+    },
+    {
+      "path": "src-modern/Crafting100PermitLedger.cs",
+      "sha256": "FCDC505021D6D17B3D7D5961C9D8B3FF74BB7DC110A9422B8DB67D29E2B0CB07"
+    },
+    {
+      "path": "src-modern/Crafting100PermitService.cs",
+      "sha256": "252C23E236E6DDF16D61D75164ABD9AE94FC68F99D83E763124B95A94AE2380F"
+    },
+    {
+      "path": "src-modern/Crafting100TraceCommand.cs",
+      "sha256": "CFCB10CDAE90CD0437BC9926C123D82BFBEE1CD36F4AE809E5635042005C3943"
+    },
+    {
+      "path": "src-modern/CraftingBatchXp.cs",
+      "sha256": "37D017954330B768AAEC7D72BFDD9F02AB4BF791D1321832CF4F173506D79C24"
+    },
+    {
+      "path": "src-modern/CraftingBuildReuseModel.cs",
+      "sha256": "89513904849FACC8E8B2D6E2FA631BAA1C672BC54177F0DEAAE15C6C8ED3E124"
+    },
+    {
+      "path": "src-modern/CraftingBuildReuseService.cs",
+      "sha256": "F0287E8114C6B17CF7B3504EDC7EB97EF005C6ECC1B9514CC06EF5C3E2AC23FD"
+    },
+    {
+      "path": "src-modern/CraftingOutcomeService.cs",
+      "sha256": "FEE0FD3EE4936DBB5E2B8546705F8078893E5EAD6F843F8E142EB296E237433B"
+    },
+    {
+      "path": "src-modern/CraftingProgressionXpPolicy.cs",
+      "sha256": "77141EF6A17969EB60EA993835D06B56A2F0F0585D08B42E5089C05FD7F78C1F"
+    },
+    {
+      "path": "src-modern/CrossbowTurretCommands.cs",
+      "sha256": "99FA010AAB450029410646492D1209897A232BA30831661A17EF25E3D16D8718"
+    },
+    {
+      "path": "src-modern/CrossbowTurretContainerGuards.cs",
+      "sha256": "F9F30C814A72FCAA0639A412E783B99F789B6F467368CB3F7EEF9E5B58981EE1"
+    },
+    {
+      "path": "src-modern/CrossbowTurretCustody.cs",
+      "sha256": "7656BF6D5FDC0C6CA82A034F9DA4B5AC4FAC026568636B45C20E4A16DB3443E2"
+    },
+    {
+      "path": "src-modern/CrossbowTurretHandoff.cs",
+      "sha256": "3DC58905D572BEDD1B8065E67333D94D167DA9B0C9660614A294E238EE513C15"
+    },
+    {
+      "path": "src-modern/CrossbowTurretPresentation.cs",
+      "sha256": "9A654B9D827DB7636EE422ED6A9EBBAC0E86C1A3AE16C76D7DECAA618CE05874"
+    },
+    {
+      "path": "src-modern/CrossbowTurretProjectile.cs",
+      "sha256": "8558FB16189B1CF74C44158F06B9D6658EB878642618D72B0AC4D43608C3C15E"
+    },
+    {
+      "path": "src-modern/CrossbowTurretRules.cs",
+      "sha256": "90A65D208F6201D94D3B290D7487DF37A9CA6CC99A17F101F28AD0D3F759A470"
+    },
+    {
+      "path": "src-modern/CrossbowTurretRuntime.cs",
+      "sha256": "08BD35A376CF4C53DC9BDAB72D54F8C62E16EC12FFC92935BBF3667590017657"
+    },
+    {
+      "path": "src-modern/CrossbowTurretStock.cs",
+      "sha256": "1FFB064F899D1A71E8F1231A6C6979D436502CB6FFAD02D2B5A43E6291C6A859"
+    },
+    {
+      "path": "src-modern/Crossbows35HookReticle.cs",
+      "sha256": "841C22B2E223E7AFBFDAEA9A054A69893D8653669364F1C1EF1F1FEC90E82994"
+    },
+    {
+      "path": "src-modern/Crossbows35ParryStagger.cs",
+      "sha256": "FEC3DE10A08FAD559EA6D327506E4CD57DC9FE2700F76EE74C085E57D32568C0"
+    },
+    {
+      "path": "src-modern/Crossbows35ReloadGuard.cs",
+      "sha256": "EAADC46E195C8E571B6E284935EE694F312F101F00DC82B46ECE95AF16188DCA"
+    },
+    {
+      "path": "src-modern/Crossbows35ShotMetadata.cs",
+      "sha256": "DA00DB9CC9951FD194EA4C793181BD88D14B1882BAA26D3702262DE80E72C2C8"
+    },
+    {
+      "path": "src-modern/Crossbows35SprintReload.cs",
+      "sha256": "7C1B903B13A237E0B70D6216254B7EC7A4093AB0D699CDE864AF35098C8B1676"
+    },
+    {
+      "path": "src-modern/Crossbows70Perk.cs",
+      "sha256": "5830F0600032BC548384042AA3D77D11CF095896AFD628C958B8CA9C776C9199"
+    },
+    {
+      "path": "src-modern/CrossbowsHookSecretText.cs",
+      "sha256": "3E1B944431F3694576F8D7344F9205FB2DE6AEBD6E5C4A0E8F433A477770DECF"
+    },
+    {
+      "path": "src-modern/CrossbowsMasteryTooltip.cs",
+      "sha256": "0446BACFAFC5F92226C602D2AF4D5BFAA92E10932B451694FDB770C9C6DC90EB"
+    },
+    {
+      "path": "src-modern/CrossbowsNativeHookScaling.cs",
+      "sha256": "08508563D53C2B2BA07DFB3BFB088DBD820CBFADA60B87E85944EAB019877E25"
+    },
+    {
+      "path": "src-modern/CustomSkillStore.cs",
+      "sha256": "E0A4487E435C9E7C844BF5DC6BFD86AE24713849974C7D342267DD9959494FE7"
+    },
+    {
+      "path": "src-modern/Dodge70Refund.cs",
+      "sha256": "056DAF255C167F0D263FEE4007403C0FFF05CF7FCCE5D58EC3454478C65D8B0A"
+    },
+    {
+      "path": "src-modern/EnemyStaggerHud.cs",
+      "sha256": "80C35D7D166C6D5921CAB63279903E1059BE0A60D47303BB9560390E50366251"
+    },
+    {
+      "path": "src-modern/ExperienceContext.cs",
+      "sha256": "8F0CE74F53A9A73C69EDE1F11652229C33E5EEBDD76CF3E41AC83684E3B0F2C8"
+    },
+    {
+      "path": "src-modern/ExperimentalOptimizationAccessibilityPatch.cs",
+      "sha256": "FD0D9AC501B16882E73A428ED29CD31850397496040CBFCC15C235BB0A39FAA6"
+    },
+    {
+      "path": "src-modern/ExperimentalOptimizationToggle.cs",
+      "sha256": "CBEBA6F0D7D5A8916EB5D584405488D218FD237C8D21E44471593C3645211AD1"
+    },
+    {
+      "path": "src-modern/FarmingPerks.cs",
+      "sha256": "A779A5599D8D58B8BAE92B5EFE87E5456955C0EC8225072BD231B23D54F608F1"
+    },
+    {
+      "path": "src-modern/Fire35CoreChargeVisual.cs",
+      "sha256": "42A75F1DB72678FA009CCC3718A0D36D6EA8BE8FE80AF65F879785113F59E4B0"
+    },
+    {
+      "path": "src-modern/Fire35PoseDriver.cs",
+      "sha256": "59FF9ADD49E66374EF0168F0D4A7BE916A572E7F04D78A9F61C144DE5CBAC123"
+    },
+    {
+      "path": "src-modern/FireStaff35Charge.cs",
+      "sha256": "9C9B1BDBEC04F167487DC3EF3448EBA2627AB93279327365893EF784F6D02CCE"
+    },
+    {
+      "path": "src-modern/Fishing70Perk.cs",
+      "sha256": "C8ABFC723D31B0F29C7A206D632ADD11E7BACD80D0E4F31B40DC10CC9309A5E3"
+    },
+    {
+      "path": "src-modern/Fists70HitRelay.cs",
+      "sha256": "1B1A205C23BE7F5ECF388B7EC2624CBA131DDF58DE26B03907FDFA5897973699"
+    },
+    {
+      "path": "src-modern/Fists70Maul.cs",
+      "sha256": "546EFB03213EE6C54C1D0B28C0676175673CDB6E4F064D12D85B0ECD3DA52E54"
+    },
+    {
+      "path": "src-modern/Fists70Parry.cs",
+      "sha256": "5A92FB6A034B04E00DFE294C98FF954E12836E35A293CF1398F0B0B3DE613E62"
+    },
+    {
+      "path": "src-modern/FistsAdrenalinePolicy.cs",
+      "sha256": "9C6EAF26B2CD817CB691CF7D05015A8C2E23DA09D856A1B4FE4A501408937651"
+    },
+    {
+      "path": "src-modern/FistsGainRules.cs",
+      "sha256": "54E25C360AF9BBDA07010BC221B15D52D4F36320AA984373CD51DB69C3049163"
+    },
+    {
+      "path": "src-modern/FistsPassiveScaling.cs",
+      "sha256": "51F21168090D6615811A0FF5986441B39712E48BAEAED3BCD6BB3D4064F75AFC"
+    },
+    {
+      "path": "src-modern/FullResourceProcExperience.cs",
+      "sha256": "DA5C0757640201498DFA5F2577C66823925A71899A9E49AABE7A893EDDF82B99"
+    },
+    {
+      "path": "src-modern/GatheringProgressionService.cs",
+      "sha256": "8A1995FA863A2397A89B958150B969F94BAFF91AF1E14D430E60CD84A2DD11E0"
+    },
+    {
+      "path": "src-modern/GoldAscensionVisual.cs",
+      "sha256": "DB6F741F827DAB3F4092C350EC517259586F558025395A915CB4EF526F658BDF"
+    },
+    {
+      "path": "src-modern/GoldCharacterSave.cs",
+      "sha256": "0F13ACE7DF060A17F34AB215772F375DB11AB746AEBC6FE1E27320F7F6C04E42"
+    },
+    {
+      "path": "src-modern/GoldCooldownPolicy.cs",
+      "sha256": "62CA622C1E34B58D6B5D442E29FAE24E91CB57C0063758F10E74AAE958FA5887"
+    },
+    {
+      "path": "src-modern/GoldCraftingLedger.cs",
+      "sha256": "B42BBAB676294EF589CEE0B59A3B5843C5EA8EB5D278D679576AC0472224B6E0"
+    },
+    {
+      "path": "src-modern/GoldCraftingService.cs",
+      "sha256": "F0A297FCB0374797FA3FB6255598CEA9EA0470732726C19CFF80CD26B2B606ED"
+    },
+    {
+      "path": "src-modern/GoldDivineTransactions.cs",
+      "sha256": "F6814DE9E54694D6DD88E5888B5EE5AC69CF868DCCFE9403B0DED89E8ABDCF14"
+    },
+    {
+      "path": "src-modern/GoldFavorModel.cs",
+      "sha256": "779DAE4122066E60316AD4B6C168E76D24D11498CABE1DE384C27714BD6B329D"
+    },
+    {
+      "path": "src-modern/GoldFavorService.cs",
+      "sha256": "03D9B824DD0C90F7CD20DBA90D8B45DF1A38798F48FFF52DCF48E67D783D725D"
+    },
+    {
+      "path": "src-modern/GoldFavorTelemetry.cs",
+      "sha256": "C884FAA462B2C58D55C5F747A8F1C48508487E45139FD54435114462D2C28D69"
+    },
+    {
+      "path": "src-modern/GoldIdolPurchases.cs",
+      "sha256": "8F3B6FCFC44934FB9D167F80A4F0C06F37B91AC45BF47B4956E0D001301D1230"
+    },
+    {
+      "path": "src-modern/GoldInspirationStatus.cs",
+      "sha256": "1B44EA48C7AE9726328365BBB42A6ACDA04386B58B1127E45AC5E3DCB1442789"
+    },
+    {
+      "path": "src-modern/GoldMasterworkButton.cs",
+      "sha256": "DDC5E776B4756910B390FCD7E22AAF7B22D74AC29371F9897B592467280D9297"
+    },
+    {
+      "path": "src-modern/GoldMasterworkPresentation.cs",
+      "sha256": "66AB3BF92B213D8E8DE48BB53808386CD64D40D129892D70E304560DBB487272"
+    },
+    {
+      "path": "src-modern/GoldMasterworkRules.cs",
+      "sha256": "353F72D216BAAD7A938D67ADBB5FC5D6D4EDA86795FC138AAC04FE80E2371FAE"
+    },
+    {
+      "path": "src-modern/GoldMasterworkSuccessSound.cs",
+      "sha256": "62641957F3A6A81E81629508ADAAAE321FEC6BDEE25ECA8904C30139D0262C13"
+    },
+    {
+      "path": "src-modern/GoldMasterworkTooltip.cs",
+      "sha256": "BC4A5C556C4D12CDE5FD7867D7A499EA28D74664FD51A9340753D20D93D38814"
+    },
+    {
+      "path": "src-modern/GoldPantheonNativeStyle.cs",
+      "sha256": "575CAEB8DBA12B12D01EC5E9897B92946AD25D205EA52ED9B0241C6C2941711E"
+    },
+    {
+      "path": "src-modern/GoldPantheonUi.cs",
+      "sha256": "584B3BE2D5D20FE82B2E431CFCE8542378FA40AA5303E8846B4B69CE24102327"
+    },
+    {
+      "path": "src-modern/GoldPatronLedger.cs",
+      "sha256": "823F107E35162F202954DDF5042841160C9E50A04D91A165BF64195FB307C2C1"
+    },
+    {
+      "path": "src-modern/GoldPatronState.cs",
+      "sha256": "4336BD289D327FB1062C4F9F85284EFCEB0D6FA9AC0BD99553813DADE2D6F622"
+    },
+    {
+      "path": "src-modern/GoldReceiptPolicy.cs",
+      "sha256": "9CE09214DCD07DCDE1F7B0D2D811190E4025C6A9B6C705AE5D571304648574A3"
+    },
+    {
+      "path": "src-modern/GrapplingTraversalXp.cs",
+      "sha256": "1FE1B646A8B507FA827A44875B82612A161A9B91022281FAAA06DB3E223885DB"
+    },
+    {
+      "path": "src-modern/Hammer35DustRing.cs",
+      "sha256": "EB13457E3436FC2E97D35337D45AB1D21169C4D6BC4182B323C54CC4E40047E2"
+    },
+    {
+      "path": "src-modern/Hammer35Epicenter.cs",
+      "sha256": "A7F0EFC7355D644E19511D2408E87F1D9B92282BEDF416FC94775FE1D4246438"
+    },
+    {
+      "path": "src-modern/HammerNativeEchoPresentation.cs",
+      "sha256": "A80590332AA5EEEE1FFB576734EDFEBD54CE6EEEF6FCDC3621B888881DC4A54D"
+    },
+    {
+      "path": "src-modern/Ice35Exposure.cs",
+      "sha256": "DF639714270518B2464CE71A23794C6F9C1F21F4AAF4B6B8A71AEAF6B990E90A"
+    },
+    {
+      "path": "src-modern/IceStaff35FlyingPressure.cs",
+      "sha256": "7D72B6D0D3B826C1A3D954556653CB67CD47A088FCC5966B9613A56C035D85FA"
+    },
+    {
+      "path": "src-modern/IceStaff35Trail.cs",
+      "sha256": "E8858F2B42BB9EABD5B561A944F7AE2C5E80E429670EDE9F38D88E603203ADB7"
+    },
+    {
+      "path": "src-modern/IceTrailVisual.cs",
+      "sha256": "F779B31CD6A6445F21E43E47829B9920EC5A5FD70F745807CCDA677B2BD37B73"
+    },
+    {
+      "path": "src-modern/Knife70ShadowStrike.cs",
+      "sha256": "53237ABBD3EE8DC4311915CA1361A5F68A747216E14811BCBA7BCD5B06098B37"
+    },
+    {
+      "path": "src-modern/Knife70VisualWarmup.cs",
+      "sha256": "C0560ADD453AC564EA775A8A85B939A195770AF752324D2FF5CB6C7EC12DD932"
+    },
+    {
+      "path": "src-modern/LegacyCatchUpService.cs",
+      "sha256": "3E7FD97E3E88622EFC5B9452543F5A7342FB7A05ADB7A98EA43C2871B9DFBDE5"
+    },
+    {
+      "path": "src-modern/LegacyMasterIdolRemoval.cs",
+      "sha256": "67589FF69AB8747A997DF39CDC4199DE4B950BDC62E271C7E2792F27D8481868"
+    },
+    {
+      "path": "src-modern/Mace35CorpseProjectile.cs",
+      "sha256": "CC478BDE52941F5567045038424CF9902C73E23416CF6DB09A456D9D73D04E86"
+    },
+    {
+      "path": "src-modern/Magic70BloodDome.cs",
+      "sha256": "4508E91DB6BC38C9911238B5172DF7554BA797C111CC1656781FCC4AD0B14D46"
+    },
+    {
+      "path": "src-modern/Magic70Carrier.cs",
+      "sha256": "DDD3EE801F0F3837A7203711AAC69B4F6F78F46ED08A020C46EB3FA11FA956E4"
+    },
+    {
+      "path": "src-modern/Magic70CarrierRuntime.cs",
+      "sha256": "2658744D8B1C51717BEB7D458A14BDE4BC21B43E0B70BD77D39223B6B7088F45"
+    },
+    {
+      "path": "src-modern/Magic70CastAnimation.cs",
+      "sha256": "ED06BF8B62CFBB30DA3242A4685DD073AEC69F625AFF650FAE8328D59CFB9CF0"
+    },
+    {
+      "path": "src-modern/Magic70IceStorm.cs",
+      "sha256": "AF6FAA2786162124353FAEA626C33CF5966A5EC07C8CCBCAB92166B375AD4573"
+    },
+    {
+      "path": "src-modern/Magic70Surtling.cs",
+      "sha256": "2B75A301743AA4A530543BF4FE1050797A0249F0AC0DABE4608C928FC529C2DF"
+    },
+    {
+      "path": "src-modern/MagicAshlandsStaffTooltip.cs",
+      "sha256": "EA8297EBFEE830B1CA87EAB52708EF62BD5A5C782E33CBB01283CE482477A906"
+    },
+    {
+      "path": "src-modern/MagicPresentationRules.cs",
+      "sha256": "18CEF3ABEF3E7AF0D27A6A2717ECD3227CD3020627C70D7879E9F87F57C025E7"
+    },
+    {
+      "path": "src-modern/MagicShield35Service.cs",
+      "sha256": "8E43CDBDEAE7A70D109A2357CDF867F71CDD17B3D0B7EEE6AAA2E0C567211A0A"
+    },
+    {
+      "path": "src-modern/MagicSkillPassives.cs",
+      "sha256": "CC2BC35CC74216565721EDB2C78AD9566D5A0B1E57D14B64D7B619578CB3D43C"
+    },
+    {
+      "path": "src-modern/MasterFeastApprovedThemes.cs",
+      "sha256": "A5F81EC3865133A6B20D6E1974C00AE3F0F60B91A846ED7A9331F340C45B0C55"
+    },
+    {
+      "path": "src-modern/MasterFeastMeadRetaliation.cs",
+      "sha256": "9C0C4B9C2358FABE47B7C9CFD9C7CAA433E56D102037D880E3CC2DFDBE2DF3F2"
+    },
+    {
+      "path": "src-modern/MasterFeastMeadStrength.cs",
+      "sha256": "F4A80E8F46C9C5ACB3A0D12872EED69242AA34135A3A46DEC10F6883CF555989"
+    },
+    {
+      "path": "src-modern/MasterFeastService.cs",
+      "sha256": "A2A9C102FC2F5F1F2E8BD21E5FD3D379F4616E9B7C61074487E969AB4162A890"
+    },
+    {
+      "path": "src-modern/MasterFeastThemePatches.cs",
+      "sha256": "52AE695B9715C1F606AF0AADD5277B3DFCE47E45627EDA988FE64ACFCEB1591C"
+    },
+    {
+      "path": "src-modern/MasterIdolActivity.cs",
+      "sha256": "9ECE5DED8134D69461934428762E4E1DC211B77501B1AFA679090517D7CF853C"
+    },
+    {
+      "path": "src-modern/MasterIdolAdmissionStore.cs",
+      "sha256": "6DD796FB15613C9A43BBA4E2AF1C01E945042B014E6C991CB080F18E06A7D660"
+    },
+    {
+      "path": "src-modern/MasterIdolArtwork.cs",
+      "sha256": "D2500FC6EDBCB7D6FCCED8600638696FE5B8F8C21A0512A750C88E9AA376F5BE"
+    },
+    {
+      "path": "src-modern/MasterIdolArtworkData.cs",
+      "sha256": "E205F2C35E8AC163D67C6F9F7C43DDDAF92216164DF1C1C14B79D0C451A3A0EC"
+    },
+    {
+      "path": "src-modern/MasterIdolAutoPlacement.cs",
+      "sha256": "C6B7910481097279273C18F706C0392425080F8C7F48A93CC70F9CA404AC6F5B"
+    },
+    {
+      "path": "src-modern/MasterIdolBiomeEffects.cs",
+      "sha256": "C7E1F8C07F30182E9E6B45514E8AE97577570F26CC2EA03033141BDF7E44B4D8"
+    },
+    {
+      "path": "src-modern/MasterIdolBuildUi.cs",
+      "sha256": "D9D45B22B3021A54A21034DBFB3AA6B137D5833CA37D39C4DF0C91B0608B9048"
+    },
+    {
+      "path": "src-modern/MasterIdolCleanup.cs",
+      "sha256": "CFFB5BF5D346F0FC6E1675CFB98DA580ED30B0EDDD5A4E754C9417A1DF12D0C8"
+    },
+    {
+      "path": "src-modern/MasterIdolDismantle.cs",
+      "sha256": "A69C4446E9DD02CE0E4168185621680F05AA331F420F1062B89FED44568B7D6A"
+    },
+    {
+      "path": "src-modern/MasterIdolDurability.cs",
+      "sha256": "1B853C54E72091F20D774BF5D1A0BDA09E5161EEF1F817980D00AC7CB74494E5"
+    },
+    {
+      "path": "src-modern/MasterIdolEffectDebug.cs",
+      "sha256": "E8BB1BB09BD72D013D475913BB94D477C9A19D99270215C972FC9EB40799AC97"
+    },
+    {
+      "path": "src-modern/MasterIdolEffectGeometry.cs",
+      "sha256": "BC85D42969404CF9489E14F98CB7BCBBBFB832FEEC37688930EE8A17D544A270"
+    },
+    {
+      "path": "src-modern/MasterIdolEffectZones.cs",
+      "sha256": "78B54E60B485D151D42E3EEFB915E3BAF6064D2D34FF16DB3F4076E04D4225B1"
+    },
+    {
+      "path": "src-modern/MasterIdolEnvironment.cs",
+      "sha256": "E9CC93833CE24583F70CBCC9A8EF6432F9BD4F91C641C73F13A4DF17B3CB59A1"
+    },
+    {
+      "path": "src-modern/MasterIdolFavor.cs",
+      "sha256": "1D955CB3BC8340F6D11FAAB568BE70439E047A3B0FCC00E07C03EC37EE2ADCE3"
+    },
+    {
+      "path": "src-modern/MasterIdolFinalBiomeRules.cs",
+      "sha256": "453122EA86196D39B90BE9864C2EA78D7F2C17B7890E6F260A6D86B74A321A17"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuardState.cs",
+      "sha256": "E203C919CDC999EBAE16A13CE1AE4766CDE9301EA0CB013F9C485C474D771F38"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuests.cs",
+      "sha256": "AC6CD7A7B4B44003C40206315D788176D611AFAD5AF96B192592C19A48B628DE"
+    },
+    {
+      "path": "src-modern/MasterIdolForestRules.cs",
+      "sha256": "998A464C6D97F102FC8C3EA4809BD837751A07524B0F2C622FB529CD8076BAD5"
+    },
+    {
+      "path": "src-modern/MasterIdolIndexHooks.cs",
+      "sha256": "1E1B561851864F58D30310C399C0C125D1866C7E4E10F09E0E6AFF31171C697F"
+    },
+    {
+      "path": "src-modern/MasterIdolInteraction.cs",
+      "sha256": "04F4D85EDB72409363914AA866DDB93DA5A3128F99529AD6CCA6593F2F72C64B"
+    },
+    {
+      "path": "src-modern/MasterIdolJournal.cs",
+      "sha256": "7ADA95E6579B12112E0321F38AD05CE14877000C7AF867F6909162C41707227A"
+    },
+    {
+      "path": "src-modern/MasterIdolLeash.cs",
+      "sha256": "08459F767E698A53736CFE1E0C5B16CFD1B0F95CB675D10674528C513AE4290F"
+    },
+    {
+      "path": "src-modern/MasterIdolLighting.cs",
+      "sha256": "AEFA8BD3074FD97C44379FCA86C12F9BA5F88F1017ED8D1437ED7653D24730F3"
+    },
+    {
+      "path": "src-modern/MasterIdolLoadIdentity.cs",
+      "sha256": "BF95325C391456A68FCCB3D3780AD1B2729A86B31BCF1A7E51B0899A0CA7F807"
+    },
+    {
+      "path": "src-modern/MasterIdolLoadIdentityRules.cs",
+      "sha256": "A87E7FBA051F58C65481123D067721023D46056CB9E7C4DF66B614613DA73733"
+    },
+    {
+      "path": "src-modern/MasterIdolMeadows.cs",
+      "sha256": "5C003B71FE36998B761B0C6C885DC466800BA166A3CF28BF679A9CA0D7EDE172"
+    },
+    {
+      "path": "src-modern/MasterIdolMistVisual.cs",
+      "sha256": "36FF0847500B440FA3FE3CB82E8E4B9A7F9E481825509C19A23EECB9DBC4036A"
+    },
+    {
+      "path": "src-modern/MasterIdolMistlands.cs",
+      "sha256": "F999A8DBFC3FEECD64D994C6094CBFD7913C1A9A87384E0D8842C6D2F17F3E59"
+    },
+    {
+      "path": "src-modern/MasterIdolMountain.cs",
+      "sha256": "82F0A23AF71FF5B135BC60C810088848D544DB1741622B146152403FB7030D96"
+    },
+    {
+      "path": "src-modern/MasterIdolNativePresentation.cs",
+      "sha256": "6693293E89B75323EEA9633E892F26285F7535957D19A4AF026E25B2815FD474"
+    },
+    {
+      "path": "src-modern/MasterIdolNativeTaming.cs",
+      "sha256": "DD2073516376F91A66FB7B7356726B2A30133D8FA85296E7BBD31D848D055624"
+    },
+    {
+      "path": "src-modern/MasterIdolNetworkCache.cs",
+      "sha256": "B5FC8E16B0AAD7218559507F0AD841A331172F822970F5A8A1284366752EBA12"
+    },
+    {
+      "path": "src-modern/MasterIdolNetworkQuota.cs",
+      "sha256": "32FFF29DD41E0C466A457B01FDCC370D08B8B886B1C6E44E27CB378719BD4719"
+    },
+    {
+      "path": "src-modern/MasterIdolNpcHud.cs",
+      "sha256": "A22A4B8DCDC9DDC13E39F286F0E11F92C11FA868D7970395197AC495CB008618"
+    },
+    {
+      "path": "src-modern/MasterIdolPerf.cs",
+      "sha256": "2327DCB84FD20C89C4A1884976DD59BC7E26123B50220495258E3981533DE00F"
+    },
+    {
+      "path": "src-modern/MasterIdolPieces.cs",
+      "sha256": "2DD5DD9048FEAC234DBBD923AD79FBA3E7D9177414A1D636C11B0E628F4EE79E"
+    },
+    {
+      "path": "src-modern/MasterIdolPilotA.cs",
+      "sha256": "039531CB724F1472E5BEE48B2987A82BFC2944714260576B930F6E8A6EDE4E2B"
+    },
+    {
+      "path": "src-modern/MasterIdolPlacement.cs",
+      "sha256": "EA82DD9DD5076C3A7177EC9D59598F8E524BF92927FC1DF77D1372A24598BD74"
+    },
+    {
+      "path": "src-modern/MasterIdolPlains.cs",
+      "sha256": "1D1C7CBCF2F83F745F82C8311C740DB0631B1FFFDF62311B2E00C308B4D81A03"
+    },
+    {
+      "path": "src-modern/MasterIdolPlainsGuardianCooldown.cs",
+      "sha256": "0771A22B98EAA5B91ED3952F5D1DC2939BA0451B6F831F1A5EDB3AA2266AC0A7"
+    },
+    {
+      "path": "src-modern/MasterIdolPlayerBuffs.cs",
+      "sha256": "512D83B7F8BE5B67AF8D20A4A483EE1026C0D4E919AE024312C86200638550EF"
+    },
+    {
+      "path": "src-modern/MasterIdolPreviewLock.cs",
+      "sha256": "500440553A17BB790EA670B9742C120C74C81C5FA41A122464AB062565CE5B63"
+    },
+    {
+      "path": "src-modern/MasterIdolProfiles.cs",
+      "sha256": "5B01AEF6C2AA97CEB1A91BEF449421395163BDBF3CBF6F4EF6A193BC957B94F0"
+    },
+    {
+      "path": "src-modern/MasterIdolProjectionCodec.cs",
+      "sha256": "D9CB33ED9775B677557CCAEEEA3926124FAF9AE97CE16C67C1347C698D535482"
+    },
+    {
+      "path": "src-modern/MasterIdolProps.cs",
+      "sha256": "D370A5B28B833065DE9AE7EF4C772D8D774A3C5DDBD8B34184D9ED000032FE0A"
+    },
+    {
+      "path": "src-modern/MasterIdolReadinessRules.cs",
+      "sha256": "16EB0AFEB3D327078CA959ECCDF11A859BAD681BBA1F0647108E002B970C3D9D"
+    },
+    {
+      "path": "src-modern/MasterIdolRecipeBudget.cs",
+      "sha256": "2109D32C017721B2F9E4DF7B36C7C54BB02D454AA06BC41E0E6BC209EDA79AA6"
+    },
+    {
+      "path": "src-modern/MasterIdolRecruitment.cs",
+      "sha256": "90629688C17F913F4E77BA4D02C30BE1F867D1CE2E2F0F3DC80EDBB3B0A9E8DA"
+    },
+    {
+      "path": "src-modern/MasterIdolRecruitmentStore.cs",
+      "sha256": "5DF9C6A05D064890A0537CCCA5FD5552391EB58F372274965312518AD39C7CA2"
+    },
+    {
+      "path": "src-modern/MasterIdolRegistryModel.cs",
+      "sha256": "C81DB1317642D07439B246B7C4CEB34ECAE2B0D2F43327012B4F9C2B584E4BF3"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentBirthPresentation.cs",
+      "sha256": "D6DE92C445AF955039F05327DBE99881E2AA0911601B04E853A57C6019F6AA6D"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentBudget.cs",
+      "sha256": "161E5258AF13B8EDA4AA37338D359A842A2FC8FAA96B2905106234CD3E65945B"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentCycleRules.cs",
+      "sha256": "F9F67520EF359E6D557245774372E00654753D61A9F722F8488B93FA5CA58B41"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentDeparture.cs",
+      "sha256": "328D0976A3D048648C4119AA57A0185E7C0779A7E514A38557CCD2D354782F19"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentDiagnostics.cs",
+      "sha256": "D6D88F768833C87F15BFFBCCBE9B0032D20A8AA4CF7202139E44DA3DD6FA1307"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentHealing.cs",
+      "sha256": "F38DD422A8358047E702F876C55F880CF035C4F9379B5129B0728B797E5B2CC6"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentIdleRules.cs",
+      "sha256": "5B73A193D6F3D2191190720AE53FDD47920394290A57D8A319771300DE1B7DFD"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentInteraction.cs",
+      "sha256": "E980A93044813191D1C206313F344A61D8C303FE34B4AD2442C8FE4B439D02D4"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentMetrics.cs",
+      "sha256": "BE9913AD2F738EE02CC07DE8C497C1E778D48F9FD7996893B14FF5E73F67D28B"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentPolicy.cs",
+      "sha256": "113F9FCE7EC125FF63623AE1903D605EA2E089C04D1FA761AE366061775E7D6F"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentPresentation.cs",
+      "sha256": "DE45CBC5405B401E1AF9545D0703B4848953540A563A7DF7EAD16AC7F3AA2307"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentRoster.cs",
+      "sha256": "6736DDFFE5BCD88CDA6DB851B2DEA0300DAC1598715781BA5545267D0FF6D9C1"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentSceneAnimation.cs",
+      "sha256": "CD0D0FDD44C178EB49609D1482E3AFF3D784C939E64FFDC45DC3108A6C061924"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentSceneRules.cs",
+      "sha256": "9E7275231344340534C4173AF4115B0A81EA0989EF3A0D502A20524B5DFE785F"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentSpacing.cs",
+      "sha256": "21D1D7A06F0C59885691BDBE4E061FF2B5068B94FE2E773241230217609413CF"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentSpellScope.cs",
+      "sha256": "289B8376F7B65B833FB1AC1811F6E4A191CF73A7DDA782379E7D64F8D1BE6EFF"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentVisibility.cs",
+      "sha256": "408B376925B67C4F695090C7572924E89AA7D092CBA73C055D6FFF5267A19B60"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentWork.cs",
+      "sha256": "98FDBBC1396351FFD59AC391411C7E399DE31B9FF9D435B604513E60BBE47919"
+    },
+    {
+      "path": "src-modern/MasterIdolResidents.cs",
+      "sha256": "72840E754B86BBFC0C1E493BE19071CEC3D599F0D1B02E16C48255906692390B"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentsDebug.cs",
+      "sha256": "49DEC33C1785F711401CBA2C8CC68C6F840D9CC13CCE865443E09F7656D2B47E"
+    },
+    {
+      "path": "src-modern/MasterIdolRuntime.cs",
+      "sha256": "BB47DC44AB3440663C36841E5BA13D9EF0A3CDBBCB973CA5D3C63A4EF90AED1C"
+    },
+    {
+      "path": "src-modern/MasterIdolSanctuaryRules.cs",
+      "sha256": "5A3B0BEF7746755A320351798B15602F1D05FA556724E3B71C4703E3031F865D"
+    },
+    {
+      "path": "src-modern/MasterIdolSeatRosterGuard.cs",
+      "sha256": "31B53D693CA6EFC9CD83476C888A3228A46289C958C5248A307854A340322F30"
+    },
+    {
+      "path": "src-modern/MasterIdolSocial.cs",
+      "sha256": "CC0BE9680ABCDEA2C51F646354555EF91B124C09ABB4E8F8B364E383DFD49B8C"
+    },
+    {
+      "path": "src-modern/MasterIdolSocialRoutes.cs",
+      "sha256": "10E19DEBFAD3B52419B5F18A37790E64D4636E6AFF1A0780F3AB19BC924184C3"
+    },
+    {
+      "path": "src-modern/MasterIdolSocialRules.cs",
+      "sha256": "F63CC4CBB3F14E14E641AD7F8B7B0ACC57C42F382B24A429A813F5808A15AB66"
+    },
+    {
+      "path": "src-modern/MasterIdolSocialScenes.cs",
+      "sha256": "7D5C69F2023267194E38B54E78FDD8E51097E8ED5019A328EF2B47924BCF8A9C"
+    },
+    {
+      "path": "src-modern/MasterIdolSocialSeats.cs",
+      "sha256": "51C7B3A7542D29AEF5A496F0B5BE2863953209F5111E66E9FC94F8FCC2E0B124"
+    },
+    {
+      "path": "src-modern/MasterIdolSpatialIndex.cs",
+      "sha256": "82BB8D7F96226C522A620EA3592E5B386378F421CF27E6ABE42CABD7DD512D0A"
+    },
+    {
+      "path": "src-modern/MasterIdolSwamp.cs",
+      "sha256": "9B5CF9051425CDE37F0432E8998D810553532504B66905A83FC88724DD479FA0"
+    },
+    {
+      "path": "src-modern/MasterIdolSwampVisual.cs",
+      "sha256": "96DFCD3E477BA292EC61BEE9F528A5E15C6C01037365F31C974ECCC38CB0F3A2"
+    },
+    {
+      "path": "src-modern/MasterIdolSwitchStore.cs",
+      "sha256": "DF757AA3458E6A173D84AF67F7CD088E728CC1EF0A9E3C8B13C858206BBD86CE"
+    },
+    {
+      "path": "src-modern/MasterIdolTiming.cs",
+      "sha256": "B4D55CF9584371EA817D3FA6DFA96E088C3253AC616FDDAD84EF96785694842C"
+    },
+    {
+      "path": "src-modern/MasterIdolToggleRules.cs",
+      "sha256": "1900D5B9D5449BCAA3A8C23F9A0ACB42FC6411D5754877BF6FFB21BD178149A1"
+    },
+    {
+      "path": "src-modern/MasterIdolTravel.cs",
+      "sha256": "F8A26D84BA0B46020EC62FCD8996345668A2C728BEC1C7371FDA1DED8F750F4E"
+    },
+    {
+      "path": "src-modern/MasterIdolTravelUi.cs",
+      "sha256": "0B1831FB58BDFB5ECF52EB3B85B93A65FC4BDDAD91B1CE80D1A801DA77382256"
+    },
+    {
+      "path": "src-modern/MasterIdolVisibilityRules.cs",
+      "sha256": "D14252FDA9CE0A5796396A7ADA50F6DDEEE3F2A7B36F96EA509D217A487AED53"
+    },
+    {
+      "path": "src-modern/MasterIdolVisibleGesture.cs",
+      "sha256": "4F3C25A31998B0599A2D18D5BBCE7B93636AF7736B8300CEEE5D412437A831CF"
+    },
+    {
+      "path": "src-modern/MasterIdolVisual.cs",
+      "sha256": "D9C436DD4ECC5145D63D4B0C01EDE0CCE1A8FFCDFE2545C48789DF6EF9C14B61"
+    },
+    {
+      "path": "src-modern/MasterIdolWelcome.cs",
+      "sha256": "389DD91EB576389237B45F6FDA61E0F786382F271FDA242833C2074ABB293542"
+    },
+    {
+      "path": "src-modern/MasterIdolWelcomeRules.cs",
+      "sha256": "1572F42FEB77140857D186641F63868D3E5D7C4ED510D4AEA724F28BC8F8A8D8"
+    },
+    {
+      "path": "src-modern/MasterIdolWorkBudget.cs",
+      "sha256": "C654DB6F1B8360FE52DAE6846CAEB20C3AC36C1EB5AA044A0DBB80F6D787EA4E"
+    },
+    {
+      "path": "src-modern/MasterIdolWorldIndex.cs",
+      "sha256": "142D9C9BF5075621A85497D7F12654E484C8CD5D9171D8A02B733927A15B15FC"
+    },
+    {
+      "path": "src-modern/MasterIdolWorldRegistry.cs",
+      "sha256": "54B41DC687138F6C94D0EB97789120E4A2C4771D45C91BF7C90D6B321191A3FC"
+    },
+    {
+      "path": "src-modern/MasteryClassificationService.cs",
+      "sha256": "1D0310F5E93A6EE7E57368A986DD6ABA2DD64845BD1F58B2345E60B012E6585D"
+    },
+    {
+      "path": "src-modern/MasteryEventDispatchPatches.cs",
+      "sha256": "D36E24409566B86F438E1D680D55225B32F65DD132F4F6325984863A9A523E4A"
+    },
+    {
+      "path": "src-modern/MasteryEvents.cs",
+      "sha256": "C82A50F86AC7A456F39BA26DE0B5A96BCA1CC989853F9CDEB9AD74CA5A537B01"
+    },
+    {
+      "path": "src-modern/MasteryEventsExtended.cs",
+      "sha256": "9CA15AAD3B507AAA68EFB7BB735A1931756CF7301AB97933301E6280C29782E2"
+    },
+    {
+      "path": "src-modern/MasteryHudArtwork.cs",
+      "sha256": "39AB6FF183CF4EBCF7478DC80FD787FDBBECFD9162335CDAAD31FEF21A0699FD"
+    },
+    {
+      "path": "src-modern/MasteryHudIconBounds.cs",
+      "sha256": "82B2DEEE8134481B0407B0423DF04E553928C4976E9B9E017D3C92A5D8C992CD"
+    },
+    {
+      "path": "src-modern/MasteryItemTooltipPatch.cs",
+      "sha256": "D736C205F316662EF6DDEC5139445DF9437D2D285A647717BBEA46C033DB7A2E"
+    },
+    {
+      "path": "src-modern/MasteryMilestoneArtwork.cs",
+      "sha256": "FCB8DA71AC20E92B7F41B6541C6E821CE9C139249A2CD4B6E8E64D66C6C3910D"
+    },
+    {
+      "path": "src-modern/MasteryMilestonePresentation.cs",
+      "sha256": "341DB02F80D1D7E77BEC757DD88059909DD92A82D13AC6C135B90BDC5B62C6DD"
+    },
+    {
+      "path": "src-modern/MasteryPatches.cs",
+      "sha256": "FCD53E45C691E5C2E8B59DDB6A94D2E674DAF84158DF2783D913666D2CD6C669"
+    },
+    {
+      "path": "src-modern/MasteryPlugin.cs",
+      "sha256": "16AAF590472D271199D18700247FA66586B771B971AF657C107791A9D34E1386"
+    },
+    {
+      "path": "src-modern/MasteryRavenTutorials.cs",
+      "sha256": "468E12155663E39CF639B1858B05D27E11580858A3834A19CCF7F43E1C23DA45"
+    },
+    {
+      "path": "src-modern/MasteryRuntime.cs",
+      "sha256": "1FDE886DF8C1F3EC53DEB4B90F1EE24CE46383505FEDF32DE529517907945D87"
+    },
+    {
+      "path": "src-modern/MasteryStateStore.cs",
+      "sha256": "CA859AC4CDB33ECCC2C888A6ECE19BAF90F872C55FD778AE38A2AB797A12ADE5"
+    },
+    {
+      "path": "src-modern/MasteryWindow.cs",
+      "sha256": "27ECA29FE50CE36B2318392A190FD77FE64B3232D832BD7239AAA3CED8262829"
+    },
+    {
+      "path": "src-modern/MeadStageExperience.cs",
+      "sha256": "C1CA59DE635103AF81D7C4E493A62EB0E98266A2BDE87674E35318030E36558D"
+    },
+    {
+      "path": "src-modern/MeadStationIdentity.cs",
+      "sha256": "A8FEB7F1945A1CFEAABE1AB84E360072CB8E14CAFF52E40598A0A99ABDDA1286"
+    },
+    {
+      "path": "src-modern/MeadXpOutbox.cs",
+      "sha256": "5E9AA2C9444589117772910FD040A16FB0995123050C8A3D5A63868D695D2EF8"
+    },
+    {
+      "path": "src-modern/MeadXpReceiptPolicy.cs",
+      "sha256": "59FEF9723CB78ECC22F203022CEBE312E7A6A53AFD3977A45D570398FA0527B0"
+    },
+    {
+      "path": "src-modern/MeadXpTransport.cs",
+      "sha256": "6AB361633BF7DD4FFA27F89A3884A97D3497D041807480B89EAF76A67E485807"
+    },
+    {
+      "path": "src-modern/MilestoneCrossingRule.cs",
+      "sha256": "76A34CB671A11E156C73C7F827AB211E1EC694E41B4F452C840DAD4662C372C8"
+    },
+    {
+      "path": "src-modern/MistlandsFrostVisualRules.cs",
+      "sha256": "431E450945FE5AE24A5A7B9831CD1DC870DD293F8C7CBEE4359E30369805E216"
+    },
+    {
+      "path": "src-modern/MovementPerks.cs",
+      "sha256": "56DD530D5E102999DDBCA198C27FAE56F6E8C9F810548BA2CBA0BEC73611AE65"
+    },
+    {
+      "path": "src-modern/NativeLandingBurst.cs",
+      "sha256": "FF03D321CF4C545D293C2F524F2190F9B2FA7D71CFDF62FDC6C6893BEFDFDBA6"
+    },
+    {
+      "path": "src-modern/NativeMovementPulse.cs",
+      "sha256": "175CF49948BD9A9405904314CADDA107BAE33952FC77C116993059A1AE2212C8"
+    },
+    {
+      "path": "src-modern/NativePerkAssetResolver.cs",
+      "sha256": "DFFA4E9C1BA829EAC6811E7750886111FDEACD779B5D07A0C51ADE88E45DC920"
+    },
+    {
+      "path": "src-modern/NativeSnowVisualAssets.cs",
+      "sha256": "347431943E9C5EE1F7B57B92CA2ED43A0BC2DD42FEDF45C81F7FB97D2D074C5A"
+    },
+    {
+      "path": "src-modern/NativeSoftVisualAssets.cs",
+      "sha256": "EC3414FB76FE431125DE84E444B0BB294822FF567991EE6D83B88E42DD6332C7"
+    },
+    {
+      "path": "src-modern/NativeStormWeatherVisual.cs",
+      "sha256": "F09BE4EE1EDD0178015087FB10F757E1F44CAB17AE76AD05AE6F667E83A7B118"
+    },
+    {
+      "path": "src-modern/NativeVfxSafeFrame.cs",
+      "sha256": "B9393E9BDE51ADBE130542862DFB2BC636B3C3D1651CA0BB970CED736C470BDB"
+    },
+    {
+      "path": "src-modern/NativeWindSwirl.cs",
+      "sha256": "9222C854C271836FBB698652D806E17184E31806C05B9220765F00813D4CD612"
+    },
+    {
+      "path": "src-modern/NearbyLocationRegistry.cs",
+      "sha256": "05EA5F937CBB158DA838938D201FCBCA551991E26D3BC7939F0C19728CC82B8E"
+    },
+    {
+      "path": "src-modern/NetworkSync.cs",
+      "sha256": "7836E9E7D295E0AD64DCD77D243D276FF6821CCCBEF9D7FA843B9746788D8F71"
+    },
+    {
+      "path": "src-modern/Overdraw70Perk.cs",
+      "sha256": "293254E0D189DBF947FEB0B7435059A839DA3BBFB783CAB6AEFEAD90FE875203"
+    },
+    {
+      "path": "src-modern/Overdraw70V2.cs",
+      "sha256": "41F2EE22D9D8AD3F59762E601707BEE6DF9DD2EA4A91F2D81F63D53967679058"
+    },
+    {
+      "path": "src-modern/OverdrawPayloads.cs",
+      "sha256": "BCD64B76226F61759A6F0EEBC66C01D692ECA5CA6B131B612CB122C054C1C46E"
+    },
+    {
+      "path": "src-modern/OverdrawPenetration.cs",
+      "sha256": "18DD433E9F91248C766E46609485D5824BCB184CADFF6823F9A3DBC59814F63E"
+    },
+    {
+      "path": "src-modern/OwnerSkillAuthority.cs",
+      "sha256": "80B5483D7AFD7485529E4CC6DD78544866B241E6350067ABEF69F6B56630FA84"
+    },
+    {
+      "path": "src-modern/PantheonActiveInput.cs",
+      "sha256": "C889BCD286A666B3E0D8E66CEACA1E90A1F5D5E20FDBF0C753B1D2E3F7BFAF2C"
+    },
+    {
+      "path": "src-modern/PatronAscensionPresentation.cs",
+      "sha256": "6C617ED2F5026DA669F9E80A2AAD86EEBC7483E91656B7A0E395C18F37264C89"
+    },
+    {
+      "path": "src-modern/PeacefulXpPatches.cs",
+      "sha256": "8164EE970D3229DCF3B9343AAC9C3EEB45E4D373B1B97C115E942FAB53E6C548"
+    },
+    {
+      "path": "src-modern/PerfectDodgeStagger.cs",
+      "sha256": "32F662C25A58BEE07C72E64625F9743CDD7A577A0E587EFE7E4A882CEE3A4C56"
+    },
+    {
+      "path": "src-modern/PerkAudioService.cs",
+      "sha256": "4B2239186C3F8256FF3A98B55905571316FB01C922F6A59024B27FA701BF9887"
+    },
+    {
+      "path": "src-modern/PerkBalance.cs",
+      "sha256": "9B10822555EC0EDB811693FC204C0F46734DCB4139CADB9C242C235327C5DBB2"
+    },
+    {
+      "path": "src-modern/PerkCatalog.cs",
+      "sha256": "89DCA02D50CEC7E4C1448A30C6C98BC4C0BDB70FA23F9A8C7E7D2068DEBC9C8D"
+    },
+    {
+      "path": "src-modern/PerkDebugService.cs",
+      "sha256": "FF8729AC7B404E0A3002C7B590182BAD59A4D42A58D5258DD295354E6228A370"
+    },
+    {
+      "path": "src-modern/PerkFeedbackService.cs",
+      "sha256": "057EE730B8889AF8D1A051DE5C19650907D6201593F491761F0F3D86ED8F233D"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches35.cs",
+      "sha256": "8654676989579BAAD9518DA1ABB6829E5325E3C4C7920A05EBBE5B2B3DE9550A"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches35Missing.cs",
+      "sha256": "37634493C6CCC009AA72FF368AFE6D6CD58FBA7623A8193D4C374F656F6F7631"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches35Objects.cs",
+      "sha256": "9E5EED5F835F46FED7689DF58293D33041E8486F83653C7189984B9DCD4B05F4"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches70Combat.cs",
+      "sha256": "A686233B03D534A7A037DA5C8237A34B3DCDDEA8D8FB0B4E5A4B5F902F42C099"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches70Foundation.cs",
+      "sha256": "59A2C08D15CB462B9F5B98BE5D5285AB0C4A8F21853B0D1F2403A9CFE01C1D2D"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatches70Polish.cs",
+      "sha256": "D0A2E9D0FB552D0E706CD60CB9BF73D0F68E30B48649CE0B903D7164300BF525"
+    },
+    {
+      "path": "src-modern/PerkGameplayPatchesA1.cs",
+      "sha256": "A3ACE5553D233D382B74579B3DC9108667AA672A22291B37B7476687153192C5"
+    },
+    {
+      "path": "src-modern/PerkLocalization.Ukrainian.cs",
+      "sha256": "83293EFEA60C8BED7C7FC6A70C3AA6C1EADF72023EA3375B730BB3D2705664C2"
+    },
+    {
+      "path": "src-modern/PerkLocalization.cs",
+      "sha256": "A0B3C05602885FC80CEDE9BB18DC03645AFB24D800363E8F2C3AC00A779CCF5D"
+    },
+    {
+      "path": "src-modern/PerkNarrativeService.cs",
+      "sha256": "E91C45252290193BA1D7E30743A072804CB1EDCA6D5A0E7752C443B9E2D7C3C7"
+    },
+    {
+      "path": "src-modern/PerkNativeFeedback.cs",
+      "sha256": "161CF671E3140595FCDB2510CCAB4FBF1DE24D7DB024AEDB6D816BC27BB75BC1"
+    },
+    {
+      "path": "src-modern/PerkProcHudService.cs",
+      "sha256": "280BCD2425B9BE432F8F44A94BCA8EB45769327829FCEFE2C5CB5188D82E6404"
+    },
+    {
+      "path": "src-modern/PerkRuntimeServices.cs",
+      "sha256": "6A84C2DAAE175C9FA6FA28F14078CC6D71329415008FF3019D82120612D1C52F"
+    },
+    {
+      "path": "src-modern/PerkUiIconService.cs",
+      "sha256": "CE02C8A840A27AF8785B378D4C762002C88F577E7B3B9478934EFB6254DAC2EB"
+    },
+    {
+      "path": "src-modern/PerkVisualService.cs",
+      "sha256": "E7372D7736CB009D96EF9B30DDD1AFAF4BF1217786524EE2A2E19F4FFE826F5E"
+    },
+    {
+      "path": "src-modern/PersonalCooking69Correction.cs",
+      "sha256": "C57346FA2A7D70FD6D9E426A812B3D8C29471F27ADE1AD413545E691A41D37A6"
+    },
+    {
+      "path": "src-modern/PhaseAVfx.cs",
+      "sha256": "3B2214C386F38FC8637238E2FCE8B58BFBDA1B118A2C810966815120D423FF4F"
+    },
+    {
+      "path": "src-modern/Pickaxes35LegacyMineRock.cs",
+      "sha256": "BA9E859F6F38EE5B9FE839CF9FB453CFB0CF9734A1D36D1961DC4B55070FE132"
+    },
+    {
+      "path": "src-modern/Pickaxes70SuperHit.cs",
+      "sha256": "C3420EE40D6F7AC89739E031EB2DA9F5D47524E3E013616660AEE0B5475F611E"
+    },
+    {
+      "path": "src-modern/Polearm35AutoSpin.cs",
+      "sha256": "0E7FBC08B622D426C4438892F0720F979CBB0CC7914D9ABBD0A648B4E31957DD"
+    },
+    {
+      "path": "src-modern/PotentialForgeRepair.cs",
+      "sha256": "E784E877C83B8C383735D149C3DBD0588C6B5D91CBD122E1705202DE3314B324"
+    },
+    {
+      "path": "src-modern/PotentialForgeSafetyPatch.cs",
+      "sha256": "870D5542E90970DD6D2942D2212B1F4DF6CC9799345D54932F38223CD20C5F30"
+    },
+    {
+      "path": "src-modern/ProcessingBatchLedger.cs",
+      "sha256": "D3DED3A926E5A35277C20FF682E620037381557422DC6B59DD9BE2EDFE46E7D8"
+    },
+    {
+      "path": "src-modern/ProcessingPersistentBatches.cs",
+      "sha256": "62D99D368B2DA748B40AA938CA365B186133D501E8F17577A50B0163DC3404CF"
+    },
+    {
+      "path": "src-modern/ProcessingStationProgression.cs",
+      "sha256": "C6646A46B355269C05FFFEF499093E5212B6FF24EEC4AD5CAEF25332102C1A73"
+    },
+    {
+      "path": "src-modern/ResourceProcXpContracts.cs",
+      "sha256": "73DA843762DCA66A4897D999214D7827F7F3072A194C9CCD5F004E33703084B9"
+    },
+    {
+      "path": "src-modern/ResourceProcXpNativePatches.cs",
+      "sha256": "9D041E86CB0D44164ED7B24B706E956660B51DCA49FA8C4752E6FCDBB002E9BC"
+    },
+    {
+      "path": "src-modern/ResourceProcXpTransport.cs",
+      "sha256": "5466C1B6E3E4F8296AF447A230C5059DD5CBC41EBE5B92AFB74371114A4FF70F"
+    },
+    {
+      "path": "src-modern/RidingPerkAuthority.cs",
+      "sha256": "E8077E8CC071284548DF5ABA6B40FF3B2BD08D6C77445F7B970900BF13713A6D"
+    },
+    {
+      "path": "src-modern/RoadRhythmPhaseVisual.cs",
+      "sha256": "BDE398D20F53C3C2A7E4C3E0E67427743B86AEC348B34DAECBA0F365F792129A"
+    },
+    {
+      "path": "src-modern/RoadRhythmVisual.cs",
+      "sha256": "3C651F5862FEDB3CC228142EF64260906FA9B4AAB540E624D2EE67F88640E1CD"
+    },
+    {
+      "path": "src-modern/Run70MapMarkerPresentation.cs",
+      "sha256": "FD5862C0689723C722620D0E2906A61C1DC825791D24C8CCF325D262FBD77646"
+    },
+    {
+      "path": "src-modern/Run70MapMarkerState.cs",
+      "sha256": "DD0CDF28D9FC2E1EFB51FD8B85A5B15A87A9ED307F172D60869377484E842DB8"
+    },
+    {
+      "path": "src-modern/Run70PoiDiscovery.cs",
+      "sha256": "0374A6D9CF23F8547A69D5F56C48EE0DB9604C8113C2E57B8CA2FD9F6BC8F948"
+    },
+    {
+      "path": "src-modern/RunSpeedWakeVisual.cs",
+      "sha256": "94893F7B07C274031F9E09809F934AA256628B04CB78CE50979F869A01DB2A8D"
+    },
+    {
+      "path": "src-modern/RuntimeAssetAuditService.cs",
+      "sha256": "283F1EB646DC59CB2846CDDB37A41220B09F1C7EB41148E26A92A59191D26445"
+    },
+    {
+      "path": "src-modern/RuntimeSelfTest.cs",
+      "sha256": "885502C9F97BE6F761E3D57435F2AB703CCCEE33684C571BD271B3A685C63EA4"
+    },
+    {
+      "path": "src-modern/SapHarvestBonus.cs",
+      "sha256": "1E594110EABFF45F242D2F416F0181D669FE36F48CACAD62F27C6C9C09AADD69"
+    },
+    {
+      "path": "src-modern/SecondaryAttackDiagnostics.cs",
+      "sha256": "738E41A5111F7381E0B5871F191E71CAD8CD4DAE9C808222928DA9B6FACF331C"
+    },
+    {
+      "path": "src-modern/ShadowStep35.cs",
+      "sha256": "20E6D18264B01EB63AD30147F15F78E6BB8D946E7053A693FA76093F3CBA66F9"
+    },
+    {
+      "path": "src-modern/ShadowStrikeGuarantee.cs",
+      "sha256": "BC00CD7BC584098256752C5C3A737EA7ABE3CE3D54B126D1566087846499C92F"
+    },
+    {
+      "path": "src-modern/Shield35HealingVisual.cs",
+      "sha256": "59DB96CE2204B768A363FB6CEA33BC75BAC51A5E0DEC80A65257025E4FE9A100"
+    },
+    {
+      "path": "src-modern/Shield35Renewal.cs",
+      "sha256": "1BC56EF1CBAC923123D3849B7562C06592CF23CB1B2B14575AF2070CCE327A1A"
+    },
+    {
+      "path": "src-modern/ShieldRenewalCostRules.cs",
+      "sha256": "9274F4C3585C909E122411C39E6CE702B7118DFC56EEB5273C5ED665423D7E0B"
+    },
+    {
+      "path": "src-modern/ShieldRush70.cs",
+      "sha256": "F4099D7A6F9506CE0E80F6D0876A472B6358577D8D3B071637E2ACDB36356716"
+    },
+    {
+      "path": "src-modern/ShieldRushImpactVisual.cs",
+      "sha256": "F0A8BAB409D842544D1937C8E26B6035913C717810C9B65D0BB63DF41F939A87"
+    },
+    {
+      "path": "src-modern/ShieldRushTerrainRules.cs",
+      "sha256": "7E19DE26F3D695B0C663231F3808F000C7B94625CEB6FF4E395FEF0719CA3A41"
+    },
+    {
+      "path": "src-modern/ShieldWeaponClasses.cs",
+      "sha256": "EEBF86B662BA51A59BFC6A9238CD0AA99D2404468595DF4819BE74B4B0571FD2"
+    },
+    {
+      "path": "src-modern/Skeleton35Travel.cs",
+      "sha256": "6D456ADAF053779BE8FBA48AC72239D546F1345DE4959DF387FE412D2013836C"
+    },
+    {
+      "path": "src-modern/SkillProgressionTooltipText.cs",
+      "sha256": "9806654968C79EAD8E247D8121AE86DC6B9104F134CEBC71BBA498A5FBAAC92F"
+    },
+    {
+      "path": "src-modern/SkillsTooltipPatch.cs",
+      "sha256": "22F26A92F8A0F4CD14F9BC3CFD15D493DBA28963404BDD575C4430AA6DBA3C22"
+    },
+    {
+      "path": "src-modern/Spear70Hook.cs",
+      "sha256": "5CAFC988AF2EB594B57C135A1A9741A248A1ABC979B36FAB7CA7F373C0D48537"
+    },
+    {
+      "path": "src-modern/SpearPinned70.cs",
+      "sha256": "D329AAEFDD89A60E93CBF37B9B5668127FA044C29D2AEAF518D0EB2853456432"
+    },
+    {
+      "path": "src-modern/SpearThrowLifecycle.cs",
+      "sha256": "E301492BEADD725E414BD89710555DD2121AFA758EBC66D5C3654823D69BAEB5"
+    },
+    {
+      "path": "src-modern/StaffMagicXpContext.cs",
+      "sha256": "0E24EC1766BF355EAC5DCAD54F720BE8FA0B02504772C2FBBC4AE964D06F183C"
+    },
+    {
+      "path": "src-modern/StaffMagicXpRules.cs",
+      "sha256": "2FD14E9645F35E92E104B75044FA7B56DEE85E709B67494E6B9C28853B922A6F"
+    },
+    {
+      "path": "src-modern/StationBulkLoad.cs",
+      "sha256": "A606D118513A4173D81C537B5B6FA6826495D72376974AE5803F0660E3E623BF"
+    },
+    {
+      "path": "src-modern/Stride70Perk.cs",
+      "sha256": "6BE39B7B7DFE4577834878F1F457CBF071D9646562DBC28A353D25C5C12D5CDD"
+    },
+    {
+      "path": "src-modern/SummonRosterCommands.cs",
+      "sha256": "D1DF22544F7A49CEDA735CCBA90AD8ADCE7C5466629CDED57154AC6E240B645D"
+    },
+    {
+      "path": "src-modern/SurtlingQualityRules.cs",
+      "sha256": "B47C51C4250E9F6683754EB75EB07DC56DA040F6B88A189238E605AB174E7301"
+    },
+    {
+      "path": "src-modern/Swords70Perk.cs",
+      "sha256": "47E945DFDBDDE937A3FF72F9DB72ACC85FD5E21B8F6CCD07FD960D5494D5895F"
+    },
+    {
+      "path": "src-modern/TargetEffectService.cs",
+      "sha256": "A2232D41E25EA9B74C93793D1EAC0721C3143EC81798717CA28B02C49E59E448"
+    },
+    {
+      "path": "src-modern/TierDatabase.cs",
+      "sha256": "207B2935DE078736FBF68EAE6AF5AFA0B1D47D2776845966BCC00B62B75B5CBD"
+    },
+    {
+      "path": "src-modern/Utility100InspirationDebug.cs",
+      "sha256": "39444BC2939C28540C72CD199679B7E26BD0073F86FC568FBC074CBEAC87711C"
+    },
+    {
+      "path": "src-modern/UtilityResourceProcLineage.cs",
+      "sha256": "6E6BA8F06C5FD97472C3D00AE92285515DFE7518F99AE1E7F81E40952FC15746"
+    },
+    {
+      "path": "src-modern/VanillaBonusFeedback.cs",
+      "sha256": "FC563D72E2C1E52F4836AFF6EF091C7D0D1FC83ACC03ED9654343B0D0D5B42C3"
+    },
+    {
+      "path": "src-modern/VeiledPerk.cs",
+      "sha256": "DE7BBA1E74440B2F7B30D84C47B308DBD019C0B9619DB13182BF21F6569F64BB"
+    },
+    {
+      "path": "src-modern/VfxAuditionService.cs",
+      "sha256": "584D0A17F0F53DA5806F656F244E68342CB62FD567A67C0224F1001DE6C8DEB2"
+    },
+    {
+      "path": "src-modern/VfxPool.cs",
+      "sha256": "A79AFB8FF6283D249588D50C79A8915A3EFFF453366A030F56865CF0ED1C4726"
+    },
+    {
+      "path": "src-modern/VfxRecipes.cs",
+      "sha256": "38C111A3A4AABF69BAD44C38FC25D0715091E16FE39745168907F0B3D45BC244"
+    },
+    {
+      "path": "src-modern/WeaponGlowService.cs",
+      "sha256": "82FFF2E31C0AA5A3AB03FD4BC797274F1E54DCBCF29AD586A70275A8B78AFF30"
+    },
+    {
+      "path": "src-modern/WoodBonusResource.cs",
+      "sha256": "66C4B3ED1BBDE88F02B1596FA2388459441DB4E4E4094270E01926C50BCA063D"
+    },
+    {
+      "path": "src-modern/WoodCuttingChainService.cs",
+      "sha256": "D2B733E5CD2369047A08FC5F337C37D1E017319F09A30D66DCFBD12C3B59CE86"
+    },
+    {
+      "path": "src-modern/WoodInventoryCapacity.cs",
+      "sha256": "AC7EEF06F39ABFEB09D6128DF7B86562A95981D1DE304FF5A6F214AE1054F1B2"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentBenchVisual.cs",
+      "sha256": "ACC4051BC0936D4241E42CECFB8A219F4641EC9C64763952ECCAF12E345217E5"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentCharacterLedger.cs",
+      "sha256": "EC4C59CB7BFF746A3CDD96FE56DA998CFBFEFDF8797F81F655186C59708E2617"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentContract.cs",
+      "sha256": "E80EC35D61C5CD9EFA33CAB2991CC60FF8049124033D760172C6970FB733918F"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentCooldownContract.cs",
+      "sha256": "23A9F6CCF93184F06FC848655B5ADFA49C1FC990ECA8A60F9EF1951A35EC1395"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentCooldownProtocol.cs",
+      "sha256": "C397BB6DC009CD89F8DCA20DC24EF6271A27C5B4EE1BB968CE9766899EDB942B"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentDismantle.cs",
+      "sha256": "2DBFAC5BD64639FD2E092029A0224BE7F2B318FBDB7F93F8BD939CE813CCFF4C"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentIdolMenu.cs",
+      "sha256": "DE1EAFE7CF21F1519A67C1F82E39F4E1995F1AC15F1B5767B36AE179E96B4267"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentIndexInvalidation.cs",
+      "sha256": "07A8F8A5EEDA0CDAA9E08CFB12E26647897A8F28EAEF550FA143F982352496D9"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentJournal.cs",
+      "sha256": "7BED01CB736408A9CD47433C7B05E6EDC7E71951299B60B34C9F66A09A7E1485"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentNativeIdentity.cs",
+      "sha256": "4A5A120F4A1B402946A0BFD3399E25F77678579C4D64449C3D3A00C87B55F1E8"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentNetwork.cs",
+      "sha256": "D7AD429DED05BED59CCBDB48DB671FC71D48EF4A1D1694E348FD5528FC5B11BA"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentRules.cs",
+      "sha256": "39216D382A456D77E2FBEA737EC9AAEB054C97C452C7322B84709439CFC8D9CD"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentRuntime.cs",
+      "sha256": "B9B723036C6F81C692A63086971F957C435ABE22F7B63390BB29EE90C08840F5"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentService.cs",
+      "sha256": "C1159496188920503CF0F7387BE76D0B50E43DC9108C47FDB451537113FD7822"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentThematicBurst.cs",
+      "sha256": "8D6E75AEAE2B621E2922C6D44D8FC4D2D183D8C781CA87C7F18CE123F5907F14"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentTravel.cs",
+      "sha256": "7894E9617408DC7B4402D9F8DE9E877C6C384F8CADD5FC2F65B8AD438DC2E6D5"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentTravelMap.cs",
+      "sha256": "FD2DF49FA1FC3A07A61FC9DB54D150CF7F886F56A107259852F86516720457D3"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentUi.cs",
+      "sha256": "CE052614F89A449DC4906205A63680A41D9D96E4BCA4A8F4B054C948B0483C80"
+    },
+    {
+      "path": "src-modern/WorkbenchEnchantmentUiBinding.cs",
+      "sha256": "AB5D353BB08EA2C34A063D04E1FD7B3468BD3E4D643E095D757360F1FCC904A1"
+    },
+    {
+      "path": "src-modern/WorkbenchTravelDestination.cs",
+      "sha256": "7010A42B9A36990E69ADE0720B81B4A806828239953E47E08B0069D445E2F7D2"
+    },
+    {
+      "path": "src-modern/WorkbenchTravelEndpoint.cs",
+      "sha256": "EB5CD04927F63D1CEE821A1FF26FAEC94C625B4365A86534298039D55738E088"
+    },
+    {
+      "path": "src-modern/WorkshopActor.cs",
+      "sha256": "BD3B4B6BC2C54D1CC68F476922CF85EE9496AB3F4AB42CB470F6786A5AF3AF0F"
+    },
+    {
+      "path": "src-modern/WorkshopAtomicDebit.cs",
+      "sha256": "10AB766382649467C71DDDBF954E81D4F3D1B714CF8E730567777E49A7EDBCA6"
+    },
+    {
+      "path": "src-modern/WorkshopBuildBridge.cs",
+      "sha256": "AD9BBA62C4B0588D857ABB6EE4AAAC7119420BD6E740F2DFC078F424A850F37D"
+    },
+    {
+      "path": "src-modern/WorkshopBuildRay.cs",
+      "sha256": "17B03FEC0F7AA87D59041A5661DF0D6F937C9CE832B1E5ECF187336A22350409"
+    },
+    {
+      "path": "src-modern/WorkshopChestLease.cs",
+      "sha256": "613996F196ECAADF4FF9248CDD384B37FB5C2862909038A3339C2444FC743649"
+    },
+    {
+      "path": "src-modern/WorkshopConnectionVisual.cs",
+      "sha256": "22947E3502652613B5EBD9298791B935A74D9B1CFF36DE86A9A0B7CCCB31D449"
+    },
+    {
+      "path": "src-modern/WorkshopDurableRequests.cs",
+      "sha256": "1333CAE6BB993DCA0BED309448F289E5D5D36ECE77241B2818B49ADA9492A5FB"
+    },
+    {
+      "path": "src-modern/WorkshopHostCrafting.cs",
+      "sha256": "6ACC4078DD88E78C39E76F3A3636916410CB6E52E69A3EDF38F06572F679FFD6"
+    },
+    {
+      "path": "src-modern/WorkshopLeaseRules.cs",
+      "sha256": "2118CAF3E1C787B5E12B538591E982DE0BA647D3E4E58C4462882BB3B99AC4C6"
+    },
+    {
+      "path": "src-modern/WorkshopNetwork.cs",
+      "sha256": "5848C959789C1CC3CB4C780B6D1E58B04EB640286DEE570BDE1181902DE58F0D"
+    },
+    {
+      "path": "src-modern/WorkshopNetworkStorage.cs",
+      "sha256": "78FF5C029ACB49FFB3D438DC82AC0CB679BCF0231DCE0127DAA843FFED1560EA"
+    },
+    {
+      "path": "src-modern/WorkshopPerformanceProbe.cs",
+      "sha256": "89D19F4ABBA62974309FE4DEEBBE971C8EF02C2AF545485A00634978639F2FD5"
+    },
+    {
+      "path": "src-modern/WorkshopPreparation.cs",
+      "sha256": "720F6E92DDB433D121104226FF7D7A6A3AC14420C3BD0AEF001B7C4488EF58B3"
+    },
+    {
+      "path": "src-modern/WorkshopPreparationCache.cs",
+      "sha256": "7711403F937138ABEA781CA288BFDA209B8C3F74653B334D3E5930A20FFCF642"
+    },
+    {
+      "path": "src-modern/WorkshopReceipt.cs",
+      "sha256": "E520C8849150DF427F119BB907A6A8382D2117879054E95E2F7172F6377C1B16"
+    },
+    {
+      "path": "src-modern/WorkshopRecordStore.cs",
+      "sha256": "A5975D0E708D31D37AA3CA176D990F0F81FEF2899E3E18B87AD72715236DECD3"
+    },
+    {
+      "path": "src-modern/WorkshopRecovery.cs",
+      "sha256": "C08C9DAC9172855AE4F3C44FB951193CABB7451BF01ECF6F4B471DFFEDB5080F"
+    },
+    {
+      "path": "src-modern/WorkshopRemoteCraft.cs",
+      "sha256": "79168405C6C46D1193A5610156886F024C4B821EB5A12CA1D35815BE0449F45D"
+    },
+    {
+      "path": "src-modern/WorkshopRequestLedger.cs",
+      "sha256": "978906A248E4CC13DD4C73C0E9F388E09ACD95DF5081BBDC437CE6D61644A24D"
+    },
+    {
+      "path": "src-modern/WorkshopResourcePlan.cs",
+      "sha256": "26CC0B586C7BE86888B0F5961366041744AF406A5DA2ECE609A184B54D6CDD5F"
+    },
+    {
+      "path": "src-modern/WorkshopResourceReservation.cs",
+      "sha256": "7E899D806DBC13E819E55D5B8F0A4AC6444DD6430657A85A17899CACEC194EEB"
+    },
+    {
+      "path": "src-modern/WorkshopSettlementHistory.cs",
+      "sha256": "857A8539224CA5346617AF54ACD1191F6F2C336F8E55447B69F71E5E092E9A16"
+    },
+    {
+      "path": "src-modern/WorkshopStationPrewarm.cs",
+      "sha256": "418EDF45132483DE0CF53F8BB56C11F683694A06226F4EAA035CAA38C5234D4A"
+    },
+    {
+      "path": "src-modern/WorkshopStationProof.cs",
+      "sha256": "7C0D2FF8F5C29168D31A17C96557705D3A32354B56B616AF1EB916E72E55D819"
+    },
+    {
+      "path": "src-modern/WorkshopStationRadius.cs",
+      "sha256": "50A68892696A6F97C37840F8AF13BB6F1E6879148259BA5384D7E3E9BA5F8F11"
+    },
+    {
+      "path": "src-modern/WorkshopStorageLockPatch.cs",
+      "sha256": "F4D17EA65FDC46EDB148697B990454C6E97F036D37D0D212F5E3D4CDAEBEADEE"
+    },
+    {
+      "path": "src-modern/WorkshopStoragePreview.cs",
+      "sha256": "1678B0FDFF42810D5A6E251713F03552B3DE2BA2681B707515399F875CED6D30"
+    },
+    {
+      "path": "src-modern/WorkshopStorageUi.cs",
+      "sha256": "F6468D3F7908D58C304C243C5906B01DEECB7AB320573FF64B639744C875576A"
+    },
+    {
+      "path": "src-modern/WorkshopTiming.cs",
+      "sha256": "FDB263B3A657B4CC7ADA28F3EB4EC0FA67B91C168F793D49A72089B33373AC46"
+    },
+    {
+      "path": "src-modern/WorkshopWorldRecords.cs",
+      "sha256": "B721578A8293CB8625C1888E356E49C963993A35B17B4CC1D8A500CCE37BEF40"
+    },
+    {
+      "path": "src-modern/WorldProgressionXpLoadPatch.cs",
+      "sha256": "32260C604489D4F76A28A97404C991240F143D5ACE7B149139C3248E6CC248D0"
+    },
+    {
+      "path": "src-modern/WorldProgressionXpService.cs",
+      "sha256": "A5E0B24D25C9936F94F041EF61387B915F4A25C95F5DC2571319B0012199FF87"
+    }
+  ],
+  "removed_old_dev_source": [],
+  "oldDevCommit": "0bff399754661f96521dd987a87a94373a4ddbb9",
+  "notes": [
+    "Exact frozen-stage bytes; no canonical export",
+    "No rebuild; reuse exact Root build/static evidence",
+    "Installer helpers and entrypoints unchanged",
+    "No push or runtime install",
+    "LIVE UNTESTED"
+  ]
+}
