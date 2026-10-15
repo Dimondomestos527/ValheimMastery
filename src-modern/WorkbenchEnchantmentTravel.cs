@@ -7,7 +7,7 @@ namespace ValheimMastery
 {
     internal static class WorkbenchEnchantmentTravel
     {
-        const string AskRpc="VM_EnchantTravelAsk_v1",MenuRpc="VM_EnchantTravelMenu_v1",ChooseRpc="VM_EnchantTravelChoose_v1",GrantRpc="VM_EnchantTravelGrant_v1";
+        const string AskRpc="VM_EnchantTravelAsk_v2",MenuRpc="VM_EnchantTravelMenu_v2",ChooseRpc="VM_EnchantTravelChoose_v2",GrantRpc="VM_EnchantTravelGrant_v2";
         const int Limit=4096,Chunk=128;
         sealed class Menu
         {
@@ -17,7 +17,8 @@ namespace ValheimMastery
         sealed class ClientState
         {
             internal ZNet Session;internal ZRpc Rpc;internal ulong Generation;internal long World,Actor;internal ZDOID Character,Source;
-            internal string Token,Nonce;internal float Until;internal int Page,Total=-1;internal bool Choosing,Ready;
+            internal string Token,Nonce,SourceChoice;internal float Until;internal int Page,Total=-1;internal bool Choosing,Ready;
+            internal WorkbenchTravelDestination Selected;
             internal readonly List<WorkbenchTravelDestination> Choices=new List<WorkbenchTravelDestination>();
             internal readonly Dictionary<ZDOID,string> Tokens=new Dictionary<ZDOID,string>();
         }
@@ -35,17 +36,23 @@ namespace ValheimMastery
             if(Session!=net||Manager!=ZDOMan.instance||World!=world||Generation!=MasterIdolLoadIdentity.Generation)
             {Reset();Session=net;Manager=ZDOMan.instance;World=world;Generation=MasterIdolLoadIdentity.Generation;}
         }
-        internal static void Reset(){Menus.Clear();LastAsk.Clear();Expired.Clear();LocalDelivery.Clear();Session=null;Manager=null;World=0;Generation=0;Next=0;Cancel();}
+        internal static void Reset(){Menus.Clear();LastAsk.Clear();Expired.Clear();LocalDelivery.Clear();Session=null;Manager=null;World=0;Generation=0;Next=0;Cancel();WorkbenchTravelLanding.Reset();}
         internal static void Cancel(){Local=null;WorkbenchEnchantmentTravelMap.Close();}
+        static bool LocalEligible(Player player)=>MasterIdolPlains.Owned(player)&&MasteryPlugin.Settings.Enabled.Value&&OwnerSkillAuthority.Has(player,Skills.SkillType.Crafting,100);
+        static bool ActorEligible(WorkshopActor actor)=>actor?.Available==true&&
+            (actor.Rpc==null?OwnerSkillAuthority.Has(Player.m_localPlayer,Skills.SkillType.Crafting,100):
+                OwnerSkillAuthority.Has(actor.Rpc,actor.CharacterId,actor.GetPlayerID(),Skills.SkillType.Crafting,100));
         internal static bool Open(CraftingStation station,Humanoid user,bool hold)
         {
             var player=user as Player;var data=station?.GetComponent<ZNetView>()?.GetZDO();
-            if(hold||!MasterIdolPlains.Owned(player)||player.IsDead()||player.IsTeleporting()||data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode())return false;
+            if(hold||!LocalEligible(player)||player.IsDead()||player.IsTeleporting()||ZNet.instance?.GetWorld()==null||ZDOMan.instance==null||ZNetScene.instance==null||
+                !MasterIdolLoadIdentity.LoadReady||data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode())return false;
             string token=data.GetString(WorkbenchEnchantmentRuntime.StationKey,"");
-            if(!Guid.TryParseExact(token,"N",out _)||MasterIdolEffectZones.Find(data.m_uid+"/"+token)==null)return false;
+            var zone=MasterIdolEffectZones.Find(data.m_uid+"/"+token);
+            if(!Guid.TryParseExact(token,"N",out _)||zone==null||!WorkbenchEnchantmentRules.Known(zone.Type))return false;
             if(!MasterIdolTravel.PortalRules(player)){Notice("Шлях закритий: залиш заборонену ношу або дочекайся тихої години.");return true;}
             Current();Cancel();
-            Local=new ClientState{Session=Session,Rpc=Session.IsServer()?null:Session.GetServerRPC(),Generation=Generation,World=World,Actor=player.GetPlayerID(),Character=player.m_nview.GetZDO().m_uid,Source=data.m_uid,Token=token,Nonce=Guid.NewGuid().ToString("N"),Until=Time.unscaledTime+30};
+            Local=new ClientState{Session=Session,Rpc=Session.IsServer()?null:Session.GetServerRPC(),Generation=Generation,World=World,Actor=player.GetPlayerID(),Character=player.m_nview.GetZDO().m_uid,Source=data.m_uid,Token=token,SourceChoice=zone.Type,Nonce=Guid.NewGuid().ToString("N"),Until=Time.unscaledTime+30};
             AskPage(Local);return true;
         }
         static void AskPage(ClientState c)
@@ -66,7 +73,7 @@ namespace ValheimMastery
         static bool MenuCurrent(Menu menu,WorkshopActor actor)
         {
             return menu!=null&&menu.Session==ZNet.instance&&menu.Generation==MasterIdolLoadIdentity.Generation&&menu.World==ZNet.instance?.GetWorldUID()&&Time.unscaledTime<=menu.Until&&
-                actor?.Available==true&&actor.GetPlayerID()==menu.Actor&&actor.CharacterId==menu.Character&&actor.Rpc==menu.Rpc&&!actor.IsDead()&&!actor.IsTeleporting()&&
+                ActorEligible(actor)&&actor.GetPlayerID()==menu.Actor&&actor.CharacterId==menu.Character&&actor.Rpc==menu.Rpc&&!actor.IsDead()&&!actor.IsTeleporting()&&
                 MasterIdolTravel.GlobalPortalRules()&&WorkbenchEnchantmentRuntime.TryTravelEndpoint(menu.Source.Id,actor,out var from)&&Same(menu.Source,from)&&
                 Vector3.Distance(actor.Position,from.Point)<=4&&MasterIdolWorldIndex.WardAllows(menu.Actor,actor.Position);
         }
@@ -78,7 +85,7 @@ namespace ValheimMastery
                 long world=packet.ReadLong(),player=packet.ReadLong();var source=packet.ReadZDOID();string token=packet.ReadString(),nonce=packet.ReadString();int page=packet.ReadInt();
                 if(packet.GetPos()!=packet.Size()||world!=World||page<0||page>=Limit/Chunk||!Guid.TryParseExact(token,"N",out _)||!Guid.TryParseExact(nonce,"N",out _))return;
                 var actor=WorkshopActor.Resolve(rpc);
-                if(actor?.Available!=true||actor.GetPlayerID()!=player||!MasterIdolTravel.GlobalPortalRules()||!WorkbenchEnchantmentRuntime.TryTravelEndpoint(source,actor,out var from)||
+                if(!ActorEligible(actor)||actor.GetPlayerID()!=player||!MasterIdolTravel.GlobalPortalRules()||!WorkbenchEnchantmentRuntime.TryTravelEndpoint(source,actor,out var from)||
                     from.Station!=token||Vector3.Distance(actor.Position,from.Point)>4||!MasterIdolWorldIndex.WardAllows(player,actor.Position))return;
                 Menus.TryGetValue(player,out var menu);
                 if(menu==null||menu.Nonce!=nonce)
@@ -88,8 +95,13 @@ namespace ValheimMastery
                     Prune();if((Menus.Count>=128&&!Menus.ContainsKey(player))||(LastAsk.Count>=128&&!LastAsk.ContainsKey(player)))return;
                     LastAsk[player]=Time.unscaledTime;var candidates=WorkbenchEnchantmentRuntime.TravelCandidates();
                     if(candidates.Length>Limit){SendMenuFailure(rpc,world,player,source,token,nonce,"Давніх шляхів забагато, щоб зараз їх роздивитися.");return;}
-                    var targets=new List<WorkbenchTravelEndpoint>();
-                    foreach(var id in candidates)if(id!=source&&WorkbenchEnchantmentRuntime.TryTravelEndpoint(id,actor,out var target))targets.Add(target);
+                    var targets=new List<WorkbenchTravelEndpoint>();var types=new HashSet<string>(StringComparer.Ordinal){from.Choice};
+                    foreach(var id in candidates)if(id!=source&&WorkbenchEnchantmentRuntime.TryTravelEndpoint(id,actor,out var target))
+                    {
+                        if(!types.Add(target.Choice)||targets.Count>=5)
+                        {SendMenuFailure(rpc,world,player,source,token,nonce,"Давні знаки ще не визначили єдиного шляху.");return;}
+                        targets.Add(target);
+                    }
                     targets.Sort((a,b)=>{int order=(a.Point-from.Point).sqrMagnitude.CompareTo((b.Point-from.Point).sqrMagnitude);return order!=0?order:StringComparer.Ordinal.Compare(a.Id.ToString(),b.Id.ToString());});
                     menu=new Menu{Session=Session,Rpc=rpc,Generation=Generation,World=world,Actor=player,Character=actor.CharacterId,Nonce=nonce,Until=Time.unscaledTime+30,Source=from,Targets=targets};Menus[player]=menu;
                 }
@@ -115,7 +127,7 @@ namespace ValheimMastery
         static bool Client(ZRpc rpc,ZPackage p)
         {
             var c=Local;return c!=null&&p!=null&&p.Size()<=16384&&c.Session==ZNet.instance&&c.Generation==MasterIdolLoadIdentity.Generation&&
-                c.Rpc==(ZNet.instance?.IsServer()==true?null:ZNet.instance?.GetServerRPC())&&rpc==c.Rpc&&MasterIdolPlains.Owned(Player.m_localPlayer)&&
+                c.Rpc==(ZNet.instance?.IsServer()==true?null:ZNet.instance?.GetServerRPC())&&rpc==c.Rpc&&LocalEligible(Player.m_localPlayer)&&
                 c.Character==Player.m_localPlayer.m_nview.GetZDO().m_uid&&c.Actor==Player.m_localPlayer.GetPlayerID()&&c.World==ZNet.instance?.GetWorldUID()&&Time.unscaledTime<=c.Until;
         }
         static bool Header(ZPackage p,ClientState c)=>p.ReadLong()==c.World&&p.ReadLong()==c.Actor&&p.ReadZDOID()==c.Source&&p.ReadString()==c.Token&&p.ReadString()==c.Nonce;
@@ -128,12 +140,13 @@ namespace ValheimMastery
                 if(!Header(packet,c)||c.Choosing||c.Ready)return;
                 if(!packet.ReadBool()){string text=packet.ReadString();if(text.Length<=256&&packet.GetPos()==packet.Size()){Cancel();Notice(text);}return;}
                 int page=packet.ReadInt(),total=packet.ReadInt(),count=packet.ReadInt();
-                if(page!=c.Page||total<0||total>Limit||c.Total>=0&&c.Total!=total||count!=Math.Min(Chunk,total-page*Chunk)||count<0)return;
+                if(page!=c.Page||total<0||total>5||c.Total>=0&&c.Total!=total||count!=Math.Min(Chunk,total-page*Chunk)||count<0)return;
                 var received=new List<WorkbenchTravelDestination>();var tokens=new Dictionary<ZDOID,string>();
+                var types=new HashSet<string>(StringComparer.Ordinal){c.SourceChoice};
                 for(int i=0;i<count;i++)
                 {
                     var id=packet.ReadZDOID();string token=packet.ReadString(),type=packet.ReadString();var point=packet.ReadVector3();
-                    if(id==ZDOID.None||id==c.Source||!Guid.TryParseExact(token,"N",out _)||!WorkbenchEnchantmentRules.Known(type)||!Finite(point)||c.Tokens.ContainsKey(id)||tokens.ContainsKey(id))return;
+                    if(id==ZDOID.None||id==c.Source||!Guid.TryParseExact(token,"N",out _)||!WorkbenchEnchantmentRules.Known(type)||!types.Add(type)||!Finite(point)||c.Tokens.ContainsKey(id)||tokens.ContainsKey(id))return;
                     tokens.Add(id,token);received.Add(new WorkbenchTravelDestination(id,point,type,page*Chunk+i+1));
                 }
                 if(packet.GetPos()!=packet.Size()||!Valid())return;
@@ -146,6 +159,7 @@ namespace ValheimMastery
         static void Choose(ZDOID id)
         {
             var c=Local;if(c?.Ready!=true||c.Choosing||!Valid()||!c.Tokens.TryGetValue(id,out var token))return;
+            c.Selected=c.Choices.FirstOrDefault(item=>item.Id==id);if(c.Selected==null)return;
             if(!MasterIdolTravel.PortalRules(Player.m_localPlayer)){Cancel();Notice("Ця ноша не пройде давнім шляхом.");return;}
             c.Choosing=true;WorkbenchEnchantmentTravelMap.Close();var p=new ZPackage();WriteHeader(p,c.World,c.Actor,c.Source,c.Token,c.Nonce);p.Write(id);p.Write(token);Send(c.Rpc,ChooseRpc,p,ReceiveChoose);
         }
@@ -157,10 +171,13 @@ namespace ValheimMastery
                 long world=packet.ReadLong(),player=packet.ReadLong();var source=packet.ReadZDOID();string token=packet.ReadString(),nonce=packet.ReadString();var target=packet.ReadZDOID();string targetToken=packet.ReadString();
                 if(packet.GetPos()!=packet.Size()||!Menus.TryGetValue(player,out var menu)||menu.Rpc!=rpc||menu.World!=world||menu.Source.Id!=source||menu.Source.Station!=token||menu.Nonce!=nonce)return;
                 Menus.Remove(player);var actor=WorkshopActor.Resolve(rpc);var selected=menu.Targets.FirstOrDefault(t=>t.Id==target&&t.Station==targetToken);
-                if(!MenuCurrent(menu,actor)||selected==null||!WorkbenchEnchantmentRuntime.TryTravelEndpoint(target,actor,out var now)||!Same(selected,now)||
-                    !MasterIdolWorldIndex.WardAllows(player,now.Point+now.Rotation*Vector3.forward*2+Vector3.up))
+                if(!MenuCurrent(menu,actor)||selected==null||!WorkbenchEnchantmentRuntime.TryTravelEndpoint(target,actor,out var now)||!Same(selected,now))
                 {GrantDenied(menu,"Цей шлях уже згас або оберіг не дозволяє пройти.");return;}
-                var result=new ZPackage();WriteHeader(result,world,player,source,token,nonce);result.Write(true);result.Write(now.Point+now.Rotation*Vector3.forward*2+Vector3.up);result.Write(now.Rotation);Send(rpc,GrantRpc,result,ReceiveGrant);
+                var landings=WorkbenchTravelLanding.AuthorizedCandidates(now,player);
+                if(landings.Length==0){GrantDenied(menu,"Обереги не залишили вільного підходу до цього верстака.");return;}
+                var result=new ZPackage();WriteHeader(result,world,player,source,token,nonce);result.Write(true);
+                result.Write(now.Id);result.Write(now.Station);result.Write(now.Choice);result.Write(now.Point);result.Write(now.Rotation);result.Write(landings.Length);
+                foreach(var point in landings)result.Write(point);Send(rpc,GrantRpc,result,ReceiveGrant);
             }catch(Exception error){Warn("grant",error);}
         }
         static void GrantDenied(Menu menu,string text)
@@ -172,19 +189,24 @@ namespace ValheimMastery
             {
                 if(!Header(packet,c)||!c.Choosing)return;
                 if(!packet.ReadBool()){string text=packet.ReadString();if(text.Length<=256&&packet.GetPos()==packet.Size()){Cancel();Notice(text);}return;}
-                var point=packet.ReadVector3();var rotation=packet.ReadQuaternion();
-                if(packet.GetPos()!=packet.Size()||!Finite(point)||!MasterIdolSanctuaryRules.Finite(rotation.x)||!MasterIdolSanctuaryRules.Finite(rotation.y)||!MasterIdolSanctuaryRules.Finite(rotation.z)||!MasterIdolSanctuaryRules.Finite(rotation.w)||!Valid())return;
+                var target=packet.ReadZDOID();string marker=packet.ReadString(),type=packet.ReadString();var point=packet.ReadVector3();var rotation=packet.ReadQuaternion();int count=packet.ReadInt();
+                if(c.Selected==null||target!=c.Selected.Id||!c.Tokens.TryGetValue(target,out var expectedMarker)||marker!=expectedMarker||type!=c.Selected.EnchantmentId||
+                    !Finite(point)||(point-c.Selected.Position).sqrMagnitude>.01f||count<1||count>16||!WorkbenchTravelLanding.ValidRotation(rotation))return;
+                var landings=new Vector3[count];
+                for(int i=0;i<count;i++){landings[i]=packet.ReadVector3();if(!Finite(landings[i])||(landings[i]-point).sqrMagnitude>25f)return;}
+                if(packet.GetPos()!=packet.Size()||!Valid())return;
                 if(!MasterIdolTravel.PortalRules(Player.m_localPlayer)){Cancel();Notice("Ця ноша вже не пройде давнім шляхом.");return;}
-                Cancel();if(!Player.m_localPlayer.TeleportTo(point,rotation,true))Notice("Давній шлях ще не готовий прийняти тебе.");
+                var selected=c.Selected;var source=c.Source;string sourceMarker=c.Token;
+                Cancel();if(!WorkbenchTravelLanding.Begin(Player.m_localPlayer,source,sourceMarker,selected,marker,point,rotation,landings))Notice("Давній шлях ще не готовий прийняти тебе.");
             }catch{if(ReferenceEquals(Local,c))Cancel();}
         }
         internal static bool Valid()
         {
             var c=Local;var p=Player.m_localPlayer;var source=c==null?null:ZDOMan.instance?.GetZDO(c.Source);
             return c!=null&&c.Session==ZNet.instance&&c.Generation==MasterIdolLoadIdentity.Generation&&MasterIdolLoadIdentity.LoadReady&&c.World==ZNet.instance?.GetWorldUID()&&
-                c.Rpc==(ZNet.instance?.IsServer()==true?null:ZNet.instance?.GetServerRPC())&&MasterIdolPlains.Owned(p)&&c.Actor==p.GetPlayerID()&&c.Character==p.m_nview.GetZDO().m_uid&&!p.IsDead()&&!p.IsTeleporting()&&
+                c.Rpc==(ZNet.instance?.IsServer()==true?null:ZNet.instance?.GetServerRPC())&&LocalEligible(p)&&c.Actor==p.GetPlayerID()&&c.Character==p.m_nview.GetZDO().m_uid&&!p.IsDead()&&!p.IsTeleporting()&&
                 Time.unscaledTime<=c.Until&&source!=null&&source.GetPrefab()=="piece_workbench".GetStableHashCode()&&source.GetString(WorkbenchEnchantmentRuntime.StationKey,"")==c.Token&&
-                Vector3.Distance(p.transform.position,source.GetPosition())<=4&&MasterIdolEffectZones.Find(c.Source+"/"+c.Token)!=null;
+                Vector3.Distance(p.transform.position,source.GetPosition())<=4&&MasterIdolEffectZones.Find(c.Source+"/"+c.Token)?.Type==c.SourceChoice;
         }
         static void Prune()
         {
@@ -201,7 +223,7 @@ namespace ValheimMastery
         }
         internal static void Tick()
         {
-            Current();int budget=8;while(budget-->0&&LocalDelivery.Count!=0)LocalDelivery.Dequeue()();
+            Current();WorkbenchTravelLanding.Tick();int budget=8;while(budget-->0&&LocalDelivery.Count!=0)LocalDelivery.Dequeue()();
             if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.25f;Prune();if(Local!=null&&!Valid())Cancel();
         }
         static void Notice(string text)=>Player.m_localPlayer?.Message(MessageHud.MessageType.Center,"<color=#FFD36A>"+text+"</color>");

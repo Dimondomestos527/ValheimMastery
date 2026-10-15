@@ -61,6 +61,7 @@ namespace ValheimMastery
                 !home.Contains(player.transform.position)||!MasterIdolResidentPolicy.Friendly(actor.SceneCreature,player)||
                 (actor.transform.position-player.transform.position).sqrMagnitude>64||
                 MasterIdolResidentSceneAnimation.HomeActive(home))return false;
+            float duration=MasterIdolVisibleGesture.ReactionSeconds(actor.SceneCreature);if(duration<=0)return false;
             if(!Homes.TryGetValue(home.Id,out var slot))
             {if(Homes.Count>=MasterIdolResidentIdleRules.MaxHomeRecords)return false;Homes.Add(home.Id,slot=new Slot());}
             int active=0;foreach(var value in Homes.Values)if(value.Actor!=null&&value!=slot)active++;
@@ -68,11 +69,11 @@ namespace ValheimMastery
             if(slot.Actor!=null)End(slot,false);
             slot.Actor=actor;slot.Data=actor.SceneView.GetZDO();slot.Owner=slot.Data.GetOwner();slot.Revision=slot.Data.OwnerRevision;
             slot.ReactionPlayer=player;slot.ReactionData=player.m_nview.GetZDO();slot.ReactionRevision=slot.ReactionData.OwnerRevision;slot.ReactionId=slot.ReactionData.GetInt(ZDOVars.s_emoteID,0);
-            slot.Until=Time.unscaledTime+MasterIdolResidentIdleRules.SlotSeconds;slot.Keep=slot.Until+30;
+            slot.Until=Time.unscaledTime+duration;slot.Keep=slot.Until+30;
             actor.SceneAi.StopMoving();actor.SceneAi.LookAt(player.transform.position);
             try
             {
-                if(MasterIdolVisibleGesture.TryStart(actor.SceneCreature,true,MasterIdolResidentIdleRules.SlotSeconds,true))return true;
+                if(MasterIdolVisibleGesture.TryStart(actor.SceneCreature,false,duration,true))return true;
             }
             catch(Exception){MasterIdolResidentMetrics.Count("emote.start-failed");}
             End(slot,false);return false;

@@ -1,0 +1,14 @@
+{
+  "status": "HUMAN_CURRENT_INSTALLED_PATCH_PUBLICATION_AUTHORIZED",
+  "version": "1.4.123-test-forest-ready-fastpack-20261015",
+  "sourceGate": "690FA788103DAC7CE2FED8F2DFCE0F4F257227C3328CE20A4B8A821C9188703B",
+  "client": "8AD33BBBB933B9065A6091139CC3ED8C854B00A2C2BF0BB69EF7B4669A90867E",
+  "server": "D53AD3928B1B0AFF4A82A726C93EAA08636111A4BF8CAF44623E381453EF67E9",
+  "Gold100NewFourIncluded": false,
+  "knownIssues": [
+    "Compact guard HUD, full replay after reload and workbench travel still need LIVE game verification.",
+    "Prior seven-second biome activation visuals, ten-second sequential guard birth and guard stats are included.",
+    "New four level100 perks, resident cargo/loot collection, unique interactions and voices are excluded."
+  ],
+  "authoritySHA256": "4E35609B9F35BA270901D14B6A0C49A0D5FCB5C45A8832425AB1F11D35ECC537"
+}

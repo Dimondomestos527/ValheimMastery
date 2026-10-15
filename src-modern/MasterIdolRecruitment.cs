@@ -8,7 +8,7 @@ namespace ValheimMastery
     internal static class MasterIdolRecruitment
     {
         private const int CheapProbes=48,TerrainCandidates=12,NativePaths=4;
-        private static ZNet Session;private static ZDOMan Manager;private static ulong Generation;private static long World;private static float Next;private static int Cursor;private static string SearchHome;private static bool CadenceStarted;
+        private static ZNet Session;private static ZDOMan Manager;private static ulong Generation;private static long World;private static float Next,NextBirth;private static int Cursor;private static string SearchHome;private static bool CadenceStarted;
         private static readonly float[] Retry=new float[4];
         private static readonly ulong[] Probes=new ulong[4];
         private static ZNet SearchSession;private static ZDOMan SearchManager;private static ulong SearchGeneration;
@@ -67,15 +67,17 @@ namespace ValheimMastery
         private static bool FindPoint(MasterIdolEffectZone zone,BaseAI prototype,int family,Vector3? observer,out Vector3 point,out Vector3 finish)
         {
             point=finish=default;if(!TrySpawnCircle(zone,out var circle,out var reason)){MasterIdolForestSpawnDiagnostics.Trace("search",reason);return false;}
+            if(!MasterIdolResidentBirthPresentation.TrySpawnView(out var camera,out var viewer)){MasterIdolForestSpawnDiagnostics.Trace("search","view-not-ready");return false;}
             if(!Shape(prototype,out var shape)){MasterIdolForestSpawnDiagnostics.Trace("search","native-shape");return false;}int terrain=0,paths=0,loaded=0;
             for(int attempt=0;attempt<CheapProbes;attempt++)
             {
                 if(!Sample(circle,family,ref Probes[family],out var candidate,out var endpoint)||!circle.Contains(candidate,-shape.Margin)||!ZoneSystem.instance.IsZoneLoaded(candidate))continue;
                 loaded++;if(terrain++>=TerrainCandidates){MasterIdolForestSpawnDiagnostics.Trace("search","terrain-budget","loaded="+loaded+" paths="+paths);return false;}
                 endpoint=circle.Inside(endpoint,-shape.Margin);
-                if(observer.HasValue&&(observer.Value-candidate).sqrMagnitude>4096)continue;
+                if(observer.HasValue&&(observer.Value-candidate).sqrMagnitude>MasterIdolResidentBirthPresentation.SpawnDistanceSquared)continue;
                 var horizontal=endpoint-candidate;horizontal.y=0;
                 if(horizontal.sqrMagnitude<4||horizontal.sqrMagnitude>16.01f||!Ground(circle,shape,ref candidate)||!Ground(circle,shape,ref endpoint))continue;
+                if(!MasterIdolResidentBirthPresentation.SpawnVisible(camera,viewer,candidate))continue;
                 if(paths++>=NativePaths){MasterIdolForestSpawnDiagnostics.Trace("search","path-candidate-budget");return false;}
                 if(!MasterIdolResidentBudget.Path()){MasterIdolForestSpawnDiagnostics.Trace("search","shared-path-budget");return false;}
                 if(!Pathfinding.instance.HavePath(candidate,endpoint,prototype.m_pathAgentType))continue;
@@ -108,7 +110,7 @@ namespace ValheimMastery
             if(!WorkbenchEnchantmentRuntime.Ready){MasterIdolForestSpawnDiagnostics.Trace("server","enchantment-not-ready");return;}
             if(!MasterIdolForestGuardState.Ready){MasterIdolForestSpawnDiagnostics.Trace("server","store-not-ready");return;}
             if(Session!=net||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||World!=net.GetWorldUID())
-            {Session=net;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=net.GetWorldUID();Next=0;Cursor=0;SearchHome=null;CadenceStarted=false;Array.Clear(Retry,0,4);Array.Clear(Probes,0,4);}
+            {Session=net;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=net.GetWorldUID();Next=NextBirth=0;Cursor=0;SearchHome=null;CadenceStarted=false;Array.Clear(Retry,0,4);Array.Clear(Probes,0,4);}
             var forest=zones.Where(z=>z.Type=="BlackForest").Take(2).ToArray();if(forest.Length!=1){MasterIdolForestSpawnDiagnostics.Trace("server","forest-count-not-one","count="+forest.Length);return;}var zone=forest[0];
             MasterIdolForestGuardState.Observe(zone);
             if(!TrySpawnCircle(zone,out var circle,out var circleReason)){MasterIdolForestSpawnDiagnostics.Trace("server",circleReason);return;}
@@ -119,12 +121,14 @@ namespace ValheimMastery
                 CadenceStarted=true;Next=Time.unscaledTime+2;MasterIdolForestSpawnDiagnostics.Trace("server","cadence-ready");return;
             }
             if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+2;
+            if(Time.unscaledTime<NextBirth)return;
             bool born=false;
             if(publishable()&&MasterIdolForestSpawnProbe.TryTake(zone,out var lease))
             {
                 try{born=Create(zone,assigned,publishable,lease.Family,lease.Before,lease.Point,lease);}
                 finally{MasterIdolForestSpawnProbe.Release(lease);}
             }
+            if(born){NextBirth=Time.unscaledTime+12;return;}
             int family=Cursor;Cursor=(Cursor+1)%4;string type=MasterIdolForestRules.Families[family];var slots=MasterIdolForestGuardState.Slots;
             slots.TryGetValue(type,out var previous);
             if(previous!=null&&previous.Death==0){MasterIdolForestSpawnDiagnostics.Trace("server","slot-occupied");return;} // Missing/unloaded is not death; never re-create occupied slots.
@@ -134,7 +138,7 @@ namespace ValheimMastery
             if(!MasterIdolActivity.SpawnNear(circle.Point,circle.Radius+32)){MasterIdolForestSpawnDiagnostics.Trace("server","no-player-near-ward",MasterIdolActivity.DescribeNear());return;}
             if(!publishable()){MasterIdolForestSpawnDiagnostics.Trace("server","projection-not-publishable");return;}Retry[family]=Time.unscaledTime+30;
             if(!born&&!net.IsDedicated()&&TryPosition(zone,family,null,out var point,out _))
-            {Create(zone,assigned,publishable,family,previous,point,null);return;}
+            {if(Create(zone,assigned,publishable,family,previous,point,null))NextBirth=Time.unscaledTime+12;return;}
             MasterIdolForestSpawnProbe.Request(zone,family,previous);
         }
         private static bool Create(MasterIdolEffectZone zone,ISet<string> assigned,Func<bool> publishable,int family,MasterIdolForestGuardRecord previous,Vector3 point,MasterIdolForestSpawnProbe.Lease lease)

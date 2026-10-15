@@ -16,13 +16,14 @@ namespace ValheimMastery
         internal static ulong Generation {get;private set;}
         private static int WorldLoadDepth,ChunkLoadDepth;private static ZDOMan LoadingManager;private static bool IncompleteLoad;
         internal static bool LoadReady=>WorldLoadDepth==0&&ChunkLoadDepth==0&&!IncompleteLoad&&!ZNet.m_loadError;
+        internal static bool CapturingGuardNative=>WorldLoadDepth>0&&ChunkLoadDepth>0&&ReferenceEquals(LoadingManager,ZDOMan.instance);
         internal static void BeginWorldLoad(){if(WorldLoadDepth++==0){IncompleteLoad=false;Reset();}}
         internal static void EndWorldLoad(Exception error){if(error!=null||ZNet.m_loadError)IncompleteLoad=true;WorldLoadDepth=Math.Max(0,WorldLoadDepth-1);}
         internal static void BeginChunks(ZDOMan manager){if(ChunkLoadDepth++==0){LoadingManager=manager;if(WorldLoadDepth==0)IncompleteLoad=false;}}
         internal static void EndChunks(Exception error){if(error!=null)IncompleteLoad=true;if((ChunkLoadDepth=Math.Max(0,ChunkLoadDepth-1))==0)LoadingManager=null;}
         internal static void ChunkFilename(ChunkSaveMapping mapping,string filename)
         {if(ChunkLoadDepth>0&&ReferenceEquals(mapping,LoadingManager?.m_chunkSaveMapping)&&string.IsNullOrEmpty(filename))IncompleteLoad=true;}
-        internal static void Reset(){Generation++;Loaded.Clear();Current.Clear();Duplicates.Clear();Session=null;Manager=null;World=0;Revision=uint.MaxValue;Overflow=false;}
+        internal static void Reset(){Generation++;Loaded.Clear();Current.Clear();Duplicates.Clear();MasterIdolForestGuardLoadIdentity.Reset();Session=null;Manager=null;World=0;Revision=uint.MaxValue;Overflow=false;}
         private static bool Context()
         {
             var net=ZNet.instance;var manager=ZDOMan.instance;
@@ -33,7 +34,9 @@ namespace ValheimMastery
         }
         internal static void LoadedNative(ZDO zdo)
         {
-            if(zdo==null)return;var profile=MasterIdolWorldRegistry.Profile(zdo.GetPrefab());if(profile==null||!Context())return;
+            if(zdo==null)return;
+            if(CapturingGuardNative&&zdo.Persistent&&zdo.GetBool(MasterIdolForestGuardState.Marker,false)&&Context())MasterIdolForestGuardLoadIdentity.Loaded(zdo);
+            var profile=MasterIdolWorldRegistry.Profile(zdo.GetPrefab());if(profile==null||!Context())return;
             string token=zdo.GetString(MasterIdolWorldRegistry.TokenKey,"");if(!Guid.TryParseExact(token,"N",out _))return;
             if(Loaded.Count>=4096&&!Loaded.ContainsKey(zdo.m_uid)){Overflow=true;return;}
             Loaded[zdo.m_uid]=new LoadedProof{Object=zdo,Token=token,Type=profile.Id,Creator=zdo.GetLong(ZDOVars.s_creator,0),Position=zdo.GetPosition()};

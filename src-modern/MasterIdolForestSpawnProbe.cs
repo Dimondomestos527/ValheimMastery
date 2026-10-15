@@ -92,7 +92,7 @@ namespace ValheimMastery
         internal static bool StillValid(Lease lease,MasterIdolEffectZone zone)
         {
             return Current()&&zone?.Type=="BlackForest"&&zone.Id==lease.Home&&Fingerprint(zone)==lease.Fingerprint&&Authorized(lease,out var player)&&SameSlot(lease)&&
-                Finite(lease.Point)&&Finite(lease.Endpoint)&&(player.GetPosition()-lease.Point).sqrMagnitude<=4096&&
+                Finite(lease.Point)&&Finite(lease.Endpoint)&&(player.GetPosition()-lease.Point).sqrMagnitude<=MasterIdolResidentBirthPresentation.SpawnDistanceSquared&&
                 MasterIdolRecruitment.CheapPosition(zone,lease.Family,lease.Point,lease.Endpoint);
         }
         internal static bool TransferReady(Lease lease,MasterIdolEffectZone zone,MasterIdolForestGuardRecord record,ZDO data)
@@ -103,7 +103,7 @@ namespace ValheimMastery
             return slots!=null&&slots.TryGetValue(MasterIdolForestRules.Families[lease.Family],out var current)&&ReferenceEquals(current,record)&&record.Death==0&&record.Valid()&&
                 data?.Persistent==true&&ReferenceEquals(Manager.GetZDO(data.m_uid),data)&&data.GetOwner()==ZNet.GetUID()&&MasterIdolForestGuardState.Matches(record,data)&&
                 data.GetFloat(ZDOVars.s_health,1)>0&&float.IsFinite(data.GetFloat(ZDOVars.s_health,1))&&
-                (player.GetPosition()-lease.Point).sqrMagnitude<=4096&&MasterIdolRecruitment.CheapPosition(zone,lease.Family,lease.Point,lease.Endpoint);
+                (player.GetPosition()-lease.Point).sqrMagnitude<=MasterIdolResidentBirthPresentation.SpawnDistanceSquared&&MasterIdolRecruitment.CheapPosition(zone,lease.Family,lease.Point,lease.Endpoint);
         }
         internal static bool TryTake(MasterIdolEffectZone zone,out Lease lease)
         {
@@ -166,7 +166,7 @@ namespace ValheimMastery
                         MasterIdolLoadIdentity.LoadReady&&net.GetServerPeer()?.IsReady()==true&&net.GetServerPeer().m_rpc==rpc&&NetworkSync.HasCurrentServerSettings(rpc)&&Player.m_localPlayer==player&&player.m_nview==view&&
                         view?.IsValid()==true&&view.IsOwner()&&ReferenceEquals(view.GetZDO(),data)&&data.OwnerRevision==revision&&ReferenceEquals(manager?.GetZDO(data.m_uid),data)&&
                         !player.IsDead()&&!player.InGhostMode()&&!player.IsDebugFlying()&&currentZone?.Type=="BlackForest"&&Fingerprint(currentZone)==fingerprint&&
-                        (player.transform.position-point).sqrMagnitude<=4096;
+                        (player.transform.position-point).sqrMagnitude<=MasterIdolResidentBirthPresentation.SpawnDistanceSquared;
                 }
                 var reply=new ZPackage();reply.Write(nonce);reply.Write(success);if(success){reply.Write(point);reply.Write(endpoint);}rpc.Invoke(ProofRpc,reply);
                 MasterIdolForestSpawnDiagnostics.Trace("query",success?"positive-proof-sent":"negative-proof-sent");

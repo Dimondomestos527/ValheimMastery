@@ -8,8 +8,9 @@ namespace ValheimMastery
     // Local cosmetic rig only. Native actor/root/bones/AI/collision remain untouched.
     internal sealed class MasterIdolResidentBirthPresentation:MonoBehaviour
     {
-        private const float Duration=1.6f;
-        private const float Admission=8f,Preparation=1.5f,LeaseLifetime=3.3f;
+        private const float Duration=10f;
+        private const float Admission=8f,Preparation=1.5f,OwnedLifetime=12f;
+        internal const float SpawnDistanceSquared=1024f;
         private static readonly Dictionary<string,GameObject> Templates=new Dictionary<string,GameObject>(StringComparer.Ordinal);
         private static ZNetScene TemplateScene;
         private static ObjectDB WarmDatabase;
@@ -26,6 +27,7 @@ namespace ValheimMastery
         private float InitialHealth,NextSight,NextAttempt,StartedAt,QueueUntil,PrepareUntil,SoundUntil;private Vector3 Origin;private GameObject Body;
         private readonly List<GameObject> Atmosphere=new List<GameObject>(2);
         private readonly List<GameObject> Sounds=new List<GameObject>(2);
+        private readonly List<GameObject> OwnedVisuals=new List<GameObject>(9);
         private readonly List<GameObject> Fragments=new List<GameObject>(6);
         private readonly List<Vector3> Starts=new List<Vector3>(6);
         private readonly List<Renderer> Originals=new List<Renderer>(6);
@@ -38,6 +40,36 @@ namespace ValheimMastery
                 actor.gameObject.AddComponent<MasterIdolResidentBirthPresentation>();
         }
         internal static void Stop(Character actor)=>actor?.GetComponent<MasterIdolResidentBirthPresentation>()?.End();
+        internal static bool TrySpawnView(out Camera camera,out Vector3 playerPosition)
+        {
+            camera=null;playerPosition=default;var player=Player.m_localPlayer;var view=GameCamera.instance?.m_camera;
+            if(Application.isBatchMode||SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null||!Application.isFocused||Game.IsPaused()||
+                player==null||player.IsDead()||player.IsTeleporting()||player.InGhostMode()||player.IsDebugFlying()||view==null||!view.isActiveAndEnabled)return false;
+            camera=view;playerPosition=player.transform.position;return true;
+        }
+        internal static bool SpawnVisible(Camera camera,Vector3 observer,Vector3 groundPoint)
+        {
+            if(camera==null||camera!=GameCamera.instance?.m_camera||!camera.isActiveAndEnabled||!((groundPoint-observer).sqrMagnitude<=SpawnDistanceSquared))return false;
+            var seed=groundPoint+Vector3.up*.1f;var body=groundPoint+Vector3.up*.9f;
+            var first=camera.WorldToViewportPoint(seed);var second=camera.WorldToViewportPoint(body);
+            if(!MasterIdolVisibilityRules.Viewport(first.x,first.y,first.z)||!MasterIdolVisibilityRules.Viewport(second.x,second.y,second.z))return false;
+            int mask=LayerMask.GetMask("piece","static_solid","terrain");
+            return !Physics.Linecast(camera.transform.position,seed,out _,mask,QueryTriggerInteraction.Ignore)&&
+                !Physics.Linecast(camera.transform.position,body,out _,mask,QueryTriggerInteraction.Ignore);
+        }
+        internal static bool FreshIdleHold(Character actor)
+        {
+            var view=actor?.m_nview;var data=view?.GetZDO();var net=ZNet.instance;
+            if(!GoldCraftingService.Enabled||!MasterIdolLoadIdentity.LoadReady||net?.GetWorld()==null||actor==null||view?.IsValid()!=true||data==null||!view.IsOwner()||
+                !ReferenceEquals(ZDOMan.instance?.GetZDO(data.m_uid),data)||!MasterIdolForestGuardState.ModuleBorn(data))return false;
+            float age=(float)((net.GetTime().Ticks-data.GetLong(MasterIdolForestGuardState.BornKey,0))/(double)TimeSpan.TicksPerSecond);
+            var ai=actor.GetBaseAI();float health=actor.GetHealth();var cue=actor.GetComponent<MasterIdolResidentBirthPresentation>();
+            if(!float.IsFinite(age)||age<0||age>OwnedLifetime||!float.IsFinite(health)||health<=0||ai==null||!(ai.m_timeSinceHurt>=OwnedLifetime)||
+                actor.IsDead()||actor.InAttack()||actor.InDodge()||actor.IsStaggering()||actor.InEmote()||ai.IsSleeping()||ai.IsAlerted()||
+                ai is MonsterAI monster&&(monster.m_targetCreature!=null||monster.m_targetStatic!=null)||
+                cue!=null&&(cue.Tried&&!cue.Active&&!cue.Pending||cue.Active&&health<cue.InitialHealth))return false;
+            return MasterIdolActivity.Near(actor.transform.position,32);
+        }
         private bool Context()
         {
             return Actor!=null&&Ai!=null&&View?.IsValid()==true&&!Actor.IsDead()&&GoldCraftingService.Enabled&&
@@ -108,7 +140,7 @@ namespace ValheimMastery
                 var ps=own.GetComponent<ParticleSystem>();ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
                 var main=ps.main;main.playOnAwake=false;main.loop=false;main.duration=Duration;main.startLifetime=.55f;main.startSpeed=.3f;main.startSize=name=="cloud"?.8f:.3f;main.maxParticles=12;
                 main.startColor=name=="cloud"?new Color(.28f,.31f,.23f,.42f):new Color(.35f,.27f,.17f,.5f);
-                var emission=ps.emission;emission.rateOverTime=0;emission.SetBursts(new[]{new ParticleSystem.Burst(0,12)});
+                var emission=ps.emission;emission.rateOverTime=0;emission.SetBursts(new[]{new ParticleSystem.Burst(0,4),new ParticleSystem.Burst(1.8f,4),new ParticleSystem.Burst(6,4)});
                 var collision=ps.collision;collision.enabled=false;var trigger=ps.trigger;trigger.enabled=false;var sub=ps.subEmitters;sub.enabled=false;
                 RenderSettings(own.GetComponent<ParticleSystemRenderer>());Templates.Add(key,root);return root;
             }
@@ -207,6 +239,16 @@ namespace ValheimMastery
             return true;
         }
         private bool Prepared(GameObject obj)=>obj!=null&&obj.activeInHierarchy&&obj.GetComponent<DeferredNativeVfx>()?.IsPrepared==true;
+        private GameObject OwnVisual(GameObject template,Quaternion rotation)
+        {
+            if(template==null||OwnedVisuals.Count>=9)return null;
+            var visual=PerkNativeFeedback.CreateVisualOnly(template);if(visual==null)return null;
+            // Track before tuning: even partial setup failure has an owned cleanup path.
+            OwnedVisuals.Add(visual);visual.transform.SetPositionAndRotation(Origin,rotation);
+            Destroy(visual,OwnedLifetime);return visual;
+        }
+        private static bool PresentationWindow(float elapsed){return float.IsFinite(elapsed)&&elapsed>=0&&elapsed<Duration;}
+        private static float Phase(float elapsed,float start,float end){float value=Mathf.Clamp01((elapsed-start)/(end-start));return value*value*(3-2*value);}
         private void Begin()
         {
             if(!Queued||!Context())return;
@@ -219,15 +261,15 @@ namespace ValheimMastery
             Waiting.Remove(this);Queued=false;Current=this;Pending=true;Active=false;StartedAt=0;PrepareUntil=Mathf.Min(QueueUntil,Time.unscaledTime+Preparation);
             try
             {
-                Body=VfxPool.Spawn(template,Origin,transform.rotation,LeaseLifetime);if(Body==null){End(false);return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
+                Body=OwnVisual(template,transform.rotation);if(Body==null){End(false);return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
                 int family=MasterIdolForestRules.Family(Utils.GetPrefabName(gameObject));
                 var names=new List<string>{"AncientSeed","Wood","Resin"};if(family!=3)names.Add("Wood");if(family!=0)names.Add("Stone");if(family==3)names.Add("Resin");if(family==2)names.Add("Stone");
                 for(int i=0;i<names.Count;i++)
                 {
-                    var item=FragmentTemplate(names[i]);if(item==null){End(false);return;}var obj=VfxPool.Spawn(item,Origin,Quaternion.identity,LeaseLifetime);if(obj==null){End(false);return;}
+                    var item=FragmentTemplate(names[i]);if(item==null){End(false);return;}var obj=OwnVisual(item,Quaternion.identity);if(obj==null){End(false);return;}
                     obj.SetActive(true);Fragments.Add(obj);float angle=i*2.399963f;Starts.Add(i==0?Vector3.zero:new Vector3(Mathf.Cos(angle),.15f,Mathf.Sin(angle))*(1.5f+(i%2)*1.5f));
                 }
-                foreach(var effect in new[]{cloud,dust}){var obj=VfxPool.Spawn(effect,Origin,Quaternion.identity,LeaseLifetime);if(obj==null){End(false);return;}obj.SetActive(true);Atmosphere.Add(obj);}
+                foreach(var effect in new[]{cloud,dust}){var obj=OwnVisual(effect,Quaternion.identity);if(obj==null){End(false);return;}obj.SetActive(true);Atmosphere.Add(obj);}
                 NativeVfxSafeFrame.AfterReady(Body,SuppressReady);foreach(var obj in Fragments)NativeVfxSafeFrame.AfterReady(obj,SuppressReady);
                 foreach(var obj in Atmosphere)NativeVfxSafeFrame.AfterReady(obj,()=>{if(Pending)foreach(var ps in obj.GetComponentsInChildren<ParticleSystem>(true))ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);SuppressReady();});
             }
@@ -275,19 +317,19 @@ namespace ValheimMastery
                 float elapsed=(float)((Session.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
                 if(!Context()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||
                     Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce||
-                    elapsed<0||!Suppressed&&(elapsed>Admission||Time.unscaledTime>=PrepareUntil)||Suppressed&&!MasterIdolForestRules.Birth(Time.unscaledTime-StartedAt)||!Peace()||!Local(false)||!MasteryPlugin.Settings.EnablePerkProcVFX.Value){End();return;}
+                    elapsed<0||!Suppressed&&(elapsed>Admission||Time.unscaledTime>=PrepareUntil)||Suppressed&&!PresentationWindow(Time.unscaledTime-StartedAt)||!Peace()||!Local(false)||!MasteryPlugin.Settings.EnablePerkProcVFX.Value){End();return;}
                 if(Time.unscaledTime>=NextSight){NextSight=Time.unscaledTime+.2f;if(!Local(true)){End();return;}}
                 if(!Suppressed)
                 {
                     SuppressReady();if(!Suppressed)return;
                 }
-                float progress=Mathf.Clamp01((Time.unscaledTime-StartedAt)/Duration),smooth=progress*progress*(3-2*progress);
-                if(!StonePlayed&&progress>=.55f){StonePlayed=true;Sound(StoneSound,.4f);}
-                Body.transform.SetPositionAndRotation(transform.position,transform.rotation);Body.transform.localScale=transform.lossyScale*Mathf.Lerp(.02f,1,smooth);
+                float visualElapsed=Time.unscaledTime-StartedAt,seed=Phase(visualElapsed,0,1.8f),gather=Phase(visualElapsed,1.8f,6),growth=Phase(visualElapsed,6,Duration);
+                if(!StonePlayed&&visualElapsed>=5.5f){StonePlayed=true;Sound(StoneSound,.4f);}
+                Body.transform.SetPositionAndRotation(transform.position,transform.rotation);Body.transform.localScale=transform.lossyScale*Mathf.Lerp(.02f,1,growth);
                 for(int i=0;i<Fragments.Count;i++)
                 {
                     var obj=Fragments[i];if(obj==null){End();return;}Vector3 end=i==0?Vector3.zero:new Vector3(Mathf.Sin(i),.2f+(i%3)*.22f,Mathf.Cos(i))*.3f;
-                    obj.transform.position=transform.position+Vector3.Lerp(Starts[i],end,smooth);float size=i==0?.45f:1f;obj.transform.localScale=Vector3.one*size*(progress>.8f?Mathf.Clamp01((1-progress)/.2f):1f);
+                    obj.transform.position=transform.position+Vector3.Lerp(Starts[i],end,gather);float size=i==0?Mathf.Lerp(.05f,.45f,seed):1f;obj.transform.localScale=Vector3.one*size*(1-growth);
                 }
             }
             catch{End();}
@@ -300,11 +342,9 @@ namespace ValheimMastery
             {
                 Originals.Clear();OriginalEnabled.Clear();Suppressed=false;
                 if(Current==this)Current=null;
-                var body=Body;Body=null;
-                try{if(body!=null&&body.activeSelf)VfxPool.Return(body.name,body);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}
-                foreach(var obj in Fragments)try{if(obj!=null&&obj.activeSelf)VfxPool.Return(obj.name,obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}
-                Fragments.Clear();Starts.Clear();
-                foreach(var obj in Atmosphere)try{if(obj!=null&&obj.activeSelf)VfxPool.Return(obj.name,obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}Atmosphere.Clear();
+                Body=null;
+                foreach(var obj in OwnedVisuals)try{if(obj!=null){try{obj.SetActive(false);}finally{Destroy(obj);}}}catch(Exception){MasterIdolResidentMetrics.Count("birth.owned-cleanup-failed");}
+                OwnedVisuals.Clear();Fragments.Clear();Starts.Clear();Atmosphere.Clear();
                 foreach(var obj in Sounds)try{if(obj!=null)Destroy(obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.sound-cleanup-failed");}Sounds.Clear();
                 if(!terminal&&!Tried&&Time.unscaledTime<QueueUntil&&Waiting.Count<4){Queued=true;Waiting.Add(this);}
             }

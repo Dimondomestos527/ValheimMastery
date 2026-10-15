@@ -109,12 +109,11 @@ namespace ValheimMastery
         {
             try
             {
-            float cueStart=Time.unscaledTime,nextMaterial=0;int local=0,anchor=0,anchorCount=0;
-            bool sampled=firstLearn;Vector3[] anchors=null;float anchorStart=0f;
-            MasterIdolEffectZone published=null;SpriteRenderer animated=null;Vector3 scale=Vector3.one;
+            float cueStart=Time.unscaledTime,nextMaterial=0,duration=WorkbenchEnchantmentThematicBurst.Duration(firstLearn);int local=0;
+            SpriteRenderer animated=null;Vector3 scale=Vector3.one;
             while(Live(run))
             {
-                float elapsed=Time.unscaledTime-cueStart;if(elapsed<0f||elapsed>=WorkbenchEnchantmentThematicBurst.Lifetime)break;
+                float elapsed=Time.unscaledTime-cueStart;if(elapsed<0f||elapsed>=duration)break;
                 // Async native material readiness may lag the accepted action. Retry only
                 // within this cue; missed emissions and the original deadline stay unchanged.
                 if(run.Root==null&&elapsed>=nextMaterial)
@@ -123,34 +122,17 @@ namespace ValheimMastery
                     run.Root=WorkbenchEnchantmentThematicBurst.Create(transform,type,firstLearn,Palette(type));
                     if(run.Root!=null&&!run.RootReported){run.RootReported=true;WorkbenchEnchantmentVisualTrace.Write("root-created",type,WorkbenchEnchantmentThematicBurst.Describe(run.Root));}
                 }
-                while(local<6&&elapsed>=WorkbenchEnchantmentThematicBurst.LocalAt(local))
+                while(local<WorkbenchEnchantmentThematicBurst.Waves(firstLearn)&&elapsed>=WorkbenchEnchantmentThematicBurst.LocalAt(local,firstLearn))
                 {
-                    if(WorkbenchEnchantmentThematicBurst.Timely(elapsed,WorkbenchEnchantmentThematicBurst.LocalAt(local)))
+                    if(WorkbenchEnchantmentThematicBurst.Timely(elapsed,WorkbenchEnchantmentThematicBurst.LocalAt(local,firstLearn),firstLearn))
                     {
-                        WorkbenchEnchantmentThematicBurst.Emit(run.Root,type,transform.position+new Vector3(0,1.15f,.18f),Palette(type),WorkbenchEnchantmentThematicBurst.LocalCount,firstLearn);
+                        WorkbenchEnchantmentThematicBurst.Emit(run.Root,type,transform.position+new Vector3(0,1.15f,.18f),Palette(type),WorkbenchEnchantmentThematicBurst.LocalCount,firstLearn,firstLearn?0:WorkbenchEnchantmentThematicBurst.FormationProgress(elapsed));
                         run.EmitCalls++;
                         if(run.Root!=null&&!run.EmitReported){run.EmitReported=true;WorkbenchEnchantmentVisualTrace.Write("first-emission",type,WorkbenchEnchantmentThematicBurst.Describe(run.Root));}
                     }
                     local++;
                 }
-                if(!sampled)
-                {
-                    if(elapsed>1.5f)sampled=true;
-                    else if((published=Matching(run,type))!=null)
-                    {
-                        sampled=true;anchors=WorkbenchEnchantmentThematicBurst.SampleAnchors(published.Circles,run.Data.GetPosition(),run.Player.transform.position,out anchorCount);
-                        anchorStart=Mathf.Max(1.2f,elapsed);
-                    }
-                }
-                while(anchor<anchorCount&&elapsed>=anchorStart+anchor*.35f)
-                {
-                    // A superseded/withdrawn geometry snapshot never flashes old members.
-                    if(ReferenceEquals(Matching(run,type),published)&&elapsed<=3.4f&&
-                        (anchors[anchor]-run.Player.transform.position).sqrMagnitude<=576f&&
-                        WorkbenchEnchantmentThematicBurst.Timely(elapsed,anchorStart+anchor*.35f))
-                        WorkbenchEnchantmentThematicBurst.Emit(run.Root,type,anchors[anchor]+new Vector3(0,1.15f,0),Palette(type),WorkbenchEnchantmentThematicBurst.AnchorCount,firstLearn);
-                    anchor++;
-                }
+                // Cover this station's actual build circle without enumerating world objects.
                 if(!firstLearn)
                 {
                     // Accepted already proved this local action. The symbol animation
@@ -159,7 +141,7 @@ namespace ValheimMastery
                     if(symbol!=null&&symbol.enabled&&choice==type)
                     {
                         if(animated!=symbol){animated=symbol;scale=symbol.transform.localScale;}
-                        float phase=elapsed<1.2f?elapsed/1.2f:elapsed<3.4f?(elapsed-1.2f)/2.2f:(elapsed-3.4f)/1.6f;
+                        float phase=elapsed/duration;
                         float wave=Mathf.Sin(Mathf.Clamp01(phase)*Mathf.PI);
                         symbol.transform.localScale=scale*(1f+wave*.12f);
                         if(pulseProperties==null)pulseProperties=new MaterialPropertyBlock();

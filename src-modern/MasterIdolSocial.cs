@@ -50,6 +50,7 @@ namespace ValheimMastery
         internal bool Idle(float dt)
         {
             using var scope = new MasterIdolPerf.Scope("social.idle");
+            if (MasterIdolResidentBirthPresentation.FreshIdleHold(Creature)) { Ai.StopMoving(); return true; }
             if (MasterIdolResidentBirthPresentation.Playing(Creature)) return false;
             if (!Context() || !MasterIdolResidentPolicy.TryHome(Creature, out var home) || !home.Contains(transform.position) ||
                 MasterIdolSocialSeats.Battle(Ai, Creature) || GetComponent<MasterIdolWelcome>()?.IsPresenting == true) return false;

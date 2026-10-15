@@ -36,7 +36,9 @@ namespace ValheimMastery
                 Store=new MasterIdolRecruitmentStore(System.IO.Path.Combine(BepInEx.Paths.ConfigPath,"ValheimMastery","Idols",World+".residents.vmi"),World);
                 LegacyTimers=Store.Load();LegacyMembers=Store.Members.ToDictionary(x=>x.Key,x=>new HashSet<string>(x.Value,StringComparer.Ordinal),StringComparer.Ordinal);
             }
-            Store.Poll();return Store.Ready;
+            Store.Poll();if(!Store.Ready)return false;
+            foreach(var record in Store.Guards.Values)if(MasterIdolForestGuardLoadIdentity.Rebind(record))Dirty=true;
+            return true;
         }
         internal static ZDO Data(string uid)
         {return MasterIdolNetworkQuota.TryUid(uid,out long user,out uint id)?ZDOMan.instance?.GetZDO(new ZDOID(user,id)):null;}
