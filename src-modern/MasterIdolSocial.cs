@@ -18,7 +18,7 @@ namespace ValheimMastery
         internal BaseAI SceneAi => Ai;
         internal ZNetView SceneView => View;
         internal MasterIdolEffectZone SceneHome => Leash?.SocialHome;
-        internal bool SceneAvailable => !Moving && Creature != null && Ai != null && View?.IsValid() == true && View.IsOwner() &&
+        internal bool SceneAvailable => !Moving && Creature != null && Ai != null && View?.IsValid() == true && View.IsOwner() && MasterIdolResidentGrounding.Slow(Creature) &&
             MasterIdolResidentPolicy.TryHome(Creature, out var home) && home.Contains(transform.position) &&
             !MasterIdolResidentWork.Busy(Creature) && GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentBirthPresentation.Playing(Creature) &&
             !MasterIdolResidentSceneAnimation.Playing(Creature) && GetComponent<MasterIdolSocialSeats>()?.Active != true &&
@@ -41,6 +41,7 @@ namespace ValheimMastery
         private void Update()
         {
             if (MasterIdolResidentBirthPresentation.Playing(Creature)) return;
+            MasterIdolSocialSeats.Attach(Creature);
             if (!Context() || !MasterIdolResidentPolicy.TryHome(Creature, out var home) || !home.Contains(transform.position) ||
                 !MasterIdolActivity.Near(transform.position) || MasterIdolSocialSeats.Battle(Ai, Creature) ||
                 MasterIdolResidentWork.Busy(Creature) || GetComponent<MasterIdolWelcome>()?.IsPresenting == true) { Reset(); return; }
@@ -55,6 +56,8 @@ namespace ValheimMastery
             if (MasterIdolResidentWork.Idle(Creature, dt)) { StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
             if (!MasterIdolActivity.Near(transform.position)) { Reset(); return false; }
             if (MasterIdolResidentSceneAnimation.Idle(Creature, dt)) { StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
+            if(MasterIdolResidentEmote.Idle(this,home,dt)){StopSpread();return true;}
+            if(MasterIdolSocialSeats.Idle(this,home,dt)){StopSpread();return true;}
             if (Moving)
             {
                 if (Time.unscaledTime >= End || !SameHome(home) || !MasterIdolSocialRoutes.Inside(home, transform.position, Goal, Route, Ranges)) { StopSpread(); return false; }

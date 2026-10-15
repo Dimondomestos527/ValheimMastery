@@ -62,7 +62,8 @@ namespace ValheimMastery
             }
             finally{ticking=false;}
         }
-        static bool Local(Player p,CraftingStation station)=>p!=null&&p==Player.m_localPlayer&&p.GetCurrentCraftingStation()==station&&!p.IsDead()&&!p.IsTeleporting()&&station?.GetComponent<ZNetView>()?.IsValid()==true;
+        internal static bool Eligible(Player p)=>p!=null&&p==Player.m_localPlayer&&OwnerSkillAuthority.Has(p,Skills.SkillType.Crafting,100);
+        static bool Local(Player p,CraftingStation station)=>Eligible(p)&&p.GetCurrentCraftingStation()==station&&!p.IsDead()&&!p.IsTeleporting()&&station?.GetComponent<ZNetView>()?.IsValid()==true;
         internal static WorkbenchEnchantmentSnapshot Snapshot(Player p,CraftingStation station)
         {
             Tick();if(Session==null||World==0||!Local(p,station))return null;var uid=station.GetComponent<ZNetView>().GetZDO().m_uid;

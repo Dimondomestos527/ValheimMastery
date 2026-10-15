@@ -148,6 +148,7 @@ namespace ValheimMastery
         {
             if (Application.isBatchMode || gui == null || gui.m_tabUpgrade == null || gui.m_crafting == null) return;
             var ui = gui.GetComponent<WorkbenchEnchantmentUi>();
+            if (!WorkbenchEnchantmentNetwork.Eligible(Player.m_localPlayer)) { ui?.HideIneligible(); return; }
             if (ui == null) ui = gui.gameObject.AddComponent<WorkbenchEnchantmentUi>();
             ui.Ensure(gui); ui.Tick();
         }
@@ -355,6 +356,7 @@ namespace ValheimMastery
         private void Open()
         {
             var player = Player.m_localPlayer; var station = player?.GetCurrentCraftingStation();
+            if (!WorkbenchEnchantmentNetwork.Eligible(player)) { HideIneligible(); return; }
             if (!InventoryGui.IsVisible() || !Bench(station) || _gui.m_craftTimer >= 0) return;
             _player = player; _station = station; _epoch++; _revision = -1; _snapshot = null;
             _requirementSession = ZNet.instance;
@@ -386,7 +388,7 @@ namespace ValheimMastery
         private void Tick()
         {
             var player = Player.m_localPlayer; var station = player?.GetCurrentCraftingStation();
-            bool visible = InventoryGui.IsVisible() && Bench(station) && _gui.m_currentContainer == null;
+            bool visible = WorkbenchEnchantmentNetwork.Eligible(player) && InventoryGui.IsVisible() && Bench(station) && _gui.m_currentContainer == null;
             _tab.GetComponentInChildren<TMP_Text>(true).text = Text("ЧАРИ", "ENCHANT");
             TabLayoutVisible(visible);
             _tab.gameObject.SetActive(visible);
@@ -418,6 +420,7 @@ namespace ValheimMastery
         private void Render()
         {
             if (!_open) return;
+            if (!WorkbenchEnchantmentNetwork.Eligible(_player)) { HideIneligible(); return; }
             bool known = _snapshot != null;
             bool blocked = _pending || !known || Request == null || !string.IsNullOrEmpty(_snapshot.Reason);
             RenderRequirement(blocked || !string.IsNullOrEmpty(_message));
@@ -480,6 +483,7 @@ namespace ValheimMastery
         }
         private void Begin(WorkbenchOperationKind kind, int attempt)
         {
+            if (!WorkbenchEnchantmentNetwork.Eligible(_player)) { HideIneligible(); return; }
             if (!_open || _pending || _snapshot == null || Request == null || !string.IsNullOrEmpty(_snapshot.Reason))
             { ActionTrace(attempt, "begin-refused"); return; }
             if (kind == WorkbenchOperationKind.Learn && (!CooldownReady(SelectedCooldown()) ||
@@ -555,6 +559,11 @@ namespace ValheimMastery
                 groups[_gui.m_activeGroup] == _ownedUiGroup && Array.IndexOf(groups, _priorUiGroup) >= 0)
                 _gui.SetActiveGroup(_priorUiGroup, false);
             _priorUiGroup = null; _ownedUiGroup = null;
+        }
+        private void HideIneligible()
+        {
+            Close();
+            if (_tab != null) { TabLayoutVisible(false); _tab.gameObject.SetActive(false); }
         }
         internal void Close()
         {

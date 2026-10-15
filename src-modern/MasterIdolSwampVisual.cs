@@ -82,7 +82,7 @@ namespace ValheimMastery
                 var renderer=donor?.transform.Find("Dome")?.GetComponent<ParticleSystemRenderer>();
                 var mesh=renderer?.renderMode==ParticleSystemRenderMode.Mesh?renderer.mesh:null;
                 var nativeMaterial=renderer?.sharedMaterial;
-                if(mesh!=null&&nativeMaterial!=null&&nativeMaterial.name=="shield"&&nativeMaterial.shader?.name=="Particles/Standard Unlit2"&&nativeMaterial.HasProperty("_TintColor"))foreach(var dome in domes)
+                if(mesh!=null&&nativeMaterial!=null&&nativeMaterial.name=="shield"&&nativeMaterial.shader?.name=="Particles/Standard Unlit2"&&nativeMaterial.HasProperty("_Color"))foreach(var dome in domes)
                 {
                     if((dome.Center-player.transform.position).sqrMagnitude>120*120||Seen.Count>=4)continue;Seen.Add(dome.Id);
                     if(!Shells.TryGetValue(dome.Id,out var shell))
@@ -90,7 +90,7 @@ namespace ValheimMastery
                         var bounds=mesh.bounds;if(bounds.size.x<=0||bounds.size.y<=0||bounds.size.z<=0)continue;
                         var obj=new GameObject("VM_SwampSanctuaryShell");obj.SetActive(false);obj.layer=donor.layer;
                         obj.AddComponent<MeshFilter>().sharedMesh=mesh;var visual=obj.AddComponent<MeshRenderer>();
-                        var material=new Material(nativeMaterial);material.SetColor("_TintColor",new Color(.64f,1f,.25f,.55f));visual.sharedMaterial=material;visual.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;visual.receiveShadows=false;
+                        var material=new Material(nativeMaterial);material.SetColor("_Color",new Color(.48f,.62f,.58f,.40f));visual.sharedMaterial=material;visual.shadowCastingMode=UnityEngine.Rendering.ShadowCastingMode.Off;visual.receiveShadows=false;
                         shell=new Shell{Object=obj,Material=material,Offset=bounds.center,Scale=bounds.size,Born=Time.time};Shells.Add(dome.Id,shell);
                     }
                     var scale=new Vector3(dome.Radius*2/shell.Scale.x,dome.Radius*2/shell.Scale.y,dome.Radius*2/shell.Scale.z);

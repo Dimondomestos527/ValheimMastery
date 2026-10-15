@@ -1,0 +1,28 @@
+{
+  "status": "HUMAN_CURRENT_INSTALLED_PATCH_PUBLICATION_AUTHORIZED",
+  "version": "1.4.123-test-peer-identity-swamp-vfx-20261015",
+  "sourceGate": "BF4129B61F2863BD6EB114FB9CDE63444474FAFF17736965BD0352C6AC750F9D",
+  "client": "F2925BA98365F228C026EA2F9056D076699B1E0C59B7E45A6AED56B0EA76AF38",
+  "server": "6C9FFE0187C72949B86E84B78C22F6099A29FBF99E3F7F1FF33F7AE8053CF19B",
+  "userRequest": "А поки йде робота, хай чат який встановлює на гіт, встановить нинішній патч туди, він наче стабільний",
+  "targets": [
+    "Dev",
+    "Release"
+  ],
+  "preservePreviousCommits": true,
+  "forcePush": false,
+  "Gold100NewFourIncluded": false,
+  "humanReported": "Installed package overall successful and satisfied; now explicitly asks current package publication",
+  "knownIssues": [
+    "Activation area visual only Mistlands convincing; semantic six-theme7s successor requested",
+    "Player-emote reactions reported absent",
+    "Shaman pose suspected failed animation; not yet diagnosed"
+  ],
+  "liveEvidence": {
+    "newSixSemanticActivation": "NOT_INCLUDED",
+    "generalPatch": "Human satisfied overall; not each isolated test independently proven",
+    "tenSecondBirth": "NOT_INCLUDED",
+    "ownGuardSpawn": "Human accepted current behavior, requests longer birth"
+  },
+  "scope": "Publish exact frozen installed current pair/source only; do not scoop canonical working tree/future visual/features/100; preserve history; no Steam or server restart"
+}

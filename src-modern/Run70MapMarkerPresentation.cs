@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
@@ -17,6 +18,20 @@ namespace ValheimMastery
             internal Minimap Map; internal Vector3 Position; internal string Label, Category;
             internal Sprite Sprite;
             internal Minimap.PinData Pin; internal bool Ambiguous;
+            internal DiscoveryTrace Trace;
+        }
+        private sealed class DiscoveryTrace
+        {
+            internal MessageHud Hud; internal object Queue; internal int Before = -1;
+            internal bool Prefix, IncomingExpected, AfterExpected; internal string Guard = "prefix-not-called";
+        }
+        private static readonly FieldInfo HudQueueField = TraceField(false);
+        private static readonly FieldInfo HudIconField = TraceField(true);
+        private static bool _traceUsed;
+        private static FieldInfo TraceField(bool icon)
+        {
+            try { var type = icon ? typeof(MessageHud).GetNestedType("MsgData", BindingFlags.NonPublic) : typeof(MessageHud); return type == null ? null : AccessTools.Field(type, icon ? "m_icon" : "m_msgQeue"); }
+            catch { return null; }
         }
         private sealed class Entry { internal string Name, Category; internal Sprite Sprite, NativeSprite; internal float RetryAt; }
         private static Capture _capture;
@@ -74,9 +89,10 @@ namespace ValheimMastery
                     Utils.DistanceXZ(pair.Key.m_pos, position) < 1f) return false;
             var capture = new Capture { Map = map, Position = position, Label = label, Category = category };
             _capture = capture;
-            bool created;
-            try { created = map.DiscoverLocation(position, Minimap.PinType.Icon4, label, false); }
-            finally { if (ReferenceEquals(_capture, capture)) _capture = null; }
+            BeginTrace(capture);
+            bool created = false, returned = false;
+            try { created = map.DiscoverLocation(position, Minimap.PinType.Icon4, label, false); returned = true; }
+            finally { EndTrace(capture, returned, created); if (ReferenceEquals(_capture, capture)) _capture = null; }
             var pin = capture.Pin;
             if (!created) return false;
             if (capture.Ambiguous || pin == null || !Current(map) || _world != Run70MapMarkerState.World ||
@@ -121,6 +137,66 @@ namespace ValheimMastery
                 pin.m_name != context.Label || pin.m_type != Minimap.PinType.Icon4 || !pin.m_save || pin.m_ownerID != 0 ||
                 text != "$msg_pin_added: " + context.Label) return;
             icon = context.Sprite;
+        }
+        private static void BeginTrace(Capture capture)
+        {
+            if (_traceUsed) return;
+            _traceUsed = true; // At most one admitted discovery per process, including native failure.
+            try
+            {
+                var trace = new DiscoveryTrace { Hud = MessageHud.instance };
+                capture.Trace = trace;
+                trace.Queue = trace.Hud == null ? null : HudQueueField?.GetValue(trace.Hud);
+                if (trace.Queue is ICollection queue) trace.Before = queue.Count;
+            }
+            catch { } // Read-only observation must never affect discovery.
+        }
+        internal static void TracePrefixBefore(Character actor, MessageHud.MessageType type, string text, Sprite icon)
+        {
+            try
+            {
+                var context = _capture; var trace = context?.Trace; if (trace == null) return;
+                trace.Prefix = true; var pin = context.Pin;
+                trace.IncomingExpected = context.Sprite != null && ReferenceEquals(icon, context.Sprite);
+                trace.Guard = context.Ambiguous ? "ambiguous" : context.Sprite == null ? "sprite-unavailable" : pin == null ? "pin-missing" :
+                    actor != Player.m_localPlayer ? "actor" : type != MessageHud.MessageType.TopLeft ? "message-type" :
+                    !Current(context.Map) ? "current-map" : context.Map != Minimap.instance ? "map-instance" :
+                    pin.m_name != context.Label ? "pin-label" : pin.m_type != Minimap.PinType.Icon4 ? "pin-type" :
+                    !pin.m_save ? "pin-save" : pin.m_ownerID != 0 ? "pin-owner" : text != "$msg_pin_added: " + context.Label ? "text" : "accepted";
+            }
+            catch { }
+        }
+        internal static void TracePrefixAfter(Sprite icon)
+        {
+            try { var context = _capture; if (context?.Trace != null) context.Trace.AfterExpected = context.Sprite != null && ReferenceEquals(icon, context.Sprite); }
+            catch { }
+        }
+        private static void EndTrace(Capture capture, bool returned, bool created)
+        {
+            var trace = capture.Trace; if (trace == null) return; capture.Trace = null;
+            try
+            {
+                string queueResult = "unavailable";
+                if (trace.Hud != null && ReferenceEquals(trace.Hud, MessageHud.instance) &&
+                    trace.Queue != null && ReferenceEquals(trace.Queue, HudQueueField?.GetValue(trace.Hud)) && trace.Queue is ICollection queue)
+                {
+                    if (queue.Count == trace.Before) queueResult = "no-enqueue";
+                    else if (queue.Count == trace.Before + 1 && queue.Count <= 64 && queue is IEnumerable rows)
+                    {
+                        object tail = null; int seen = 0;
+                        foreach (var row in rows) { tail = row; if (++seen > 64) break; }
+                        if (seen == queue.Count && tail != null && HudIconField != null)
+                            queueResult = capture.Sprite == null ? "expected-sprite-unavailable" :
+                                ReferenceEquals(HudIconField.GetValue(tail), capture.Sprite) ? "expected-sprite" : "different-sprite";
+                    }
+                    else queueResult = "ambiguous-count";
+                }
+                MasteryPlugin.Log?.LogInfo("[Run70DiscoveryTrace] category=" + capture.Category + " returned=" + returned + " created=" + created +
+                    " capture=" + (capture.Pin != null) + " ambiguous=" + capture.Ambiguous + " resolved=" + (capture.Sprite != null) +
+                    " prefix=" + trace.Prefix + " guard=" + trace.Guard + " incomingExpected=" + trace.IncomingExpected +
+                    " afterExpected=" + trace.AfterExpected + " hudQueue=" + queueResult);
+            }
+            catch { }
         }
         internal static void Reload(Minimap map)
         {
@@ -179,7 +255,11 @@ namespace ValheimMastery
     internal static class Run70DiscoveryNotificationIconPatch
     {
         private static void Prefix(Player __instance, MessageHud.MessageType __0, string __1, ref Sprite __3)
-            => Run70MapMarkerPresentation.NotificationIcon(__instance, __0, __1, ref __3);
+        {
+            Run70MapMarkerPresentation.TracePrefixBefore(__instance, __0, __1, __3);
+            Run70MapMarkerPresentation.NotificationIcon(__instance, __0, __1, ref __3);
+            Run70MapMarkerPresentation.TracePrefixAfter(__3);
+        }
     }
     [HarmonyPatch(typeof(Minimap), "AddPin")]
     internal static class Run70MapMarkerCapturePatch

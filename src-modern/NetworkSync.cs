@@ -10,11 +10,55 @@ namespace ValheimMastery
     {
         // The semantic mod version is intentionally stable across compatible releases.
         // WireIdentity changes whenever the RPC/build cohort is not safe to mix.
-        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261014-crossbow-progress-v2-ready-fixes";
+        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261015-ward-circle-v3";
         private static readonly HashSet<ZRpc> Registered = new HashSet<ZRpc>();
         private static readonly Dictionary<ZNetPeer, float> PendingHello = new Dictionary<ZNetPeer, float>();
         private static readonly Dictionary<ZNetPeer, float> PendingConfirmation = new Dictionary<ZNetPeer, float>();
         internal static bool HasServerSettings { get; private set; }
+        // Separate confirmed cohort proof for the new spawn-position protocol.
+        // Native peer readiness and absence from timeout queues are not acceptance.
+        private sealed class SettingsProof { internal ZRpc Rpc; internal string Manifest; }
+        private static readonly Dictionary<ZNetPeer, SettingsProof> ConfirmedPeers = new Dictionary<ZNetPeer, SettingsProof>();
+        private static ZNet ConfirmationNet;
+        private static long ConfirmationWorld;
+        private static ZRpc ConfirmedServerRpc;
+        private static string ConfirmedServerManifest;
+
+        private static bool ConfirmationContext(ZNet net)
+        {
+            long world = net != null && net.GetWorld() != null ? net.GetWorldUID() : 0;
+            if (ConfirmationNet != net || ConfirmationWorld != world)
+            {
+                ConfirmedPeers.Clear(); ConfirmedServerRpc = null; ConfirmedServerManifest = null;
+                ConfirmationNet = net; ConfirmationWorld = world;
+            }
+            return net != null && net == ZNet.instance && world != 0;
+        }
+
+        private static void PruneConfirmedPeers(ZNet net)
+        {
+            var current = net.GetPeers();
+            foreach (var entry in new List<KeyValuePair<ZNetPeer, SettingsProof>>(ConfirmedPeers))
+                if (entry.Key == null || !current.Contains(entry.Key) || entry.Key.m_rpc != entry.Value.Rpc)
+                    ConfirmedPeers.Remove(entry.Key);
+        }
+
+        internal static bool HasPeerSettings(ZNetPeer peer)
+        {
+            var net = ZNet.instance;
+            if (!ConfirmationContext(net) || !net.IsServer() || peer == null || peer.m_rpc == null) return false;
+            PruneConfirmedPeers(net);
+            return peer.IsReady() && ConfirmedPeers.TryGetValue(peer, out var proof) &&
+                peer.m_rpc == proof.Rpc && proof.Manifest == MasteryRuntime.ManifestHash();
+        }
+
+        internal static bool HasCurrentServerSettings(ZRpc rpc)
+        {
+            var net = ZNet.instance;
+            return ConfirmationContext(net) && !net.IsServer() && HasServerSettings && rpc != null &&
+                net.GetServerPeer()?.IsReady() == true && net.GetServerRPC() == rpc &&
+                ConfirmedServerRpc == rpc && ConfirmedServerManifest == MasteryRuntime.ManifestHash();
+        }
 
         internal static void Register(ZNetPeer peer)
         {
@@ -155,6 +199,8 @@ namespace ValheimMastery
             ZNet net = ZNet.instance;
             if (net == null || net.IsServer())
                 return;
+            if (ConfirmationContext(net) && net.GetServerRPC() == rpc)
+            { ConfirmedServerRpc = null; ConfirmedServerManifest = null; }
             MasteryPlugin.Log.LogInfo("Mastery hello received from server.");
             string[] values = manifest.Split('|');
             if (values.Length != 13 || values[0] != serverVersion ||
@@ -183,6 +229,8 @@ namespace ValheimMastery
             }
             MasteryRuntime.ApplyServerSettings(tierStep, firstMultiplier, dodgeXpCoefficient, worldScaling, earlyBonus, lateBonus, legacyCatchUpEnabled, legacyCatchUpScale, combatDefault, combatBow, combatClub, clubStaggerPerLevel);
             HasServerSettings = true;
+            if (ConfirmationContext(net) && net.GetServerRPC() == rpc)
+            { ConfirmedServerRpc = rpc; ConfirmedServerManifest = MasteryRuntime.ManifestHash(); }
             rpc.Invoke("ValheimMastery_Ready", WireIdentity, MasteryRuntime.ManifestHash());
         }
 
@@ -194,10 +242,14 @@ namespace ValheimMastery
             ZNetPeer peer = FindPeer(net, rpc);
             if (peer == null)
                 return;
+            if (ConfirmationContext(net))
+            { PruneConfirmedPeers(net); ConfirmedPeers.Remove(peer); }
             MasteryPlugin.Log.LogInfo("Mastery ready received from client.");
             PendingConfirmation.Remove(peer);
             if (clientVersion == WireIdentity && manifestHash == MasteryRuntime.ManifestHash())
             {
+                if (ConfirmationContext(net) && peer.IsReady() && peer.m_rpc == rpc && net.GetPeers().Contains(peer))
+                    ConfirmedPeers[peer] = new SettingsProof { Rpc = rpc, Manifest = manifestHash };
                 if (MasteryPlugin.Settings.VerboseLogging.Value)
                     MasteryPlugin.Log.LogInfo("Mastery handshake accepted: " + peer.m_socket.GetHostName());
                 return;

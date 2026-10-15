@@ -82,8 +82,11 @@ namespace ValheimMastery
             if (hit.m_skill == Skills.SkillType.Clubs)
                 CombatSkillScalingService.ApplyClubStaggerScaling(attacker, hit);
 
-            // Modify only the packet; vanilla victim awareness decides whether backstab applies.
-            if (hit.m_skill == Skills.SkillType.Knives && hit.m_backstabBonus > 1f && !PerkRuntimeService.IsPerkGenerated(hit) &&
+            // Knives learned-level passive applies to all player weapon attacks.
+            // Native weapon hit kinds (including legacy Undefined) only; awareness,
+            // weapon backstab base and actual damage application remain native.
+            if ((hit.m_hitType == HitData.HitType.PlayerHit || hit.m_hitType == HitData.HitType.Undefined) &&
+                hit.m_backstabBonus > 1f && !PerkRuntimeService.IsPerkGenerated(hit) &&
                 PerkRuntimeService.TryMarkApplied(hit, "knife_passive_backstab"))
                 hit.m_backstabBonus += .02f * Mathf.Clamp(PerkRuntimeService.GetActualSkillLevel(attacker, Skills.SkillType.Knives), 0f, 100f);
 

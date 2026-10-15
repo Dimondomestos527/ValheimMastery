@@ -12,15 +12,22 @@ namespace ValheimMastery
         private ZNet Session; private ZDOMan Manager; private ulong Generation; private long World, Owner, ContextTicks, LastStamp; private ushort Revision;
         private Animator Animator; private RuntimeAnimatorController Original; private AnimatorOverrideController Override; private AnimationClip Clip;
         private bool Active, Lease; private float End; private string Home, BroadcastHome; private long LeaseEpoch;
-        private static int GraphicsScenes; private static long GraphicsEpoch;
+        private static int GraphicsScenes,SeatGraphics; private static long GraphicsEpoch;
         private static ZNet GraphicsSession; private static ZDOMan GraphicsManager; private static ulong GraphicsGeneration;
         private static long GraphicsWorld;
-        internal static int GraphicsCount { get { GraphicsContext(); return GraphicsScenes; } }
+        internal static int GraphicsCount { get { GraphicsContext(); return GraphicsScenes+SeatGraphics; } }
+        internal static bool ReserveSeat(out long epoch)
+        {
+            GraphicsContext();epoch=GraphicsEpoch;
+            if(GraphicsCount+MasterIdolResidentSceneAnimation.GraphicsCount+MasterIdolResidentBirthPresentation.GraphicsCount>=MasterIdolResidentIdleRules.MaxGraphics)return false;
+            SeatGraphics++;return true;
+        }
+        internal static void ReleaseSeat(long epoch){GraphicsContext();if(epoch==GraphicsEpoch)SeatGraphics=Math.Max(0,SeatGraphics-1);}
         private static void GraphicsContext()
         {
             long world = ZNet.instance?.GetWorld() != null ? ZNet.instance.GetWorldUID() : 0;
             if (GraphicsSession == ZNet.instance && GraphicsManager == ZDOMan.instance && GraphicsGeneration == MasterIdolLoadIdentity.Generation && GraphicsWorld == world) return;
-            GraphicsSession = ZNet.instance; GraphicsManager = ZDOMan.instance; GraphicsGeneration = MasterIdolLoadIdentity.Generation; GraphicsWorld = world; GraphicsScenes = 0; GraphicsEpoch++;
+            GraphicsSession = ZNet.instance; GraphicsManager = ZDOMan.instance; GraphicsGeneration = MasterIdolLoadIdentity.Generation; GraphicsWorld = world; GraphicsScenes = SeatGraphics = 0; GraphicsEpoch++;
         }
         private void Awake() { Actor = GetComponent<Character>(); Ai = GetComponent<BaseAI>(); View = GetComponent<ZNetView>(); }
         private bool Context()
@@ -34,23 +41,37 @@ namespace ValheimMastery
             { Stop(); BroadcastHome = null; Data = data; Session = ZNet.instance; Manager = ZDOMan.instance; Generation = MasterIdolLoadIdentity.Generation; Owner = data.GetOwner(); Revision = data.OwnerRevision; World = Session.GetWorldUID(); ContextTicks = Session.GetTime().Ticks; LastStamp = 0; }
             return true;
         }
-        private bool Peace() => Actor != null && Ai != null && !MasterIdolSocialSeats.Battle(Ai, Actor) && Ai.m_timeSinceHurt >= 8 && !Ai.IsSleeping() && !Actor.InDodge() && !Actor.InEmote() &&
+        private bool Peace() => Actor != null && Ai != null && MasterIdolResidentGrounding.Slow(Actor) && !MasterIdolSocialSeats.Battle(Ai, Actor) && Ai.m_timeSinceHurt >= 8 && !Ai.IsSleeping() && !Actor.InDodge() && !Actor.InEmote() &&
             GetComponent<MasterIdolSocialSeats>()?.Active != true && GetComponent<MasterIdolWelcome>()?.IsPresenting != true && !MasterIdolResidentWork.Busy(Actor) &&
             GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentSceneAnimation.Playing(Actor)&&!MasterIdolResidentBirthPresentation.Playing(Actor);
         internal static bool Playing(Character actor) => actor?.GetComponent<MasterIdolVisibleGesture>()?.Active == true;
         internal static void Start(Character actor) => Start(actor, true, MasterIdolResidentIdleRules.SlotSeconds);
         internal static void Start(Character actor, bool vibe, float duration)
+            => TryStart(actor,vibe,duration);
+        internal static bool TryStart(Character actor, bool vibe, float duration, bool reaction=false)
         {
-            if (actor == null || MasterIdolResidentRoster.Limit(Utils.GetPrefabName(actor.gameObject)) == 0) return;
+            if (actor == null || MasterIdolResidentRoster.Limit(Utils.GetPrefabName(actor.gameObject)) == 0) return false;
             var scene = actor.GetComponent<MasterIdolVisibleGesture>();
             if (scene == null || !scene.Context() || !scene.View.IsOwner() || !scene.Peace() || !MasterIdolSocialScenes.Active(actor.GetComponent<MasterIdolSocial>()) ||
-                !MasterIdolResidentVisibility.Observed(actor) || !MasterIdolResidentPolicy.TryHome(actor, out var zone)) return;
+                !reaction&&!MasterIdolResidentVisibility.Observed(actor) || !MasterIdolResidentPolicy.TryHome(actor, out var zone)) return false;
             vibe = vibe && Utils.GetPrefabName(actor.gameObject) == "Greydwarf";
             duration = vibe ? MasterIdolResidentIdleRules.VibeSeconds : MasterIdolResidentIdleRules.SlotSeconds;
             scene.BroadcastHome = zone.Id; // Dedicated authority has no local graphics lease but must cancel peer cues.
-            var packet = scene.Header(zone.Id, scene.Session.GetTime().Ticks, true); packet.Write(vibe); packet.Write(duration);
+            var packet = scene.Header(zone.Id, Math.Max(scene.Session.GetTime().Ticks,scene.LastStamp+1), true); packet.Write(vibe); packet.Write(duration);
             scene.Receive(scene.Owner, new ZPackage(packet.GetArray())); scene.View.InvokeRPC(ZNetView.Everybody, Rpc, packet);
+            return true;
         }
+        internal static bool SendEmote(Character actor,long target,string home,long stamp,Action<ZPackage> write)
+        {
+            var scene=actor?.GetComponent<MasterIdolVisibleGesture>();
+            if(scene==null||!scene.Context()||!MasterIdolForestGuardState.ModuleBorn(scene.Data))return false;
+            var packet=scene.Header(home,stamp,false);write(packet);
+            if(target==ZNet.GetUID())scene.Receive(target,new ZPackage(packet.GetArray()));
+            else scene.View.InvokeRPC(target,Rpc,packet);
+            return true;
+        }
+        internal static long ContextStart(Character actor)
+        {var scene=actor?.GetComponent<MasterIdolVisibleGesture>();return scene?.Context()==true?scene.ContextTicks:long.MaxValue;}
         private ZPackage Header(string home, long stamp, bool begin)
         {
             var packet = new ZPackage(); packet.Write(World); MasterIdolResidentWork.WriteUid(packet, Data.m_uid); packet.Write((int)Revision);
@@ -58,13 +79,18 @@ namespace ValheimMastery
         }
         private void Receive(long sender, ZPackage packet)
         {
+            bool committing=false;
             try
             {
-                if (packet == null || packet.Size() > 256 || !Context() || sender != Owner) return;
+                if (packet == null || packet.Size() > 384 || !Context()) return;
                 long world = packet.ReadLong(); var uid = MasterIdolResidentWork.ReadUid(packet); int revision = packet.ReadInt();
                 string home = packet.ReadString(); long stamp = packet.ReadLong(); bool begin = packet.ReadBool();
+                if(!begin&&packet.GetPos()<packet.Size())
+                {
+                    MasterIdolResidentEmote.Receive(Actor,View,sender,world,uid,revision,home,stamp,packet);return;
+                }
                 bool vibe = false; float duration = 0; if (begin) { vibe = packet.ReadBool(); duration = packet.ReadSingle(); }
-                if (packet.GetPos() != packet.Size() || world != World || uid != Data.m_uid || revision != Revision || home.Length > 128 ||
+                if (sender!=Owner||packet.Size()>256||packet.GetPos() != packet.Size() || world != World || uid != Data.m_uid || revision != Revision || home.Length > 128 ||
                     stamp < LastStamp || begin && stamp == LastStamp || !MasterIdolVisibilityRules.Stamp(stamp, Session.GetTime().Ticks, ContextTicks)) return;
                 if (!begin) { if (Home == null || home == Home) { LastStamp = stamp; Stop(); } return; }
                 if (!MasterIdolResidentPolicy.TryHome(Actor, out var zone) || zone.Id != home || !zone.Contains(transform.position) ||
@@ -86,7 +112,7 @@ namespace ValheimMastery
                 if (idle == null || vibe && donor == null) return;
                 float elapsed = Mathf.Max(0, (float)((Session.GetTime().Ticks - stamp) / (double)TimeSpan.TicksPerSecond));
                 if (elapsed >= duration) return;
-                Home = home; End = Time.unscaledTime + duration - elapsed;
+                committing=true;Home = home; End = Time.unscaledTime + duration - elapsed;
                 if (vibe)
                 {
                     Clip = Instantiate(donor); Clip.name = "VM_EventlessVisibleGreydwarfGesture"; Clip.hideFlags = HideFlags.DontSave; Clip.events = Array.Empty<AnimationEvent>();
@@ -96,7 +122,7 @@ namespace ValheimMastery
                 Hold(); Animator.Play(Movement, 0, elapsed / (vibe ? donor.length : idle.length));
                 MasterIdolResidentMetrics.Count(vibe ? "idle.native-vibe-start" : "idle.native-idle-start");
             }
-            catch (Exception) { Stop(); MasterIdolResidentMetrics.Count("idle.native-start-failed"); }
+            catch (Exception) { if(committing)Stop(); MasterIdolResidentMetrics.Count("idle.native-start-failed"); }
         }
         private void Update()
         {
@@ -139,7 +165,7 @@ namespace ValheimMastery
                 if (scene.Context() && scene.View.IsOwner())
                 {
                     string home = scene.BroadcastHome ?? scene.Home;
-                    if (home != null) scene.View.InvokeRPC(ZNetView.Everybody, Rpc, scene.Header(home, scene.Session.GetTime().Ticks, false));
+                    if (home != null) scene.View.InvokeRPC(ZNetView.Everybody, Rpc, scene.Header(home, Math.Max(scene.Session.GetTime().Ticks,scene.LastStamp+1), false));
                 }
             }
             finally { scene.BroadcastHome = null; scene.Stop(); }

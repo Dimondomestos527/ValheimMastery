@@ -27,7 +27,7 @@ namespace ValheimMastery
             return net!=null&&world!=0;
         }
         internal static MasterIdolEffectGeometry Snapshot => Ready ? Geometry : null;
-        internal static string Diagnostics()=>"effectsReady="+Ready+" server="+(Session?.IsServer()==true)+" world="+World+" revision="+Revision+" zones="+Geometry.ById.Count+" residents="+Geometry.ById.Values.Sum(z=>z.Residents.Count)+" caps=Greyling4/Greydwarf2/Elite1/Shaman1 wards="+Geometry.Wards.Count+" proofAge="+Math.Max(0,Time.unscaledTime-LastVerified).ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+"s";
+        internal static string Diagnostics()=>"effectsReady="+Ready+" server="+(Session?.IsServer()==true)+" world="+World+" revision="+Revision+" zones="+Geometry.ById.Count+" residents="+Geometry.ById.Values.Sum(z=>z.Residents.Count)+" caps=Greyling1/Greydwarf1/Elite1/Shaman1 wards="+Geometry.Wards.Count+" proofAge="+Math.Max(0,Time.unscaledTime-LastVerified).ToString("0.0",System.Globalization.CultureInfo.InvariantCulture)+"s";
         internal static bool Ready=>Current()&&Available&&(Session.IsServer()||Time.unscaledTime-LastVerified<6f);
         internal static MasterIdolEffectZone At(string type,Vector3 point)=>Ready?Geometry.At(type,point):null;
         internal static MasterIdolEffectZone Find(string id)=>Ready&&id!=null&&Geometry.ById.TryGetValue(id,out var zone)?zone:null;

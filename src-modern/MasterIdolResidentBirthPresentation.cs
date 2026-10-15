@@ -9,14 +9,23 @@ namespace ValheimMastery
     internal sealed class MasterIdolResidentBirthPresentation:MonoBehaviour
     {
         private const float Duration=1.6f;
+        private const float Admission=8f,Preparation=1.5f,LeaseLifetime=3.3f;
         private static readonly Dictionary<string,GameObject> Templates=new Dictionary<string,GameObject>(StringComparer.Ordinal);
         private static ZNetScene TemplateScene;
+        private static ObjectDB WarmDatabase;
+        private static ulong TemplateGeneration;
         private static MasterIdolResidentBirthPresentation Current;
-        internal static int GraphicsCount=>Current!=null&&Current.Active?1:0;
-        internal static bool Playing(Character actor)=>actor?.GetComponent<MasterIdolResidentBirthPresentation>()?.Active==true;
-        private Character Actor;private ZNetView View;private ZDO Data;private BaseAI Ai;private bool Tried,Active,Suppressed;
-        private ZNet Session;private ZDOMan Manager;private ulong Generation;private long Owner,Born;private ushort Revision;
-        private float InitialHealth,NextSight;private Vector3 Origin;private GameObject Body;
+        private static readonly List<MasterIdolResidentBirthPresentation> Waiting=new List<MasterIdolResidentBirthPresentation>(4);
+        private static readonly Dictionary<string,long> Seen=new Dictionary<string,long>(StringComparer.Ordinal);
+        private static GameObject WoodSound,StoneSound;
+        private static readonly HashSet<AudioClip> RequestedAudio=new HashSet<AudioClip>();
+        internal static int GraphicsCount=>Current!=null&&(Current.Active||Current.Pending)?1:0;
+        internal static bool Playing(Character actor){var cue=actor?.GetComponent<MasterIdolResidentBirthPresentation>();return cue!=null&&cue.Active&&cue.Suppressed;}
+        private Character Actor;private ZNetView View;private ZDO Data;private BaseAI Ai;private bool Tried,Active,Pending,Suppressed,Queued,StonePlayed;
+        private ZNet Session;private ZDOMan Manager;private ulong Generation;private long Owner,Born;private ushort Revision;private string Nonce;
+        private float InitialHealth,NextSight,NextAttempt,StartedAt,QueueUntil,PrepareUntil,SoundUntil;private Vector3 Origin;private GameObject Body;
+        private readonly List<GameObject> Atmosphere=new List<GameObject>(2);
+        private readonly List<GameObject> Sounds=new List<GameObject>(2);
         private readonly List<GameObject> Fragments=new List<GameObject>(6);
         private readonly List<Vector3> Starts=new List<Vector3>(6);
         private readonly List<Renderer> Originals=new List<Renderer>(6);
@@ -24,6 +33,7 @@ namespace ValheimMastery
         private void Awake(){Actor=GetComponent<Character>();View=GetComponent<ZNetView>();Ai=GetComponent<BaseAI>();}
         internal static void Attach(Character actor)
         {
+            if(Application.isBatchMode||SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null)return;
             if(actor!=null&&MasterIdolForestGuardState.ModuleBorn(actor.m_nview?.GetZDO())&&actor.GetComponent<MasterIdolResidentBirthPresentation>()==null)
                 actor.gameObject.AddComponent<MasterIdolResidentBirthPresentation>();
         }
@@ -38,8 +48,8 @@ namespace ValheimMastery
         {
             var player=Player.m_localPlayer;var camera=GameCamera.instance?.m_camera;
             if(Application.isBatchMode||SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null||!Application.isFocused||
-                !MasteryPlugin.Settings.EnablePerkProcVFX.Value||player==null||player.IsDead()||player.IsTeleporting()||player.InGhostMode()||player.IsDebugFlying()||
-                camera==null||!camera.isActiveAndEnabled||!player.TakeInput()||InventoryGui.IsVisible()||Game.IsPaused()||Hud.InRadial()||Hud.InBuildUi()||
+                player==null||player.IsDead()||player.IsTeleporting()||player.InGhostMode()||player.IsDebugFlying()||
+                camera==null||!camera.isActiveAndEnabled||Game.IsPaused()||
                 (player.transform.position-transform.position).sqrMagnitude>1024)return false;
             Vector3 point=transform.position+Vector3.up*.9f;var screen=camera.WorldToViewportPoint(point);
             if(!MasterIdolVisibilityRules.Viewport(screen.x,screen.y,screen.z))return false;
@@ -55,9 +65,82 @@ namespace ValheimMastery
         }
         private static void TemplatesCurrent()
         {
-            if(TemplateScene==ZNetScene.instance)return;
+            if(TemplateScene==ZNetScene.instance&&TemplateGeneration==MasterIdolLoadIdentity.Generation)return;
+            ClearOwned();TemplateScene=ZNetScene.instance;TemplateGeneration=MasterIdolLoadIdentity.Generation;
+        }
+        internal static void ClearOwned()
+        {
+            Current?.End();
+            foreach(var cue in Waiting.ToArray())cue?.End();Waiting.Clear();Seen.Clear();RequestedAudio.Clear();WoodSound=StoneSound=null;
             foreach(var template in Templates.Values)if(template!=null)Destroy(template);
-            Templates.Clear();TemplateScene=ZNetScene.instance;
+            Templates.Clear();TemplateScene=null;WarmDatabase=null;
+        }
+        internal static void Warm()
+        {
+            if(Application.isBatchMode||SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null||ZNetScene.instance==null||ObjectDB.instance==null)return;
+            TemplatesCurrent();
+            WoodSound=ZNetScene.instance.GetPrefab("sfx_tree_hit")??NativeSoftVisualAssets.Get<GameObject>("Assets/world/Props/FirTree/fx/sfx_tree_hit.prefab");
+            StoneSound=ZNetScene.instance.GetPrefab("sfx_greydwarf_stone_hit")??NativeSoftVisualAssets.Get<GameObject>("Assets/Characters/GreyDwarf/fx/sfx_greydwarf_stone_hit.prefab");
+            WarmSound(WoodSound);WarmSound(StoneSound);
+            EffectTemplate("cloud","Assets/Characters/GreyDwarf/fx/vfx_greydwarf_death.prefab","soft cloud");
+            EffectTemplate("dust","Assets/Effects/vfx_SawDust.prefab","smokepoff");
+            if(WarmDatabase==ObjectDB.instance)return;
+            foreach(string family in MasterIdolForestRules.Families)if(ZNetScene.instance.GetPrefab(family)==null)return;
+            foreach(string item in new[]{"AncientSeed","Wood","Stone","Resin"})if(ObjectDB.instance.GetItemPrefab(item)==null)return;
+            foreach(string family in MasterIdolForestRules.Families)if(BodyTemplate(family)==null)return;
+            foreach(string item in new[]{"AncientSeed","Wood","Stone","Resin"})if(FragmentTemplate(item)==null)return;
+            WarmDatabase=ObjectDB.instance;
+        }
+        private static void WarmSound(GameObject prefab)
+        {
+            var clips=prefab?.GetComponent<ZSFX>()?.m_audioClips;if(clips==null||clips.Length==0)return;var clip=clips[0];
+            if(clip!=null&&clip.loadState==AudioDataLoadState.Unloaded&&RequestedAudio.Count<2&&RequestedAudio.Add(clip))clip.LoadAudioData();
+        }
+        private static GameObject EffectTemplate(string name,string path,string child)
+        {
+            string key="vfx_VM_BF_BirthAtmosphere_"+name;if(Templates.TryGetValue(key,out var cached))return cached;
+            var donor=NativeSoftVisualAssets.Get<GameObject>(path)?.transform.Find(child);
+            if(donor==null||donor.childCount!=0||donor.GetComponents<Component>().Length!=3||donor.GetComponent<ParticleSystem>()==null||donor.GetComponent<ParticleSystemRenderer>()==null)return null;
+            var root=new GameObject(key);root.SetActive(false);
+            try
+            {
+                var own=Instantiate(donor.gameObject,root.transform,false);own.transform.localPosition=Vector3.zero;
+                var ps=own.GetComponent<ParticleSystem>();ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);
+                var main=ps.main;main.playOnAwake=false;main.loop=false;main.duration=Duration;main.startLifetime=.55f;main.startSpeed=.3f;main.startSize=name=="cloud"?.8f:.3f;main.maxParticles=12;
+                main.startColor=name=="cloud"?new Color(.28f,.31f,.23f,.42f):new Color(.35f,.27f,.17f,.5f);
+                var emission=ps.emission;emission.rateOverTime=0;emission.SetBursts(new[]{new ParticleSystem.Burst(0,12)});
+                var collision=ps.collision;collision.enabled=false;var trigger=ps.trigger;trigger.enabled=false;var sub=ps.subEmitters;sub.enabled=false;
+                RenderSettings(own.GetComponent<ParticleSystemRenderer>());Templates.Add(key,root);return root;
+            }
+            catch{Destroy(root);return null;}
+        }
+        private void Sound(GameObject prefab,float gain)
+        {
+            if(prefab==null||!MasteryPlugin.Settings.EnablePerkSFX.Value||PerkAudioService.ActiveSounds>=32)return;
+            var source=prefab.GetComponent<AudioSource>();var settings=prefab.GetComponent<ZSFX>();var clips=settings?.m_audioClips;
+            if(source==null||clips==null||clips.Length==0||clips[0]==null||clips[0].loadState!=AudioDataLoadState.Loaded)return;
+            var group=source.outputAudioMixerGroup;
+            if(group==null){var groups=AudioMan.instance?.m_masterMixer?.FindMatchingGroups("SFX");if(groups==null||groups.Length==0)return;group=groups[0];}
+            var own=new GameObject("VM_BirthSound");Sounds.Add(own);own.transform.position=transform.position;
+            var audio=own.AddComponent<AudioSource>();audio.playOnAwake=false;audio.loop=false;audio.clip=clips[0];audio.outputAudioMixerGroup=group;audio.spatialBlend=1;
+            audio.minDistance=2;audio.maxDistance=32;audio.rolloffMode=AudioRolloffMode.Logarithmic;audio.dopplerLevel=0;
+            audio.volume=Mathf.Clamp01((settings.m_minVol+settings.m_maxVol)*.5f*gain);audio.pitch=Mathf.Clamp((settings.m_minPitch+settings.m_maxPitch)*.5f,.5f,2);
+            float duration=Mathf.Min(.8f,audio.clip.length/audio.pitch);own.AddComponent<PerkAudioLifetime>().Arm(audio,0,duration,.02f,Mathf.Max(0,duration-.12f),.12f);
+            audio.Play();SoundUntil=Time.unscaledTime+1;
+        }
+        private void Queue()
+        {
+            if(!Context())return;TemplatesCurrent();Data=View.GetZDO();Born=Data.GetLong(MasterIdolForestGuardState.BornKey,0);Nonce=Data.GetString(MasterIdolForestGuardState.NonceKey,"");
+            float age=(float)((ZNet.instance.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
+            if(Born<=0||age<0||age>Admission){End();return;}if(!Local(true))return;
+            string key=Data.m_uid+"/"+Nonce;if(Seen.ContainsKey(key)){End();return;}
+            if(Seen.Count>=16){var old=new List<string>();long now=ZNet.instance.GetTime().Ticks;foreach(var item in Seen)if(now-item.Value>Admission*TimeSpan.TicksPerSecond)old.Add(item.Key);foreach(var item in old)Seen.Remove(item);}
+            if(Seen.Count>=16||Waiting.Count>=4)return;
+            Session=ZNet.instance;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;Owner=Data.GetOwner();Revision=Data.OwnerRevision;
+            InitialHealth=Actor.GetHealth();Origin=transform.position;if(!Peace()){End();return;}
+            Seen.Add(key,Born);QueueUntil=Time.unscaledTime+Mathf.Min(6.5f,Admission-age);
+            if(!MasteryPlugin.Settings.EnablePerkProcVFX.Value){Tried=true;Warm();Sound(WoodSound,.35f);return;}
+            Queued=true;Waiting.Add(this);
         }
         private static string Relative(Transform root,Transform node)
         {
@@ -126,37 +209,44 @@ namespace ValheimMastery
         private bool Prepared(GameObject obj)=>obj!=null&&obj.activeInHierarchy&&obj.GetComponent<DeferredNativeVfx>()?.IsPrepared==true;
         private void Begin()
         {
-            Tried=true;if(!Context()||!Local(true)||Current!=null||MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentSceneAnimation.GraphicsCount>=4)return;
-            Data=View.GetZDO();Born=Data.GetLong(MasterIdolForestGuardState.BornKey,0);float elapsed=(float)((ZNet.instance.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
-            if(elapsed<0||elapsed>.2f)return;InitialHealth=Actor.GetHealth();Origin=transform.position;if(!Peace())return;
-            TemplatesCurrent();var template=BodyTemplate(Utils.GetPrefabName(gameObject));if(template==null)return;
-            Session=ZNet.instance;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;Owner=Data.GetOwner();Revision=Data.OwnerRevision;
-            Current=this;Active=true;
+            if(!Queued||!Context())return;
+            float elapsed=(float)((ZNet.instance.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
+            if(elapsed<0||elapsed>Admission||Time.unscaledTime>=QueueUntil){End();return;}
+            if(!Local(true)||Current!=null||MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentSceneAnimation.GraphicsCount>=4)return;
+            Origin=transform.position;if(!Peace()){End();return;}
+            Warm();TemplatesCurrent();if(!Queued)return;var template=BodyTemplate(Utils.GetPrefabName(gameObject));
+            if(template==null||!Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_cloud",out var cloud)||!Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_dust",out var dust))return;
+            Waiting.Remove(this);Queued=false;Current=this;Pending=true;Active=false;StartedAt=0;PrepareUntil=Mathf.Min(QueueUntil,Time.unscaledTime+Preparation);
             try
             {
-                Body=VfxPool.Spawn(template,Origin,transform.rotation,1.8f);if(Body==null){End();return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
+                Body=VfxPool.Spawn(template,Origin,transform.rotation,LeaseLifetime);if(Body==null){End(false);return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
                 int family=MasterIdolForestRules.Family(Utils.GetPrefabName(gameObject));
                 var names=new List<string>{"AncientSeed","Wood","Resin"};if(family!=3)names.Add("Wood");if(family!=0)names.Add("Stone");if(family==3)names.Add("Resin");if(family==2)names.Add("Stone");
                 for(int i=0;i<names.Count;i++)
                 {
-                    var item=FragmentTemplate(names[i]);if(item==null){End();return;}var obj=VfxPool.Spawn(item,Origin,Quaternion.identity,1.8f);if(obj==null){End();return;}
+                    var item=FragmentTemplate(names[i]);if(item==null){End(false);return;}var obj=VfxPool.Spawn(item,Origin,Quaternion.identity,LeaseLifetime);if(obj==null){End(false);return;}
                     obj.SetActive(true);Fragments.Add(obj);float angle=i*2.399963f;Starts.Add(i==0?Vector3.zero:new Vector3(Mathf.Cos(angle),.15f,Mathf.Sin(angle))*(1.5f+(i%2)*1.5f));
                 }
+                foreach(var effect in new[]{cloud,dust}){var obj=VfxPool.Spawn(effect,Origin,Quaternion.identity,LeaseLifetime);if(obj==null){End(false);return;}obj.SetActive(true);Atmosphere.Add(obj);}
                 NativeVfxSafeFrame.AfterReady(Body,SuppressReady);foreach(var obj in Fragments)NativeVfxSafeFrame.AfterReady(obj,SuppressReady);
+                foreach(var obj in Atmosphere)NativeVfxSafeFrame.AfterReady(obj,()=>{if(Pending)foreach(var ps in obj.GetComponentsInChildren<ParticleSystem>(true))ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);SuppressReady();});
             }
-            catch{End();}
+            catch{End(false);}
         }
         private void SuppressReady()
         {
             try
             {
-            if(!Active||Suppressed||!Prepared(Body))return;foreach(var obj in Fragments)if(!Prepared(obj))return;
+            if(!Pending||Suppressed||!Prepared(Body))return;foreach(var obj in Fragments)if(!Prepared(obj))return;foreach(var obj in Atmosphere)if(!Prepared(obj))return;
             float elapsed=(float)((Session.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
-            if(elapsed<0||elapsed>.25f||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||
-                !Context()||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||!BindBody()||!Peace()||!Local(true)){End();return;}
+            if(elapsed<0||elapsed>Admission||Time.unscaledTime>=PrepareUntil||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||
+                !Context()||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||
+                Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce||!BindBody()||!Peace()||!Local(true)){End();return;}
             var renderers=Actor.m_visual.GetComponentsInChildren<Renderer>(true);if(renderers.Length>6){End();return;}
             foreach(var renderer in renderers){Originals.Add(renderer);OriginalEnabled.Add(renderer.enabled);}
-            Suppressed=true;foreach(var renderer in Originals)renderer.enabled=false;
+            Suppressed=true;StartedAt=Time.unscaledTime;Tried=true;Pending=false;Active=true;foreach(var renderer in Originals)renderer.enabled=false;
+            foreach(var obj in Atmosphere)foreach(var ps in obj.GetComponentsInChildren<ParticleSystem>(true))ps.Play(true);
+            StonePlayed=false;Sound(WoodSound,.35f);
             }
             catch{End();}
         }
@@ -164,16 +254,35 @@ namespace ValheimMastery
         {
             try
             {
-                if(!Tried){if(Context())Begin();else return;}if(!Active)return;
+                if(Sounds.Count>0&&!MasteryPlugin.Settings.EnablePerkSFX.Value){foreach(var obj in Sounds)try{if(obj!=null)Destroy(obj);}catch(Exception){}Sounds.Clear();}
+                if(Sounds.Count>0&&!Active&&!Pending&&!Queued&&(!Context()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||Data?.GetOwner()!=Owner||Data?.OwnerRevision!=Revision||Time.unscaledTime>=SoundUntil)){End();return;}
+                if(!Tried&&!Pending&&!Active)
+                {
+                    if(Time.unscaledTime<NextAttempt)return;NextAttempt=Time.unscaledTime+.1f;
+                    if(Actor==null||Actor.IsDead()||View?.IsValid()!=true||ZNet.instance?.GetWorld()==null){End();return;}
+                    long birth=View.GetZDO().GetLong(MasterIdolForestGuardState.BornKey,0);
+                    float age=(float)((ZNet.instance.GetTime().Ticks-birth)/(double)TimeSpan.TicksPerSecond);
+                    if(birth<=0||age<0||age>Admission){End();return;}
+                    if(!Queued){Queue();if(!Queued)return;}
+                    if(Time.unscaledTime>=QueueUntil){End();return;}
+                    if(!Context()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||
+                        Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce){End();return;}
+                    Origin=transform.position;if(!Peace()||!Local(true)){End();return;}
+                    if(Waiting.Count>0&&Waiting[0]==this)Begin();
+                    if(Queued)return;
+                }
+                if(!Active&&!Pending)return;
                 float elapsed=(float)((Session.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
                 if(!Context()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||
-                    !MasterIdolForestRules.Birth(elapsed)||!Peace()||!Local(false)){End();return;}
+                    Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce||
+                    elapsed<0||!Suppressed&&(elapsed>Admission||Time.unscaledTime>=PrepareUntil)||Suppressed&&!MasterIdolForestRules.Birth(Time.unscaledTime-StartedAt)||!Peace()||!Local(false)||!MasteryPlugin.Settings.EnablePerkProcVFX.Value){End();return;}
                 if(Time.unscaledTime>=NextSight){NextSight=Time.unscaledTime+.2f;if(!Local(true)){End();return;}}
                 if(!Suppressed)
                 {
                     SuppressReady();if(!Suppressed)return;
                 }
-                float progress=Mathf.Clamp01(elapsed/Duration),smooth=progress*progress*(3-2*progress);
+                float progress=Mathf.Clamp01((Time.unscaledTime-StartedAt)/Duration),smooth=progress*progress*(3-2*progress);
+                if(!StonePlayed&&progress>=.55f){StonePlayed=true;Sound(StoneSound,.4f);}
                 Body.transform.SetPositionAndRotation(transform.position,transform.rotation);Body.transform.localScale=transform.lossyScale*Mathf.Lerp(.02f,1,smooth);
                 for(int i=0;i<Fragments.Count;i++)
                 {
@@ -183,9 +292,9 @@ namespace ValheimMastery
             }
             catch{End();}
         }
-        private void End()
+        private void End(bool terminal=true)
         {
-            Active=false;
+            Active=false;Pending=false;Queued=false;Waiting.Remove(this);if(terminal)Tried=true;
             try{for(int i=0;i<Originals.Count;i++)try{if(Originals[i]!=null)Originals[i].enabled=OriginalEnabled[i];}catch(Exception){MasterIdolResidentMetrics.Count("birth.restore-failed");}}
             finally
             {
@@ -195,6 +304,9 @@ namespace ValheimMastery
                 try{if(body!=null&&body.activeSelf)VfxPool.Return(body.name,body);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}
                 foreach(var obj in Fragments)try{if(obj!=null&&obj.activeSelf)VfxPool.Return(obj.name,obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}
                 Fragments.Clear();Starts.Clear();
+                foreach(var obj in Atmosphere)try{if(obj!=null&&obj.activeSelf)VfxPool.Return(obj.name,obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.pool-return-failed");}Atmosphere.Clear();
+                foreach(var obj in Sounds)try{if(obj!=null)Destroy(obj);}catch(Exception){MasterIdolResidentMetrics.Count("birth.sound-cleanup-failed");}Sounds.Clear();
+                if(!terminal&&!Tried&&Time.unscaledTime<QueueUntil&&Waiting.Count<4){Queued=true;Waiting.Add(this);}
             }
         }
         private void OnDisable()=>End();private void OnDestroy()=>End();
@@ -202,4 +314,14 @@ namespace ValheimMastery
     [HarmonyPatch(typeof(BaseAI),"Awake")]
     internal static class MasterIdolForestBirthAttachPatch
     {private static void Postfix(BaseAI __instance)=>MasterIdolResidentBirthPresentation.Attach(__instance.GetComponent<Character>());}
+    [HarmonyPatch(typeof(ZNetScene),"Awake")]
+    internal static class MasterIdolBirthSceneWarmPatch{private static void Postfix()=>MasterIdolResidentBirthPresentation.Warm();}
+    [HarmonyPatch(typeof(ObjectDB),"Awake")]
+    internal static class MasterIdolBirthDatabaseWarmPatch{private static void Postfix()=>MasterIdolResidentBirthPresentation.Warm();}
+    [HarmonyPatch(typeof(ObjectDB),nameof(ObjectDB.CopyOtherDB))]
+    internal static class MasterIdolBirthDatabaseCopyWarmPatch{private static void Postfix()=>MasterIdolResidentBirthPresentation.Warm();}
+    [HarmonyPatch(typeof(ZNetScene),"OnDestroy")]
+    internal static class MasterIdolBirthSceneCleanupPatch{private static void Postfix()=>MasterIdolResidentBirthPresentation.ClearOwned();}
+    [HarmonyPatch(typeof(MasterIdolLoadIdentity),nameof(MasterIdolLoadIdentity.Reset))]
+    internal static class MasterIdolBirthGenerationCleanupPatch{private static void Postfix()=>MasterIdolResidentBirthPresentation.ClearOwned();}
 }
