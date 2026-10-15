@@ -2,29 +2,26 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-test-peer-identity-swamp-vfx-20261015",
-  "archive": "server-1.4.123-test-peer-identity-swamp-vfx-20261015.zip",
-  "archive_sha256": "de60b047632e9a41c36129ce0ebbed1da32cf3aa9f680887bc6cf382799fc6d8",
+  "version": "1.4.123-test-forest-ready-fastpack-20261015",
+  "archive": "server-1.4.123-test-forest-ready-fastpack-20261015.zip",
+  "archive_sha256": "1511a9038751d46f32d9195f400d21ef78df8f00a9f5b75252d434374f1e2a60",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26473472,
-      "sha256": "6c9ffe0187c72949b86e84b78c22f6099a29fbf99e3f7f1ff33f7ae8053cf19b"
+      "size": 26514944,
+      "sha256": "d53ad3928b1b0aff4a82a726c93eaa08636111a4bf8caf44623e381453ef67e9"
     }
   ],
-  "validation": "HUMAN_APPROVED_CURRENT_PATCH;SOURCE_NATIVE_CONTRACT_COHORT_PASS;LIVE_PARTIAL",
+  "validation": "HUMAN_APPROVED_CURRENT_PATCH;SOURCE_NATIVE_CONTRACT_COHORT_PASS;CHANGED_FEATURES_LIVE_UNTESTED",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261015-ward-circle-v3",
+  "network_wire_identity": "1.4.123+rpc-20261015-forest-ready-travel-v5",
   "known_issues": [
-    "Activation area visual only Mistlands convincing; semantic six-theme7s successor requested",
-    "Player-emote reactions reported absent",
-    "Shaman pose suspected failed animation; not yet diagnosed",
-    "Future seven-second thematic activation, ten-second birth and new resident features are not included.",
-    "Guard spawn/current overall behavior accepted by the human; not every behavior is independently LIVE VERIFIED.",
-    "Exact approved Client F292 is compiled-equivalent to Steam-native compatibility probe; actual rendering/AI acceptance remains partial."
+    "Compact guard HUD, full replay after reload and workbench travel still need LIVE game verification.",
+    "Prior seven-second biome activation visuals, ten-second sequential guard birth and guard stats are included.",
+    "New four level100 perks, resident cargo/loot collection, unique interactions and voices are excluded."
   ]
 }
