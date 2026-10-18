@@ -2,26 +2,27 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-test-forest-ready-fastpack-20261015",
-  "archive": "server-1.4.123-test-forest-ready-fastpack-20261015.zip",
-  "archive_sha256": "1511a9038751d46f32d9195f400d21ef78df8f00a9f5b75252d434374f1e2a60",
+  "version": "1.4.123-test-non100-livefix-20261018",
+  "archive": "server-1.4.123-test-non100-livefix-20261018.zip",
+  "archive_sha256": "be853f7ffacf763e91d0eeaa4a5e856fa7efeabf33f479b80f724dcf5b9fa2b4",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26514944,
-      "sha256": "d53ad3928b1b0aff4a82a726c93eaa08636111a4bf8caf44623e381453ef67e9"
+      "size": 26795008,
+      "sha256": "c70fbfb70f2736530f3a4e19d07ef7eab6abdacbda9583b007c58f67c58ddcef"
     }
   ],
-  "validation": "HUMAN_APPROVED_CURRENT_PATCH;SOURCE_NATIVE_CONTRACT_COHORT_PASS;CHANGED_FEATURES_LIVE_UNTESTED",
+  "validation": "FINAL_PAIR_BUILD_AND_TARGETED_CHECKS_REQUIRED;LIVE_RETEST_PENDING",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261015-forest-ready-travel-v5",
+  "network_wire_identity": "1.4.123+rpc-20261018-non100-livefix-v10",
   "known_issues": [
-    "Compact guard HUD, full replay after reload and workbench travel still need LIVE game verification.",
-    "Prior seven-second biome activation visuals, ten-second sequential guard birth and guard stats are included.",
-    "New four level100 perks, resident cargo/loot collection, unique interactions and voices are excluded."
-  ]
+    "Final reported visual/audio/observer/capacity/recast fixes included; multiplayer appearance and FPS require human retest.",
+    "No full gameplay LIVE PASS claimed; Elite greeting and new100 additions excluded."
+  ],
+  "EliteGreetingIncluded": false,
+  "Gold100NewFourIncluded": false
 }
