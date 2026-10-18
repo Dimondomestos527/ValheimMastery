@@ -10,6 +10,8 @@ namespace ValheimMastery
         [HarmonyPriority(Priority.First)]
         private static void Prefix()
         {
+            MasterIdolCleanup.Run("residents.close",MasterIdolForestGuardState.Close,Report);
+            MasterIdolCleanup.Run("resident-dance.reset",MasterIdolResidentDance.Reset,Report);
             MasterIdolCleanup.Run("interaction.reset",MasterIdolInteraction.Reset,Report);
             MasterIdolCleanup.Run("legacy-removal.shutdown",LegacyMasterIdolRemoval.Shutdown,Report);
             MasterIdolCleanup.Run("placement.shutdown",MasterIdolPlacement.Shutdown,Report);

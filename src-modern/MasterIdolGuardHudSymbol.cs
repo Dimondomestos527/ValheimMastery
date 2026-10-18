@@ -144,7 +144,7 @@ namespace ValheimMastery
             Showing = true; Level2.gameObject.SetActive(false); Level3.gameObject.SetActive(false);
             Icon.gameObject.SetActive(true);
         }
-        internal const float SymbolSize = 16f, Padding = 4f;
+        internal const float SymbolSize = 16f, Padding = 2f;
         private static bool Finite(float value) => !float.IsNaN(value) && !float.IsInfinity(value);
         private bool Bounds(RectTransform gui, RectTransform widget, out Rect bounds)
         {
@@ -164,8 +164,9 @@ namespace ValheimMastery
                 !Finite(name.xMin)||!Finite(name.xMax)||!Finite(name.yMin)||!Finite(name.yMax)||
                 health.width<=0||health.height<=0||name.width<=0||name.height<=0)return false;
             float half=SymbolSize*.5f,x=health.xMax+Padding+half,y=health.center.y;
-            if(x-half<name.xMax+Padding&&x+half>name.xMin-Padding&&y-half<name.yMax+Padding&&y+half>name.yMin-Padding)
-                y=Mathf.Max(y,name.yMax+Padding+half);
+            // The native name RectTransform is a 400x52 layout container, not its visible glyph bounds.
+            // Raising the symbol over that empty container separated it from the health bar.
+            // Keep the rune aligned to the health bar, outside its right edge.
             if(!Finite(x)||!Finite(y))return false;center=new Vector2(x,y);return true;
         }
         internal void Restore(bool nativeFresh = false)

@@ -15,8 +15,7 @@ namespace ValheimMastery
             if (__result.Contains("<color=#D6B47A>Майстерність арбалета</color>") ||
                 __result.Contains("<color=#D6B47A>Crossbow Mastery</color>")) return;
             bool ready = PerkRuntimeService.HasPerk(Player.m_localPlayer, Skills.SkillType.Crossbows, 35);
-            string stats = CrossbowsHookSecretText.CurrentStats(Player.m_localPlayer, ua);
-            __result += "\n\n" + marker + (stats.Length > 0 ? "\n" + stats : "") + "\n<color=#D6B47A>35 — " +
+            __result += "\n\n" + marker + "\n<color=#D6B47A>35 — " +
                 (ready ? "" : (ua ? "ще дрімає — " : "dormant — ")) +
                 CrossbowsHookSecretText.ReloadDescription(ua) + "</color>";
             bool turret = PerkRuntimeService.HasPerk(Player.m_localPlayer, Skills.SkillType.Crossbows, 70);

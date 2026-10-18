@@ -13,22 +13,7 @@ namespace ValheimMastery
             if (Discovered(player)) text += ua
                 ? " Гак заряджається швидше й сягає далі."
                 : " The grappling hook charges faster and reaches farther.";
-            string stats = CurrentStats(player, ua);
-            if (stats.Length > 0) text += "\n" + stats;
             return text;
-        }
-        internal static string CurrentStats(Player player, bool ua)
-        {
-            if (player == null || player != Player.m_localPlayer || player.m_nview?.IsOwner() != true ||
-                MasteryPlugin.Settings?.Enabled.Value != true || ZNet.instance == null || ZNet.instance.GetWorldUID() == 0) return "";
-            var skills = player.GetSkills();
-            if (skills?.m_skillData == null || !skills.m_skillData.ContainsKey(Skills.SkillType.Crossbows)) return "";
-            float level = Crossbows35ParryStagger.LearnedLevel(player);
-            string parry = Crossbows35ParryStagger.ParryAddition(level).ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-            string stagger = ((Crossbows35ParryStagger.StaggerTargetMultiplier(level) - 1f) * 100f)
-                .ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
-            return ua ? "Парирування: +" + parry + " до множника; шкода оглушеним істотам: +" + stagger + "%."
-                : "Parry multiplier: +" + parry + "; damage to staggered creatures: +" + stagger + "%.";
         }
         internal static string ReloadDescription(bool ua) => ua
             ? "Готуючи важкий постріл, ти тримаєш удар. Перезарядка дає +20 броні та ще 40% від поточної, подвоює межу оглушення й не втрачає захисту на бігу. Завершення чи переривання заряджання прибирає цей захист."

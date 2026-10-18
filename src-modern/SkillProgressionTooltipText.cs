@@ -10,70 +10,80 @@ namespace ValheimMastery
         internal static string Build(Skills.Skill skill)
         {
             if (skill?.m_info == null) return string.Empty;
-            string native = PerkLocalization.Localize(skill.m_info.m_description)?.Trim() ?? string.Empty;
-            string added = AddedPassive(skill.m_info.m_skill, Ukrainian());
-            if (string.IsNullOrWhiteSpace(added)) return native;
-            if (skill.m_info.m_skill == Skills.SkillType.Crossbows)
-                return native + (native.Length > 0 ? "\n\n" : string.Empty) + added;
-            string label = Ukrainian() ? "Додатково від рівня:" : "Additional level effect:";
-            return native + (native.Length > 0 ? "\n\n" : string.Empty) +
-                "<color=#B9C5CE>" + label + "</color> " + added;
+            return Describe(skill.m_info.m_skill, PerkLocalization.Localize(skill.m_info.m_description), Player.m_localPlayer);
+        }
+
+        internal static string Describe(Skills.SkillType skill, string nativeDescription, Player player)
+        {
+            bool ua = Ukrainian();
+            string lead = PerkNarrativeService.SkillLead(skill, ua);
+            string native = nativeDescription?.Trim() ?? "";
+            string passive = Passive(skill, ua, player);
+            string text = lead;
+            if (native.Length > 0)
+            {
+                text += (text.Length > 0 ? " " : "") + native;
+                char last = native[native.Length - 1];
+                if (passive.Length > 0 && last != '.' && last != '!' && last != '?') text += ".";
+            }
+            if (passive.Length > 0) text += (text.Length > 0 ? " " : "") + passive;
+            return text;
         }
 
         private static bool Ukrainian() => Localization.instance != null &&
             string.Equals(Localization.instance.GetSelectedLanguage(), "Ukrainian",
                 StringComparison.OrdinalIgnoreCase);
 
-        private static string AddedPassive(Skills.SkillType skill, bool ua)
+        internal static string Passive(Skills.SkillType skill, bool ua, Player player)
         {
             switch (skill)
             {
                 case Skills.SkillType.Cooking:
                     return ua
-                        ? "вищий рівень збільшує шанс додаткового виходу з ферментера."
-                        : "higher skill increases the chance of extra fermenter output.";
+                        ? "Досвідчений кухар частіше отримує зайву пляшку під час розливу готової медовиці."
+                        : "An experienced cook more often gains an extra bottle when tapping finished mead.";
                 case Skills.SkillType.Crafting:
                     return ua
-                        ? "вищий рівень збільшує шанс додаткового виходу з переробних станцій."
-                        : "higher skill increases the chance of extra processing-station output.";
+                        ? "З досвідом переробка завантаженої тобою сировини частіше дає зайвий виріб."
+                        : "With experience, processing the materials you load more often yields extra output.";
                 case Skills.SkillType.Farming:
                     return ua
-                        ? "вищий рівень збільшує шанс додаткового врожаю та додаткового соку під час збору."
-                        : "higher skill increases the chance of extra harvest and extra sap when collected.";
+                        ? "З досвідом земля частіше дарує зайвий врожай, а збірник — додатковий сік."
+                        : "With experience, the land more often yields extra crops, and the extractor extra sap.";
                 case Skills.SkillType.Pickaxes:
                     return ua
-                        ? "вищий рівень збільшує шанс видобути додатковий цінний ресурс із покладу."
-                        : "higher skill increases the chance of an extra valuable resource from a deposit.";
+                        ? "Досвідчений рудокоп частіше знаходить у покладі зайвий цінний ресурс."
+                        : "An experienced miner more often finds extra valuable resources in a deposit.";
                 case Skills.SkillType.WoodCutting:
                     return ua
-                        ? "вищий рівень збільшує шанс отримати додаткову цінну деревину."
-                        : "higher skill increases the chance of extra valuable wood.";
+                        ? "Досвід допомагає частіше добувати зайву цінну деревину."
+                        : "Experience helps you gather extra valuable wood more often.";
                 case Skills.SkillType.Axes:
                     return ua
-                        ? "вищий рівень розширює зону влучання сокири й трохи подовжує ближній удар."
-                        : "higher skill widens an axe's hit area and slightly extends its melee reach.";
+                        ? "З досвідом замах сокири охоплює ширшу зону й сягає трохи далі."
+                        : "With experience, an axe swing covers a wider area and reaches slightly farther.";
                 case Skills.SkillType.Clubs:
                     return ua
-                        ? "вищий рівень додатково посилює похитування від ударів булавою."
-                        : "higher skill further increases stagger from mace hits.";
+                        ? "Умілі удари булави сильніше збивають ворога з рівноваги."
+                        : "Skilled mace strikes knock enemies further off balance.";
                 case Skills.SkillType.Knives:
                     return ua
-                        ? "вищий рівень додатково посилює удар у спину ножем."
-                        : "higher skill further strengthens knife backstabs.";
+                        ? "Майстерність ножів підсилює звичайні удари в спину й з іншою зброєю."
+                        : "Knife mastery also strengthens ordinary backstabs with other weapons.";
                 case Skills.SkillType.Crossbows:
-                    return CrossbowsHookSecretText.Progression(Player.m_localPlayer, ua);
+                    return CrossbowsHookSecretText.Progression(player, ua);
                 case Skills.SkillType.Unarmed:
                     return ua
-                        ? "вищий рівень підсилює бонус до адреналіну під час бою кулаками й ефекти стусана, а без зброї — шкоду та швидкість атак."
-                        : "higher skill strengthens the adrenaline bonus while fighting with fists and the kick's effects; bare hands also gain damage and attack speed.";
+                        ? "Досвід кулачного бою додає адреналіну й сили стусану; голі руки б’ють швидше та сильніше. Кулачна зброя отримує стриманий бонус навички до шкоди."
+                        : "Experience in fist fighting adds adrenaline and power to your kick; bare hands strike faster and harder. Fist weapons gain a restrained skill-derived damage bonus.";
                 case Skills.SkillType.ElementalMagic:
                     return ua
-                        ? "вищий рівень прискорює базове відновлення ейтру, не змінюючи затримку."
-                        : "higher skill improves base eitr regeneration without changing its delay.";
+                        ? "Досвід прискорює базове відновлення ейтру, але не скорочує паузу перед ним."
+                        : "Experience improves base eitr regeneration without shortening the pause before it.";
                 case Skills.SkillType.BloodMagic:
                     return ua
-                        ? "вищий рівень додає лікування до звичайного тіку відновлення."
-                        : "higher skill adds healing to the normal regeneration tick.";
+                        ? "Досвід посилює звичайне відновлення здоров’я."
+                        : "With experience, each normal regeneration tick restores more health.";
                 default:
                     return string.Empty;
             }

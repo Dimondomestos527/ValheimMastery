@@ -32,7 +32,7 @@ namespace ValheimMastery
         internal static uint Revision { get; private set; }
         internal static int StartupScans { get; private set; }
         internal static void Reset()
-        { Shapes.Clear(); Families.Clear();FamilyHomes.Clear();HomeMembers.Clear();FamilyPoints.Clear(); Idols.Clear(); Stations.Clear(); Benches.Clear(); Wards.Clear(); Extensions.Clear(); Definitions.Clear(); Radii.Clear(); Ready = false; DirtyBenches.Clear(); BenchPoints.Clear(); BenchCoverage.Clear(); WardCoverage.Clear(); ExtensionCoverage.Clear(); TopologyRevision++; Revision++; Session = null; Manager = null; World = 0; }
+        { MasterIdolResidentCargo.Reset(); Shapes.Clear(); Families.Clear();FamilyHomes.Clear();HomeMembers.Clear();FamilyPoints.Clear(); Idols.Clear(); Stations.Clear(); Benches.Clear(); Wards.Clear(); Extensions.Clear(); Definitions.Clear(); Radii.Clear(); Ready = false; DirtyBenches.Clear(); BenchPoints.Clear(); BenchCoverage.Clear(); WardCoverage.Clear(); ExtensionCoverage.Clear(); TopologyRevision++; Revision++; Session = null; Manager = null; World = 0; }
         internal static void BeginLoad() { if (Loading == 0) LoadFailed = false; Loading++; Blocked = true; Reset(); }
         internal static void EndLoad(bool failed) { LoadFailed |= failed; Loading = Math.Max(0, Loading - 1); if (Loading == 0) Blocked = LoadFailed; }
         internal static void Shutdown() { Reset(); Loading = 0; Blocked = LoadFailed = false; }
@@ -46,7 +46,7 @@ namespace ValheimMastery
             if (Ready) return true;
             // The only entire-world enumeration. Native load/reset invalidates completeness.
             Populate(manager);
-            StartupScans++; Ready = true; Revision++; return true;
+            MasterIdolResidentCargo.IndexComplete(); StartupScans++; Ready = true; Revision++; return true;
         }
         private static bool EnsureOptimized()
         {
@@ -57,7 +57,7 @@ namespace ValheimMastery
             if (Ready) return true;
             // The only entire-world enumeration. Native load/reset invalidates completeness.
             Populate(manager);
-            StartupScans++; Ready = true; Revision++; return true;
+            MasterIdolResidentCargo.IndexComplete(); StartupScans++; Ready = true; Revision++; return true;
         }
         private static void Populate(ZDOMan manager)
         {MasterIdolTiming.Measure("index.startup",()=>{foreach(var zdo in manager.m_objectsByID.Values)Add(zdo);return true;});}
@@ -81,6 +81,7 @@ namespace ValheimMastery
         private static void Add(ZDO zdo)
         {
             if (!Actual(zdo)) return;
+            MasterIdolResidentCargo.Observe(zdo);
             var definition = Describe(zdo.GetPrefab());
             IndexFamily(zdo,definition);
             if(definition.Station!=null||definition.Extension!=null||definition.Ward!=null)Shapes[zdo.m_uid]=new Shape(zdo);
@@ -93,6 +94,7 @@ namespace ValheimMastery
         internal static void Observe(ZDO zdo)
         {
             if (!Ready || Blocked || Loading != 0 || !ReferenceEquals(Session, ZNet.instance) || !ReferenceEquals(Manager, ZDOMan.instance) || ZNet.instance?.GetWorld() == null || World != ZNet.instance.GetWorldUID() || !Actual(zdo)) return;
+            MasterIdolResidentCargo.Observe(zdo);
             if(Shapes.TryGetValue(zdo.m_uid,out var shape)&&shape.Same(zdo)&&(!Stations.TryGetValue(zdo.m_uid,out var station)||ReferenceEquals(station,zdo))&&(!Extensions.TryGetValue(zdo.m_uid,out var extension)||ReferenceEquals(extension,zdo))&&(!Wards.TryGetValue(zdo.m_uid,out var ward)||ReferenceEquals(ward,zdo))){IndexFamily(zdo,Describe(zdo.GetPrefab()));return;}
             bool wasIdol = Idols.Remove(zdo.m_uid);
             RemoveCategories(zdo.m_uid); Add(zdo);

@@ -37,6 +37,15 @@ namespace ValheimMastery
                 data.OwnerRevision==revision&&data.GetOwner()!=0&&data.GetInt(ZDOVars.s_emoteID,0)==id&&
                 !string.IsNullOrEmpty(data.GetString(ZDOVars.s_emote,""))&&data.GetString(ZDOVars.s_emote,"").Length<=32;
         }
+        // Match the current approved-only consumer before selecting or acknowledging a target.
+        // This is capability selection only; existing owner/home/friend/player proofs remain mandatory.
+        private static bool ApprovedReaction(ZDO actor,ZDO player)
+        {
+            if(actor==null||player==null)return false;
+            int choice=MasterIdolResidentUniqueRules.Gesture(player.GetString(ZDOVars.s_emote,""));
+            int family=MasterIdolForestGuardState.Family(actor);
+            return choice>=0&&(MasterIdolResidentUniqueRules.MotionApproved(family,ResidentUniqueKind.Gesture,(byte)choice)||family==2&&choice==0);
+        }
         private static bool Same(Observation value,Player player)
         {
             var data=player?.m_nview?.GetZDO();return data!=null&&ReferenceEquals(value.Data,data)&&value.Net==ZNet.instance&&value.Manager==ZDOMan.instance&&
@@ -79,7 +88,7 @@ namespace ValheimMastery
             {
                 if(!MasterIdolNetworkQuota.TryUid(member.Key,out long user,out uint number))continue;
                 var data=ZDOMan.instance?.GetZDO(new ZDOID(user,number));var actor=ZNetScene.instance?.FindInstance(new ZDOID(user,number))?.GetComponent<Character>();
-                if(data==null||actor==null||actor.m_nview?.IsValid()!=true||!ReferenceEquals(actor.m_nview.GetZDO(),data)||!MasterIdolForestGuardState.ModuleBorn(data)||
+                if(data==null||actor==null||!ApprovedReaction(data,context.Data)||actor.m_nview?.IsValid()!=true||!ReferenceEquals(actor.m_nview.GetZDO(),data)||!MasterIdolForestGuardState.ModuleBorn(data)||
                     !MasterIdolResidentPolicy.TryHome(actor,out var assigned)||assigned.Id!=home.Id||!MasterIdolResidentPolicy.Friendly(actor,player)||
                     !home.Contains(data.GetPosition())||!float.IsFinite(data.GetFloat(ZDOVars.s_health,0))||data.GetFloat(ZDOVars.s_health,0)<=0)continue;
                 float distance=(data.GetPosition()-player.transform.position).sqrMagnitude;if(!float.IsFinite(distance)||distance>64)continue;
@@ -99,7 +108,7 @@ namespace ValheimMastery
             {
                 var target=value.Targets[value.Attempt++];
                 if(target.Actor?.m_nview?.IsValid()!=true||!ReferenceEquals(target.Actor.m_nview.GetZDO(),target.Data)||!ReferenceEquals(ZDOMan.instance.GetZDO(target.Data.m_uid),target.Data)||
-                    target.Owner==0||target.Data.GetOwner()!=target.Owner||target.Data.OwnerRevision!=target.Revision)continue;
+                    target.Owner==0||target.Data.GetOwner()!=target.Owner||target.Data.OwnerRevision!=target.Revision||!ApprovedReaction(target.Data,value.Context.Data))continue;
                 value.Target=target;
                 try{if(MasterIdolVisibleGesture.SendEmote(target.Actor,target.Owner,value.Home,value.Stamp,p=>Write(p,1,value)))return;}
                 catch(Exception){MasterIdolResidentMetrics.Count("emote.request-unknown");}
@@ -144,7 +153,7 @@ namespace ValheimMastery
         }
         private bool TryQueue(Player player,ZDO playerData,int id,string home,long stamp)
         {
-            if(Queued||QueueCount>=4||Social==null||!Social.SceneAvailable||MasterIdolResidentSceneAnimation.HomeActive(MasterIdolEffectZones.Find(home)))return false;
+            if(!ApprovedReaction(View?.GetZDO(),playerData)||Queued||QueueCount>=4||Social==null||!Social.SceneAvailable||MasterIdolResidentSceneAnimation.HomeActive(MasterIdolEffectZones.Find(home)))return false;
             var data=View.GetZDO();Player=player;PlayerData=playerData;PlayerOwner=playerData.GetOwner();PlayerRevision=playerData.OwnerRevision;
             ActorData=data;ActorOwner=data.GetOwner();ActorRevision=data.OwnerRevision;Id=id;Home=home;Stamp=stamp;Net=ZNet.instance;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=Net.GetWorldUID();
             Epoch=QueueEpoch;Until=Time.unscaledTime+QueueSeconds;Next=0;Queued=true;QueueCount++;return true;
@@ -153,7 +162,7 @@ namespace ValheimMastery
         {
             return Net==ZNet.instance&&Net?.GetWorld()!=null&&Net.GetWorldUID()==World&&MasterIdolLoadIdentity.LoadReady&&Manager==ZDOMan.instance&&Generation==MasterIdolLoadIdentity.Generation&&View?.IsValid()==true&&View.IsOwner()&&
                 ReferenceEquals(View.GetZDO(),ActorData)&&ReferenceEquals(Manager?.GetZDO(ActorData.m_uid),ActorData)&&ActorData.GetOwner()==ActorOwner&&ActorData.OwnerRevision==ActorRevision&&
-                home?.Id==Home&&Current(Player,PlayerData,PlayerRevision,Id)&&PlayerData.GetOwner()==PlayerOwner&&home.Contains(Player.transform.position)&&home.Contains(transform.position)&&
+                home?.Id==Home&&Current(Player,PlayerData,PlayerRevision,Id)&&ApprovedReaction(ActorData,PlayerData)&&PlayerData.GetOwner()==PlayerOwner&&home.Contains(Player.transform.position)&&home.Contains(transform.position)&&
                 (Player.transform.position-transform.position).sqrMagnitude<=64&&MasterIdolResidentPolicy.Friendly(Actor,Player);
         }
         internal static bool Idle(MasterIdolSocial social,MasterIdolEffectZone home,float dt)

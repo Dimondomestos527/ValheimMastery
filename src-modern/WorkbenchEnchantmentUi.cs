@@ -114,7 +114,7 @@ namespace ValheimMastery
         private static string CapacityReason(WorkbenchEnchantmentSnapshot snapshot, string selected, bool blocked)
         {
             if (blocked || snapshot?.Learned == null || snapshot.NativeLevel < 1 ||
-                Contains(snapshot.Learned, selected) || snapshot.Learned.Length < Math.Min(6, snapshot.NativeLevel)) return "";
+                Contains(snapshot.Learned, selected) || snapshot.Learned.Length < WorkbenchEnchantmentRules.Capacity(snapshot.NativeLevel)) return "";
             return Text("Щоб відкрити ще один дар, підвищ рівень верстака.", "Upgrade the workbench to unlock another gift.");
         }
         private static bool Bench(CraftingStation station) => station != null && station.m_name == "$piece_workbench";
@@ -134,11 +134,11 @@ namespace ValheimMastery
         private static bool ValidSnapshot(WorkbenchEnchantmentSnapshot value)
         {
             if (value == null || value.Revision < 0 || value.NativeLevel < 1 || value.Learned == null || value.Available == null ||
-                value.Learned.Length > 6 || value.Available.Length > Math.Min(6, value.NativeLevel) || (value.Reason?.Length ?? 0) > 160) return false;
+                value.Learned.Length > 6 || value.Available.Length > WorkbenchEnchantmentRules.Capacity(value.NativeLevel) || (value.Reason?.Length ?? 0) > 160) return false;
             var learned = new HashSet<string>(StringComparer.Ordinal);
             foreach (string id in value.Learned) if (Array.IndexOf(Choices, id) < 0 || !learned.Add(id)) return false;
             var available = new HashSet<string>(StringComparer.Ordinal);
-            if (value.Available.Length != Math.Min(value.Learned.Length, Math.Min(6, value.NativeLevel))) return false;
+            if (value.Available.Length != Math.Min(value.Learned.Length, WorkbenchEnchantmentRules.Capacity(value.NativeLevel))) return false;
             for (int i = 0; i < value.Available.Length; ++i)
                 if (value.Available[i] != value.Learned[i] || !available.Add(value.Available[i])) return false;
             return string.IsNullOrEmpty(value.Active) || available.Contains(value.Active);
@@ -259,7 +259,7 @@ namespace ValheimMastery
             if (blocked || snapshot?.Learned == null || snapshot.NativeLevel < 1 ||
                 snapshot.Learned.Length >= 6 || Array.IndexOf(Choices, selected) < 0 ||
                 Contains(snapshot.Learned, selected)) return 0;
-            return snapshot.Learned.Length + 1;
+            return Math.Max(1, snapshot.Learned.Length);
         }
         private void RenderRequirement(bool blocked)
         {
@@ -462,7 +462,7 @@ namespace ValheimMastery
             _detail.rectTransform.sizeDelta = new Vector2(-8f,
                 Mathf.Max(_detailViewport.rect.height, _detail.GetPreferredValues(_detail.text, width, 0).y + 8f));
             _learn.interactable = !blocked && CooldownReady(SelectedCooldown()) && !Contains(_snapshot.Learned, _selected) &&
-                (_snapshot.Learned?.Length ?? 0) < Math.Min(6, _snapshot.NativeLevel);
+                (_snapshot.Learned?.Length ?? 0) < WorkbenchEnchantmentRules.Capacity(_snapshot.NativeLevel);
             _switch.interactable = !blocked && Contains(_snapshot.Available, _selected);
         }
         // First four natural action clicks only; never polls or changes admission.
@@ -487,7 +487,7 @@ namespace ValheimMastery
             if (!_open || _pending || _snapshot == null || Request == null || !string.IsNullOrEmpty(_snapshot.Reason))
             { ActionTrace(attempt, "begin-refused"); return; }
             if (kind == WorkbenchOperationKind.Learn && (!CooldownReady(SelectedCooldown()) ||
-                Contains(_snapshot.Learned, _selected) || _snapshot.Learned.Length >= Math.Min(6, _snapshot.NativeLevel)))
+                Contains(_snapshot.Learned, _selected) || _snapshot.Learned.Length >= WorkbenchEnchantmentRules.Capacity(_snapshot.NativeLevel)))
             { ActionTrace(attempt, "learn-refused"); return; }
             var snapshot = _snapshot; var player = _player; var station = _station; int epoch = _epoch;
             _pending = true; Render(); ActionTrace(attempt, "pending"); bool queued = false;

@@ -125,7 +125,7 @@ namespace ValheimMastery
             bool born=false;
             if(publishable()&&MasterIdolForestSpawnProbe.TryTake(zone,out var lease))
             {
-                try{born=Create(zone,assigned,publishable,lease.Family,lease.Before,lease.Point,lease);}
+                try{born=Create(zone,assigned,publishable,lease.Family,lease.Before,lease.Point,lease,lease.Claim);}
                 finally{MasterIdolForestSpawnProbe.Release(lease);}
             }
             if(born){NextBirth=Time.unscaledTime+12;return;}
@@ -133,29 +133,38 @@ namespace ValheimMastery
             slots.TryGetValue(type,out var previous);
             if(previous!=null&&previous.Death==0){MasterIdolForestSpawnDiagnostics.Trace("server","slot-occupied");return;} // Missing/unloaded is not death; never re-create occupied slots.
             long now=net.GetTime().Ticks;
-            if(previous!=null&&(!previous.Valid()||now<previous.Respawn))return;
+            if(previous!=null&&!previous.Valid())return;
             if(Time.unscaledTime<Retry[family])return;
             if(!MasterIdolActivity.SpawnNear(circle.Point,circle.Radius+32)){MasterIdolForestSpawnDiagnostics.Trace("server","no-player-near-ward",MasterIdolActivity.DescribeNear());return;}
-            if(!publishable()){MasterIdolForestSpawnDiagnostics.Trace("server","projection-not-publishable");return;}Retry[family]=Time.unscaledTime+30;
-            if(!born&&!net.IsDedicated()&&TryPosition(zone,family,null,out var point,out _))
-            {if(Create(zone,assigned,publishable,family,previous,point,null))NextBirth=Time.unscaledTime+12;return;}
-            MasterIdolForestSpawnProbe.Request(zone,family,previous);
+            if(!publishable()){MasterIdolForestSpawnDiagnostics.Trace("server","projection-not-publishable");return;}
+            if(!MasterIdolForestGuardState.TryBirthClaim(zone,family,previous,out var claim))return;
+            bool handed=false;
+            try
+            {
+                Retry[family]=Time.unscaledTime+30;
+                if(!born&&!net.IsDedicated()&&TryPosition(zone,family,null,out var point,out _))
+                {if(Create(zone,assigned,publishable,family,previous,point,null,claim))NextBirth=Time.unscaledTime+12;return;}
+                handed=MasterIdolForestSpawnProbe.Request(zone,family,previous,claim);
+            }
+            finally{if(!handed)MasterIdolForestGuardState.ReleaseBirth(claim);}
         }
-        private static bool Create(MasterIdolEffectZone zone,ISet<string> assigned,Func<bool> publishable,int family,MasterIdolForestGuardRecord previous,Vector3 point,MasterIdolForestSpawnProbe.Lease lease)
+        private static bool Create(MasterIdolEffectZone zone,ISet<string> assigned,Func<bool> publishable,int family,MasterIdolForestGuardRecord previous,Vector3 point,MasterIdolForestSpawnProbe.Lease lease,ForestBirthClaim claim)
         {
             var net=ZNet.instance;var slots=MasterIdolForestGuardState.Slots;string type=MasterIdolForestRules.Families[family];
             if(!Context(net)||slots==null||!publishable()||slots.TryGetValue(type,out var current)&&!ReferenceEquals(current,previous)||lease!=null&&!MasterIdolForestSpawnProbe.StillValid(lease,zone))return false;
-            if(previous!=null&&(previous.Death==0||!previous.Valid()||net.GetTime().Ticks<previous.Respawn))return false;
+            if(claim?.Family!=family||!MasterIdolForestGuardState.BirthValid(claim,zone,previous))return false;
             var prefab=ZNetScene.instance?.GetPrefab(type);if(prefab==null)return false;
+            claim.Creating=true;
             var created=UnityEngine.Object.Instantiate(prefab,point,Quaternion.identity);var view=created.GetComponent<ZNetView>();var actor=created.GetComponent<Character>();var data=view?.GetZDO();
             if(view?.IsValid()!=true||!view.IsOwner()||actor==null||data?.Persistent!=true||data.GetPrefab()!=type.GetStableHashCode()||!ReferenceEquals(ZDOMan.instance.GetZDO(data.m_uid),data)||
-                !Context(net)||!publishable()||lease!=null&&!MasterIdolForestSpawnProbe.StillValid(lease,zone))
+                !Context(net)||!publishable()||!MasterIdolForestGuardState.BirthValid(claim,zone,previous)||lease!=null&&!MasterIdolForestSpawnProbe.StillValid(lease,zone))
             {MasterIdolForestSpawnDiagnostics.Trace("server","factory-registration-rejected");if(view?.IsValid()==true&&view.IsOwner())ZNetScene.instance.Destroy(created);else UnityEngine.Object.Destroy(created);return false;}
             MasterIdolForestGuardRecord record=null;
             try
             {
                 if(created.GetComponent<MonsterAI>() is MonsterAI ai){ai.m_eventCreature=false;ai.m_despawnInDay=false;data.Set(ZDOVars.s_eventCreature,false);data.Set(ZDOVars.s_despawnInDay,false);}
                 record=new MasterIdolForestGuardRecord{Home=zone.Id,Family=type,Uid=data.m_uid.ToString(),Nonce=Guid.NewGuid().ToString("N"),Born=net.GetTime().Ticks,Name=previous?.Name??MasterIdolForestGuardState.DefaultKey(type)};
+                if(!MasterIdolForestGuardState.BirthValid(claim,zone,previous))throw new InvalidOperationException("Guard birth cause changed");
                 MasterIdolForestGuardState.Stamp(actor,record);MasterIdolForestGuardState.Added(record);zone.Residents[record.Uid]=type;assigned.Add(record.Uid);MasterIdolWorldIndex.Observe(data);
                 MasterIdolResidentMetrics.Count("guard.native-birth");
                 MasterIdolForestSpawnDiagnostics.Trace("server","native-birth-registered","family="+family);
@@ -165,7 +174,7 @@ namespace ValheimMastery
                     if(!Context(net)||!publishable()||!MasterIdolForestSpawnProbe.TransferReady(lease,zone,record,data))throw new InvalidOperationException("Guard handoff witness changed");
                     data.SetOwner(lease.Peer.m_uid);
                 }
-                return true;
+                FinalizeApplied(claim,record);return true;
             }
             catch
             {
@@ -175,7 +184,7 @@ namespace ValheimMastery
                 if(registered&&(!own||record.Death!=0))
                 {
                     // Applied or uncertain owner transfer must keep the occupied UID and consumed nonce.
-                    MasterIdolResidentMetrics.Count("guard.handoff-retained");return true;
+                    MasterIdolResidentMetrics.Count("guard.handoff-retained");FinalizeApplied(claim,record);return true;
                 }
                 if(!own)return false;
                 MasterIdolForestGuardState.CancelBirth(record,previous);
@@ -183,7 +192,16 @@ namespace ValheimMastery
                 ZNetScene.instance.Destroy(created);return false;
             }
         }
-        internal static string Describe()=>"recruitment=world-four native guards; ready="+MasterIdolForestGuardState.Ready+" slots="+(MasterIdolForestGuardState.Slots?.Count??0)+" search=active Ward workbench circle; dedicated=bounded peer position; wild recruitment=off; respawn=verified death+one game-day; "+MasterIdolActivity.DescribeNear();
+        private static void FinalizeApplied(ForestBirthClaim claim,MasterIdolForestGuardRecord record)
+        {
+            // This is post-native-success. Failure never returns false from Create or retries the occupied slot.
+            if(!MasterIdolForestGuardState.CompleteBirth(claim,record))
+            {
+                MasterIdolForestGuardState.Changed();
+                MasterIdolForestGuardState.RevivalWarning("[GuardRevival] Applied occupied birth retained; quota finalization/persistence needs attention");
+            }
+        }
+        internal static string Describe()=>"recruitment=world-four native guards; ready="+MasterIdolForestGuardState.Ready+" slots="+(MasterIdolForestGuardState.Slots?.Count??0)+" search=active Ward workbench circle; dedicated=bounded peer position; wild recruitment=off; respawn=Shaman timer; others living-home-Shaman up to2/native-day; "+MasterIdolActivity.DescribeNear();
     }
 
     internal static class MasterIdolForestSpawnDiagnostics

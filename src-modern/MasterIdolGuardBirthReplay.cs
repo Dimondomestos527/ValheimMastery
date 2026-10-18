@@ -22,6 +22,16 @@ namespace ValheimMastery
         private static Request Pending;private static ZNet Session;private static ZDOMan Manager;private static ZNetScene Scene;
         private static ulong Generation;private static float Next;private static string ReplayHome;private static MasterIdolEffectCircle ReplayCircle;
         private static readonly bool[] Queued=new bool[4];
+        private static readonly MasterIdolForestGuardRecord[] BirthReady=new MasterIdolForestGuardRecord[4];
+        // Proposed Root provider: current accepted replay intent only, never plain file presence.
+        internal static ReplayBirthAdmission BirthAdmission(MasterIdolEffectZone zone,int family,MasterIdolForestGuardRecord before,out string replayNonce)
+        {
+            replayNonce=null;
+            if(Pending==null||!Bound||!Current()||zone?.Type!="BlackForest"||family<0||family>3||ReplayHome==null||!MasterIdolNativeTaming.SameHome(zone.Id,ReplayHome))return ReplayBirthAdmission.None;
+            var slots=MasterIdolForestGuardState.Slots;
+            if(slots!=null&&slots.TryGetValue(MasterIdolForestRules.Families[family],out var current)&&ReferenceEquals(current,before)&&ReferenceEquals(BirthReady[family],before)&&before!=null&&Consumed&&!Faulted){replayNonce=Pending.Nonce;return ReplayBirthAdmission.Ready;}
+            return !Finished||Faulted?ReplayBirthAdmission.Hold:ReplayBirthAdmission.None;
+        }
         private static readonly ZDOID[] TargetUids=new ZDOID[4];private static readonly ZDO[] TargetObjects=new ZDO[4];private static bool TargetsPinned;private static string TargetReason;
         private static readonly HashSet<string> Messages=new HashSet<string>(StringComparer.Ordinal);
         private static string Hash(Stream stream){using(var sha=SHA256.Create())return BitConverter.ToString(sha.ComputeHash(stream)).Replace("-","");}
@@ -156,7 +166,10 @@ namespace ValheimMastery
                 if(!Bound){Session=net;Manager=ZDOMan.instance;Scene=ZNetScene.instance;Generation=MasterIdolLoadIdentity.Generation;Bound=true;}
                 if(!Current())return Reject("rejected-context");
                 if(Time.unscaledTime<Next)return false;Next=Time.unscaledTime+.5f;
-                var slots=MasterIdolForestGuardState.Slots;if(!SameSlots(slots))return Reject("rejected-record-drift");
+                var slots=MasterIdolForestGuardState.Slots;
+                if(!Consumed&&slots!=null)foreach(var expected in Pending.Records)
+                    if(slots.TryGetValue(expected.Family,out var current)&&expected.Uid!=current.Uid)MasterIdolForestGuardLoadIdentity.AdmitReplayAlias(expected,current);
+                if(!SameSlots(slots))return Reject("rejected-record-drift");
                 if(Consumed&&!PinnedHome(zones))return Reject("fault-pinned-active-home-changed");
                 if(!Consumed)
                 {
@@ -183,6 +196,11 @@ namespace ValheimMastery
                     }
                     TargetsPinned=true;
                     if(!Current()||!SameSlots(slots)||!OperatorNear(circle)||!PinnedHome(zones))return Reject("rejected-preconsume-drift");
+                    // Quiesce all independent inventories before consuming the same one-off intent.
+                    // These are current native birth-proven objects, never historical request UIDs.
+                    for(int i=0;i<4;i++)
+                        if(!MasterIdolResidentCargo.BeforeRemoval(TargetObjects[i],"BirthReplay"))
+                        {Note("waiting-cargo-quiescent");return false;}
                     Consume();
                 }
                 bool gone=true;
@@ -199,7 +217,7 @@ namespace ValheimMastery
                 if(!gone){Note("waiting-old-uids-gone");return false;}
                 var eligible=Eligible(Session.GetTime().Ticks);if(eligible==null||!Current()||!SameSlots(slots))return Reject("fault-final-record-drift");
                 // Explicit manual replay only; ordinary death proofs and day respawn code are untouched.
-                for(int i=0;i<4;i++)slots[eligible[i].Family]=eligible[i];
+                for(int i=0;i<4;i++){slots[eligible[i].Family]=eligible[i];BirthReady[i]=eligible[i];}
                 MasterIdolForestGuardState.Changed();Finished=true;Note("four-slots-eligible-normal-front-birth");return true;
             }
             catch(Exception){return Reject(Consumed?"fault-consumed-request-manual-rebind":"rejected-request-no-native-mutation");}

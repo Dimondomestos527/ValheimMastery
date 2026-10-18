@@ -9,7 +9,7 @@ namespace ValheimMastery
         internal const int MaximumChoices = 6;
         internal static bool Known(string id) => id == "Meadows" || id == "BlackForest" ||
             id == "Swamp" || id == "Mountain" || id == "Plains" || id == "Mistlands";
-        internal static int Capacity(int nativeLevel) => nativeLevel < 1 ? 0 : Math.Min(nativeLevel, MaximumChoices);
+        internal static int Capacity(int nativeLevel) => nativeLevel < 1 ? 0 : Math.Min(nativeLevel, MaximumChoices - 1) + 1;
         private static bool TrySnapshot(IEnumerable<string> learned, out HashSet<string> seen)
         {
             seen = new HashSet<string>(StringComparer.Ordinal);

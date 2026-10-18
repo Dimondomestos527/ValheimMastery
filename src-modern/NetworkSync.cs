@@ -10,7 +10,7 @@ namespace ValheimMastery
     {
         // The semantic mod version is intentionally stable across compatible releases.
         // WireIdentity changes whenever the RPC/build cohort is not safe to mix.
-        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261015-forest-ready-travel-v5";
+        internal const string WireIdentity = MasteryPlugin.Version + "+rpc-20261018-non100-livefix-v10";
         private static readonly HashSet<ZRpc> Registered = new HashSet<ZRpc>();
         private static readonly Dictionary<ZNetPeer, float> PendingHello = new Dictionary<ZNetPeer, float>();
         private static readonly Dictionary<ZNetPeer, float> PendingConfirmation = new Dictionary<ZNetPeer, float>();
@@ -421,4 +421,6 @@ namespace ValheimMastery
         private static void Postfix(ZNet __instance, ZRpc __0) => NetworkSync.Begin(__instance, __0);
     }
 }
+
+
 

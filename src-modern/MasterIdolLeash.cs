@@ -49,6 +49,7 @@ namespace ValheimMastery
                 internal void Calm()
         {
             ResetThreatBuffer();
+            if(Ashlands70Madness.Active(Creature))return;
             if(!Owned||!Forest||Zone==null||Ai is not MonsterAI monster||!monster.IsAlerted()||Time.unscaledTime<NextCalm)return;
             NextCalm=Time.unscaledTime+1f;
             if(Creature.IsDead()||Creature.InAttack()||Creature.IsStaggering()||Ai.m_timeSinceHurt<8||monster.m_targetStatic!=null)return;

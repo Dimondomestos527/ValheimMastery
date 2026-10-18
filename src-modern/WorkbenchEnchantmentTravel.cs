@@ -42,18 +42,43 @@ namespace ValheimMastery
         static bool ActorEligible(WorkshopActor actor)=>actor?.Available==true&&
             (actor.Rpc==null?OwnerSkillAuthority.Has(Player.m_localPlayer,Skills.SkillType.Crafting,100):
                 OwnerSkillAuthority.Has(actor.Rpc,actor.CharacterId,actor.GetPlayerID(),Skills.SkillType.Crafting,100));
+        internal static bool ShiftHeld()=>ZInput.GetKey(KeyCode.LeftShift,false)||ZInput.GetKey(KeyCode.RightShift,false);
+        internal static bool Hint(CraftingStation station)
+        {
+            var p=Player.m_localPlayer;
+            if(station==null||!LocalEligible(p)||p.IsDead()||p.IsTeleporting()||!station.InUseDistance(p)||!MasterIdolLoadIdentity.LoadReady)return false;
+            var view=station.GetComponent<ZNetView>();var data=view?.GetZDO();
+            if(view?.IsValid()!=true||data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode())return false;
+            string token=data.GetString(WorkbenchEnchantmentRuntime.StationKey,"");
+            if(!Guid.TryParseExact(token,"N",out _))return false;
+            string home=data.m_uid+"/"+token;var zone=MasterIdolEffectZones.Find(home);var point=data.GetPosition();
+            // Find supplies only fresh authenticated active zones. Never turn a
+            // learned/old/moved station's retained projection into an active hint.
+            if(zone==null||zone.Id!=home||!WorkbenchEnchantmentRules.Known(zone.Type)||!Finite(point)||!Finite(zone.Home)||
+                zone.Home.x!=point.x||zone.Home.y!=point.y||zone.Home.z!=point.z)return false;
+            return MasterIdolEffectZones.Allows(p.GetPlayerID(),point)&&MasterIdolEffectZones.Allows(p.GetPlayerID(),p.transform.position);
+        }
         internal static bool Open(CraftingStation station,Humanoid user,bool hold)
         {
+            if(hold)return false;
             var player=user as Player;var data=station?.GetComponent<ZNetView>()?.GetZDO();
-            if(hold||!LocalEligible(player)||player.IsDead()||player.IsTeleporting()||ZNet.instance?.GetWorld()==null||ZDOMan.instance==null||ZNetScene.instance==null||
-                !MasterIdolLoadIdentity.LoadReady||data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode())return false;
+            Trace("entry");
+            if(data==null||data.GetPrefab()!="piece_workbench".GetStableHashCode()){Trace("entry-not-workbench");return false;}
             string token=data.GetString(WorkbenchEnchantmentRuntime.StationKey,"");
+            if(!Guid.TryParseExact(token,"N",out _)){Trace("entry-unmarked");return false;}
+            if(player!=Player.m_localPlayer||!MasterIdolPlains.Owned(player)||!MasteryPlugin.Settings.Enabled.Value)return false;
+            if(!OwnerSkillAuthority.Has(player,Skills.SkillType.Crafting,100))
+            {Trace("entry-skill-denied");Notice(GoldUiLocalization.Text("Only a master artisan can open this ancient path.","Лише майстер ремесла може відкрити цей давній шлях."));return true;}
+            if(player.IsDead()||player.IsTeleporting()){Trace("entry-player-busy");return true;}
+            if(ZNet.instance?.GetWorld()==null||ZDOMan.instance==null||ZNetScene.instance==null||!MasterIdolLoadIdentity.LoadReady)
+            {Trace("entry-world-not-ready");Notice(GoldUiLocalization.Text("The ancient paths are still awakening. Try again in a moment.","Давні шляхи ще прокидаються. Спробуй за мить."));return true;}
             var zone=MasterIdolEffectZones.Find(data.m_uid+"/"+token);
-            if(!Guid.TryParseExact(token,"N",out _)||zone==null||!WorkbenchEnchantmentRules.Known(zone.Type))return false;
-            if(!MasterIdolTravel.PortalRules(player)){Notice("Шлях закритий: залиш заборонену ношу або дочекайся тихої години.");return true;}
+            if(zone==null||!WorkbenchEnchantmentRules.Known(zone.Type))
+            {Trace("entry-source-not-active-or-proof-stale");Notice(GoldUiLocalization.Text("Awaken this workbench enchantment to open the path.","Пробуди чари цього верстака, щоб відкрити шлях."));return true;}
+            if(!MasterIdolTravel.PortalRules(player)){Trace("entry-native-portal-rule");Notice("Шлях закритий: залиш заборонену ношу або дочекайся тихої години.");return true;}
             Current();Cancel();
             Local=new ClientState{Session=Session,Rpc=Session.IsServer()?null:Session.GetServerRPC(),Generation=Generation,World=World,Actor=player.GetPlayerID(),Character=player.m_nview.GetZDO().m_uid,Source=data.m_uid,Token=token,SourceChoice=zone.Type,Nonce=Guid.NewGuid().ToString("N"),Until=Time.unscaledTime+30};
-            AskPage(Local);return true;
+            Trace("ask-sent");AskPage(Local);return true;
         }
         static void AskPage(ClientState c)
         {
@@ -79,14 +104,14 @@ namespace ValheimMastery
         }
         static void ReceiveAsk(ZRpc rpc,ZPackage packet)
         {
-            if(!Server(packet))return;Current();
+            if(!Server(packet))return;Current();Trace("ask-received");
             try
             {
                 long world=packet.ReadLong(),player=packet.ReadLong();var source=packet.ReadZDOID();string token=packet.ReadString(),nonce=packet.ReadString();int page=packet.ReadInt();
                 if(packet.GetPos()!=packet.Size()||world!=World||page<0||page>=Limit/Chunk||!Guid.TryParseExact(token,"N",out _)||!Guid.TryParseExact(nonce,"N",out _))return;
                 var actor=WorkshopActor.Resolve(rpc);
                 if(!ActorEligible(actor)||actor.GetPlayerID()!=player||!MasterIdolTravel.GlobalPortalRules()||!WorkbenchEnchantmentRuntime.TryTravelEndpoint(source,actor,out var from)||
-                    from.Station!=token||Vector3.Distance(actor.Position,from.Point)>4||!MasterIdolWorldIndex.WardAllows(player,actor.Position))return;
+                    from.Station!=token||Vector3.Distance(actor.Position,from.Point)>4||!MasterIdolWorldIndex.WardAllows(player,actor.Position)){Trace("ask-actor-source-access-or-portal-denied");return;}
                 Menus.TryGetValue(player,out var menu);
                 if(menu==null||menu.Nonce!=nonce)
                 {
@@ -123,7 +148,7 @@ namespace ValheimMastery
         static void WriteHeader(ZPackage p,long world,long actor,ZDOID source,string token,string nonce)
         {p.Write(world);p.Write(actor);p.Write(source);p.Write(token);p.Write(nonce);}
         static void SendMenuFailure(ZRpc rpc,long world,long actor,ZDOID source,string token,string nonce,string text)
-        {var p=new ZPackage();WriteHeader(p,world,actor,source,token,nonce);p.Write(false);p.Write(text);Send(rpc,MenuRpc,p,ReceiveMenu);}
+        {Trace("menu-server-denied");var p=new ZPackage();WriteHeader(p,world,actor,source,token,nonce);p.Write(false);p.Write(text);Send(rpc,MenuRpc,p,ReceiveMenu);}
         static bool Client(ZRpc rpc,ZPackage p)
         {
             var c=Local;return c!=null&&p!=null&&p.Size()<=16384&&c.Session==ZNet.instance&&c.Generation==MasterIdolLoadIdentity.Generation&&
@@ -134,10 +159,10 @@ namespace ValheimMastery
         static bool Finite(Vector3 point)=>MasterIdolSanctuaryRules.Finite(point.x)&&MasterIdolSanctuaryRules.Finite(point.y)&&MasterIdolSanctuaryRules.Finite(point.z);
         static void ReceiveMenu(ZRpc rpc,ZPackage packet)
         {
-            if(!Client(rpc,packet))return;var c=Local;
+            if(!Client(rpc,packet)){Trace("menu-context-denied");return;}var c=Local;
             try
             {
-                if(!Header(packet,c)||c.Choosing||c.Ready)return;
+                Trace("menu-received");if(!Header(packet,c)||c.Choosing||c.Ready){Trace("menu-header-or-phase-denied");return;}
                 if(!packet.ReadBool()){string text=packet.ReadString();if(text.Length<=256&&packet.GetPos()==packet.Size()){Cancel();Notice(text);}return;}
                 int page=packet.ReadInt(),total=packet.ReadInt(),count=packet.ReadInt();
                 if(page!=c.Page||total<0||total>5||c.Total>=0&&c.Total!=total||count!=Math.Min(Chunk,total-page*Chunk)||count<0)return;
@@ -149,19 +174,19 @@ namespace ValheimMastery
                     if(id==ZDOID.None||id==c.Source||!Guid.TryParseExact(token,"N",out _)||!WorkbenchEnchantmentRules.Known(type)||!types.Add(type)||!Finite(point)||c.Tokens.ContainsKey(id)||tokens.ContainsKey(id))return;
                     tokens.Add(id,token);received.Add(new WorkbenchTravelDestination(id,point,type,page*Chunk+i+1));
                 }
-                if(packet.GetPos()!=packet.Size()||!Valid())return;
+                if(packet.GetPos()!=packet.Size()||!Valid()){Trace("menu-final-context-denied");return;}
                 c.Total=total;c.Choices.AddRange(received);foreach(var item in tokens)c.Tokens.Add(item.Key,item.Value);
-                if(total==0){Cancel();Notice("Інший пробуджений верстак ще не відкрив свого шляху.");return;}
+                if(total==0){Trace("menu-no-destination");Cancel();Notice("Інший пробуджений верстак ще не відкрив свого шляху.");return;}
                 if(c.Choices.Count<total){c.Page++;AskPage(c);return;}
-                c.Ready=true;WorkbenchEnchantmentTravelMap.Show(c.Choices.AsReadOnly(),Choose,Cancel);
-            }catch{if(ReferenceEquals(Local,c))Cancel();}
+                c.Ready=true;Trace("menu-show-requested");WorkbenchEnchantmentTravelMap.Show(c.Choices.AsReadOnly(),Choose,Cancel);Trace(WorkbenchEnchantmentTravelMap.Active?"menu-visible":"menu-ui-rejected");
+            }catch(Exception error){Warn("menu-decode",error);if(ReferenceEquals(Local,c))Cancel();}
         }
         static void Choose(ZDOID id)
         {
             var c=Local;if(c?.Ready!=true||c.Choosing||!Valid()||!c.Tokens.TryGetValue(id,out var token))return;
             c.Selected=c.Choices.FirstOrDefault(item=>item.Id==id);if(c.Selected==null)return;
             if(!MasterIdolTravel.PortalRules(Player.m_localPlayer)){Cancel();Notice("Ця ноша не пройде давнім шляхом.");return;}
-            c.Choosing=true;WorkbenchEnchantmentTravelMap.Close();var p=new ZPackage();WriteHeader(p,c.World,c.Actor,c.Source,c.Token,c.Nonce);p.Write(id);p.Write(token);Send(c.Rpc,ChooseRpc,p,ReceiveChoose);
+            Trace("choose-sent");c.Choosing=true;WorkbenchEnchantmentTravelMap.Close();var p=new ZPackage();WriteHeader(p,c.World,c.Actor,c.Source,c.Token,c.Nonce);p.Write(id);p.Write(token);Send(c.Rpc,ChooseRpc,p,ReceiveChoose);
         }
         static void ReceiveChoose(ZRpc rpc,ZPackage packet)
         {
@@ -224,18 +249,52 @@ namespace ValheimMastery
         internal static void Tick()
         {
             Current();WorkbenchTravelLanding.Tick();int budget=8;while(budget-->0&&LocalDelivery.Count!=0)LocalDelivery.Dequeue()();
-            if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.25f;Prune();if(Local!=null&&!Valid())Cancel();
+            if(Time.unscaledTime<Next)return;Next=Time.unscaledTime+.25f;Prune();if(Local!=null&&!Valid()){Trace("client-context-expired-or-changed");Cancel();}
+        }
+        static readonly Dictionary<string,float> TraceTimes=new Dictionary<string,float>(StringComparer.Ordinal);
+        internal static void Trace(string reason)
+        {
+            float now=Time.unscaledTime;
+            if(TraceTimes.TryGetValue(reason,out float last)&&now>=last&&now-last<2f)return;
+            if(TraceTimes.Count>=32&&!TraceTimes.ContainsKey(reason))return;
+            TraceTimes[reason]=now;
+            try{MasteryPlugin.Log?.LogInfo("[WorkbenchTravel] "+reason);}catch{}
         }
         static void Notice(string text)=>Player.m_localPlayer?.Message(MessageHud.MessageType.Center,"<color=#FFD36A>"+text+"</color>");
         static void Warn(string stage,Exception error){try{MasteryPlugin.Log?.LogWarning("[WorkbenchTravel] "+stage+": "+error.Message);}catch{}}
     }
     [HarmonyPatch(typeof(CraftingStation),nameof(CraftingStation.Interact))]
     internal static class WorkbenchTravelInteractionPatch
-    {static bool Prefix(CraftingStation __instance,Humanoid __0,bool __1,bool __2,ref bool __result){if(!__2||!WorkbenchEnchantmentTravel.Open(__instance,__0,__1))return true;__result=true;return false;}}
+    {static bool Prefix(CraftingStation __instance,Humanoid __0,bool __1,bool __2,ref bool __result){if((!__2&&!WorkbenchEnchantmentTravel.ShiftHeld())||!WorkbenchEnchantmentTravel.Open(__instance,__0,__1))return true;__result=true;return false;}}
     [HarmonyPatch(typeof(ZNet),nameof(ZNet.OnNewConnection))]
     internal static class WorkbenchTravelRegisterPatch {static void Postfix(ZNetPeer peer)=>WorkbenchEnchantmentTravel.Register(peer);}
     [HarmonyPatch(typeof(MasteryPlugin),"Update")]
     internal static class WorkbenchTravelTickPatch {static void Postfix()=>WorkbenchEnchantmentTravel.Tick();}
     [HarmonyPatch(typeof(ZNet),"OnDestroy")]
     internal static class WorkbenchTravelCleanupPatch {static void Prefix()=>WorkbenchEnchantmentTravel.Reset();}
+}
+
+namespace ValheimMastery
+{
+    // Observation only: distinguishes native player dispatch from station entry.
+    [HarmonyPatch(typeof(Player),"Interact")]
+    internal static class WorkbenchTravelEntryTracePatch
+    {
+        static void Prefix(Player __instance,GameObject __0,bool __1,bool __2)
+        {
+            if(__instance!=Player.m_localPlayer||__1||(!__2&&!WorkbenchEnchantmentTravel.ShiftHeld())||__0==null)return;
+            var native=__0.GetComponentInParent<Interactable>();
+            WorkbenchEnchantmentTravel.Trace(native is CraftingStation?"player-use-station":"player-use-other-interactable");
+        }
+    }
+    [HarmonyPatch(typeof(CraftingStation),nameof(CraftingStation.GetHoverText))]
+    internal static class WorkbenchTravelHintPatch
+    {
+        static void Postfix(CraftingStation __instance,ref string __result)
+        {
+            if(__instance==null||!WorkbenchEnchantmentTravel.Hint(__instance))return;
+            __result+=Localization.instance.Localize("\n[<color=yellow>Shift + $KEY_Use</color>] "+
+                GoldUiLocalization.Text("Ancient paths","Давні шляхи"));
+        }
+    }
 }

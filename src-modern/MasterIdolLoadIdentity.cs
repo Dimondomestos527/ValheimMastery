@@ -23,7 +23,7 @@ namespace ValheimMastery
         internal static void EndChunks(Exception error){if(error!=null)IncompleteLoad=true;if((ChunkLoadDepth=Math.Max(0,ChunkLoadDepth-1))==0)LoadingManager=null;}
         internal static void ChunkFilename(ChunkSaveMapping mapping,string filename)
         {if(ChunkLoadDepth>0&&ReferenceEquals(mapping,LoadingManager?.m_chunkSaveMapping)&&string.IsNullOrEmpty(filename))IncompleteLoad=true;}
-        internal static void Reset(){Generation++;Loaded.Clear();Current.Clear();Duplicates.Clear();MasterIdolForestGuardLoadIdentity.Reset();Session=null;Manager=null;World=0;Revision=uint.MaxValue;Overflow=false;}
+        internal static void Reset(){MasterIdolForestGuardState.Close();MasterIdolCleanup.Run("enchantment-area-load-reset",EnchantmentAreaVisual.Clear,(stage,error)=>MasteryPlugin.Log?.LogWarning("[MasterIdols] "+stage+": "+error));MasterIdolResidentDance.Reset();Generation++;Loaded.Clear();Current.Clear();Duplicates.Clear();MasterIdolForestGuardLoadIdentity.Reset();Session=null;Manager=null;World=0;Revision=uint.MaxValue;Overflow=false;}
         private static bool Context()
         {
             var net=ZNet.instance;var manager=ZDOMan.instance;
@@ -90,3 +90,5 @@ namespace ValheimMastery
     internal static class MasterIdolChunkFilenameIdentityPatch
     {private static void Postfix(ChunkSaveMapping __instance,string __result)=>MasterIdolLoadIdentity.ChunkFilename(__instance,__result);}
 }
+
+

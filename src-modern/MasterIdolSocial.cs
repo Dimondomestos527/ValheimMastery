@@ -20,7 +20,7 @@ namespace ValheimMastery
         internal MasterIdolEffectZone SceneHome => Leash?.SocialHome;
         internal bool SceneAvailable => !Moving && Creature != null && Ai != null && View?.IsValid() == true && View.IsOwner() && MasterIdolResidentGrounding.Slow(Creature) &&
             MasterIdolResidentPolicy.TryHome(Creature, out var home) && home.Contains(transform.position) &&
-            !MasterIdolResidentWork.Busy(Creature) && GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentBirthPresentation.Playing(Creature) &&
+            !MasterIdolResidentUniqueActions.Busy(Creature) && !MasterIdolResidentWork.Busy(Creature) && GetComponent<MasterIdolResidentPresentation>()?.Playing != true && !MasterIdolResidentBirthPresentation.Playing(Creature) &&
             !MasterIdolResidentSceneAnimation.Playing(Creature) && GetComponent<MasterIdolSocialSeats>()?.Active != true &&
             GetComponent<MasterIdolWelcome>()?.IsPresenting != true && !MasterIdolSocialSeats.Battle(Ai, Creature) &&
             Ai.m_timeSinceHurt >= 8 && !Ai.IsSleeping() && !Creature.InDodge() && !Creature.InEmote();
@@ -54,7 +54,10 @@ namespace ValheimMastery
             if (MasterIdolResidentBirthPresentation.Playing(Creature)) return false;
             if (!Context() || !MasterIdolResidentPolicy.TryHome(Creature, out var home) || !home.Contains(transform.position) ||
                 MasterIdolSocialSeats.Battle(Ai, Creature) || GetComponent<MasterIdolWelcome>()?.IsPresenting == true) return false;
-            if (MasterIdolResidentWork.Idle(Creature, dt)) { StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
+            if (MasterIdolResidentWork.Idle(Creature, dt)) { MasterIdolResidentDance.Cancel(Creature,"work");StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
+            if (MasterIdolResidentUniqueActions.Idle(Creature, dt)) { MasterIdolResidentDance.Cancel(Creature,"unique");StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
+            if (MasterIdolResidentCargo.Idle(Creature, dt)) { MasterIdolResidentDance.Cancel(Creature,"cargo");StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
+            if(MasterIdolResidentDance.Idle(Creature,dt)){StopSpread();MasterIdolSocialScenes.Cancel(this);return true;}
             if (!MasterIdolActivity.Near(transform.position)) { Reset(); return false; }
             if (MasterIdolResidentSceneAnimation.Idle(Creature, dt)) { StopSpread(); MasterIdolSocialScenes.Cancel(this); return true; }
             if(MasterIdolResidentEmote.Idle(this,home,dt)){StopSpread();return true;}

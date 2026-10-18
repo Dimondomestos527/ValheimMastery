@@ -166,7 +166,7 @@ namespace ValheimMastery
             gui.m_multiCrafting = false; gui.m_touchMultiCrafting = false; gui.m_craftTimer = 0;
             Crafting100AttemptTrace.Event(gui, "special-timer-started");
             var intent = Current;
-            GoldMasterworkPresentation.Begin(gui, player, recipe, () => ReferenceEquals(Current, intent) && Context(intent));
+            GoldMasterworkPresentation.Begin(gui, player, recipe, () => ReferenceEquals(Current, intent) && Context(intent), plan.Operation);
         }
         private static bool Context(Intent intent) => intent != null && ZNet.instance == intent.Session &&
             Player.m_localPlayer == intent.Player && InventoryGui.IsVisible() &&
@@ -417,14 +417,3 @@ namespace ValheimMastery
     internal static class Crafting100NativeCraftPatch
     { [HarmonyPriority(Priority.First + 200)] private static bool Prefix(InventoryGui __instance, Player player) => Crafting100ActionController.Intercept(__instance, player); }
 }
-
-
-
-
-
-
-
-
-
-
-

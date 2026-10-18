@@ -28,6 +28,7 @@ namespace ValheimMastery
         private static Action CancelAction;
         private static int Revision;
         private static bool Closing;
+        private static bool ReadingNativeMenu;
         private static string Text(string ua,string en)=>GoldUiLocalization.Text(en,ua);
         internal static int PageCount(int count)=>1;
         internal static bool Finite(Vector3 point)=>float.IsFinite(point.x)&&float.IsFinite(point.y)&&float.IsFinite(point.z);
@@ -51,7 +52,7 @@ namespace ValheimMastery
             Actor.m_nview?.IsValid()==true&&ReferenceEquals(Actor.m_nview.GetZDO(),ActorData)&&
             ReferenceEquals(Manager?.GetZDO(ActorData.m_uid),ActorData)&&MasteryPlugin.Settings.Enabled.Value&&
             Canvas!=null&&Canvas.isActiveAndEnabled&&Root!=null&&Root.activeInHierarchy;
-        internal static bool OwnsInput=>LocalContext()&&!(UnifiedPopup.instance?.popupStack.Count>0);
+        internal static bool OwnsInput=>!ReadingNativeMenu&&LocalContext()&&!(UnifiedPopup.instance?.popupStack.Count>0);
         private static bool Context()=>LocalContext()&&WorkbenchEnchantmentTravel.Valid();
         internal static void Show(IReadOnlyList<WorkbenchTravelDestination> list,Action<ZDOID> choose,Action cancel)
         {
@@ -158,10 +159,17 @@ namespace ValheimMastery
             }
             finally{PriorSelection=null;Panel=null;CanvasRect=null;Canvas=null;Actor=null;ActorData=null;Session=null;Manager=null;World=0;Closing=false;}
         }
+        private static bool ForeignMenuVisible()
+        {
+            // Menu.IsVisible includes UnifiedPopup.IsVisible. Do not mistake our cursor lease for a foreign menu.
+            bool previous=ReadingNativeMenu;ReadingNativeMenu=true;
+            try{return Menu.IsVisible();}
+            finally{ReadingNativeMenu=previous;}
+        }
         internal static void Tick()
         {
             if(!Active)return;
-            if(!Context()||InventoryGui.IsVisible()||Minimap.IsOpen()||Menu.IsVisible()||TextInput.IsVisible()||
+            if(!Context()||InventoryGui.IsVisible()||Minimap.IsOpen()||ForeignMenuVisible()||TextInput.IsVisible()||
                 UnifiedPopup.instance?.popupStack.Count>0||Chat.instance?.HasFocus()==true){Cancel();return;}
             Resize();
             if(ZInput.GetKeyDown(KeyCode.Escape,true)||ZInput.GetButtonDown("JoyButtonB"))

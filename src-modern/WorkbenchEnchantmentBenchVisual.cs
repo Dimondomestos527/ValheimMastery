@@ -12,7 +12,7 @@ namespace ValheimMastery
         static readonly LinkedList<WorkbenchEnchantmentBenchVisual> Loaded=new LinkedList<WorkbenchEnchantmentBenchVisual>();
         static readonly Dictionary<string,Material> GlowMaterials=new Dictionary<string,Material>(StringComparer.Ordinal);static float Next;
         LinkedListNode<WorkbenchEnchantmentBenchVisual> node;ZNetView view;ZDO identity;ZDOID uid;
-        string marker,home,choice;SpriteRenderer symbol;float RetryAsset;static int Pulses;
+        string marker,home,choice,lastObserverEvent;SpriteRenderer symbol;float RetryAsset;static int Pulses;
         sealed class Ritual
         {
             internal Coroutine Routine;internal bool Slot;internal GameObject Root;
@@ -29,13 +29,14 @@ namespace ValheimMastery
             if(station.GetComponent<WorkbenchEnchantmentBenchVisual>()==null)station.gameObject.AddComponent<WorkbenchEnchantmentBenchVisual>();
         }
         void OnEnable(){if(Graphics&&node==null)node=Loaded.AddLast(this);}
-        void OnDisable(){StopAudio();StopPulse();if(node!=null){Loaded.Remove(node);node=null;}Hide();}
+        void OnDisable(){EnchantmentAreaVisual.Cancel(GetComponent<CraftingStation>(),"bench-disabled");StopAudio();StopPulse();if(node!=null){Loaded.Remove(node);node=null;}Hide();}
         void OnDestroy(){OnDisable();if(symbol!=null)Destroy(symbol.gameObject);}
         void Hide(){if(symbol!=null)symbol.enabled=false;choice=null;}
-        internal static void Accepted(CraftingStation station,string type,bool firstLearn)
+        internal static void AcceptedObserver(CraftingStation station,ObserverCueEvent cue)
         {
+            string type=cue.Choice;bool firstLearn=cue.Kind==ObserverCueKind.EnchantLearn;
             if(!Graphics||station==null||!WorkbenchEnchantmentRules.Known(type)||Player.m_localPlayer==null||
-                (Player.m_localPlayer.transform.position-station.transform.position).sqrMagnitude>64)return;
+                ZNet.instance?.GetWorld()==null||ZNet.instance.GetTime().Ticks>=cue.Until)return;
             Attach(station);var visual=station.GetComponent<WorkbenchEnchantmentBenchVisual>();
             if(visual==null||!visual.isActiveAndEnabled)return;
             var data=station.GetComponent<ZNetView>()?.GetZDO();var net=ZNet.instance;
@@ -43,10 +44,19 @@ namespace ValheimMastery
             var run=new Ritual{Session=net,Scene=ZNetScene.instance,Player=Player.m_localPlayer,World=net.GetWorldUID(),
                 Data=data,Uid=data.m_uid,Marker=data.GetString(WorkbenchEnchantmentRuntime.StationKey,""),Type=type,FirstLearn=firstLearn,Slot=false};
             if(Guid.TryParseExact(run.Marker,"N",out _))run.Home=run.Uid+"/"+run.Marker;
+            if(visual.lastObserverEvent==cue.Key)return;
+            if(!firstLearn&&MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+            {
+                var status=EnchantmentAreaVisual.TryBegin(new EnchantmentAreaVisual.Cue(station,data,run.Uid,run.Marker,run.Home,type,
+                    net,ZNetScene.instance,Player.m_localPlayer,run.World,MasterIdolLoadIdentity.Generation,cue.Issued,cue.Until,cue.Key));
+                if(status==EnchantmentAreaVisual.BeginResult.Skipped)return; // Duplicate/invalid admission must not disturb the current cue.
+            }
+            visual.lastObserverEvent=cue.Key;
             // A newly committed action replaces the previous local presentation.
             // In particular, Learn followed immediately by Activate must show Activate.
             bool replaced=visual.ritual!=null;
             if(replaced)visual.ritual.EndReason="replaced-by-committed-action";
+            if(firstLearn)EnchantmentAreaVisual.Cancel(station,"replaced-by-committed-action");
             visual.StopPulse();
             visual.StopAudio();
             WorkbenchEnchantmentVisualTrace.Write("accepted",type,"learn="+firstLearn+" replaced="+replaced+" vfx="+MasteryPlugin.Settings.EnablePerkProcVFX.Value);
@@ -54,6 +64,7 @@ namespace ValheimMastery
             {
                 try{visual.audioLease=EnchantmentRitualAudio.TryPlay(station);}catch{}
             }
+            if(!firstLearn)return;
             if(!MasteryPlugin.Settings.EnablePerkProcVFX.Value||Pulses>=4)
             {WorkbenchEnchantmentVisualTrace.Write("skipped",type,"vfx="+MasteryPlugin.Settings.EnablePerkProcVFX.Value+" active="+Pulses);return;}
             run.Slot=true;
@@ -235,4 +246,3 @@ namespace ValheimMastery
     internal static class WorkbenchEnchantmentVisualCleanupPatch
     {static void Postfix()=>WorkbenchEnchantmentBenchVisual.Clear();}
 }
-

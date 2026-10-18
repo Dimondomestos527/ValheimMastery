@@ -22,7 +22,7 @@ internal static class MasterIdolResidentSpellPrefab{
 
 namespace ValheimMastery{
 [HarmonyPatch(typeof(Aoe),"OnHit")]internal static class MasterIdolResidentSpellActualHitPatch{
- private static bool Prefix(Aoe __instance,UnityEngine.Collider __0,ref bool __result,out bool __state){__state=__instance.m_useTriggers;var scope=__instance.GetComponent<MasterIdolResidentSpellScope>();if(scope!=null){if(scope.Allows(__0)){__instance.m_useTriggers=false;return true;}__result=false;MasterIdolResidentMetrics.Count("spell.hit-denied");return false;}if(!MasterIdolResidentPolicy.TryHome(__instance.m_owner,out _))return true;__result=false;return false;}
+ private static bool Prefix(Aoe __instance,UnityEngine.Collider __0,ref bool __result,out bool __state){__state=__instance.m_useTriggers;var scope=__instance.GetComponent<MasterIdolResidentSpellScope>();if(scope!=null){if(scope.Allows(__0)){__instance.m_useTriggers=false;return true;}__result=false;MasterIdolResidentMetrics.Count("spell.hit-denied");return false;}if(MasterIdolResidentMadness.OffensiveSpell(__instance,__0)){__instance.m_useTriggers=false;return true;}if(!MasterIdolResidentPolicy.TryHome(__instance.m_owner,out _))return true;__result=false;return false;}
  private static System.Exception Finalizer(Aoe __instance,bool __state,System.Exception __exception){__instance.m_useTriggers=__state;return __exception;}
 }
 }

@@ -33,19 +33,46 @@ namespace ValheimMastery
             [Skills.SkillType.ElementalMagic] = "Стихії слухають лише впевнену руку.",
             [Skills.SkillType.BloodMagic] = "Кров пам’ятає навіть забутих союзників."
         };
+        private static readonly Dictionary<Skills.SkillType, string> EnSkillLead = new Dictionary<Skills.SkillType, string>
+        {
+            [Skills.SkillType.Cooking] = "Even a campfire meal can become a feast.",
+            [Skills.SkillType.Crafting] = "A smith leaves a mark where others see scrap.",
+            [Skills.SkillType.Farming] = "The land rewards those who learn its ways.",
+            [Skills.SkillType.Fishing] = "A Viking's patience outlasts a fish's memory.",
+            [Skills.SkillType.Jump] = "Even the stones must chase your steps.",
+            [Skills.SkillType.Pickaxes] = "The mountain is strong; an iron will is stronger.",
+            [Skills.SkillType.Ride] = "Two travel faster when they trust each other.",
+            [Skills.SkillType.Run] = "The road favours those who keep their rhythm.",
+            [Skills.SkillType.Sneak] = "Silence can be sharper than a blade.",
+            [Skills.SkillType.Swim] = "The wave yields to a stubborn swimmer.",
+            [Skills.SkillType.WoodCutting] = "The forest remembers every axe blow.",
+            [Skills.SkillType.Swords] = "The blade finds an opening before thought.",
+            [Skills.SkillType.Axes] = "Each notch brings the final blow closer.",
+            [Skills.SkillType.Clubs] = "Ringing iron persuades better than threats.",
+            [Skills.SkillType.Knives] = "The shadow steps where no blade is expected.",
+            [Skills.SkillType.Spears] = "The spear remembers the way to its master's hand.",
+            [Skills.SkillType.Polearms] = "One circle of steel holds back a crowd.",
+            [Skills.SkillType.Bows] = "The bowstring whispers of a moment the foe cannot see.",
+            [Skills.SkillType.Crossbows] = "A bolt travels faster than bad news.",
+            [Skills.SkillType.Unarmed] = "When there is no weapon, fists give the answer.",
+            [Skills.SkillType.Blocking] = "A firm shield sometimes speaks first.",
+            [Skills.SkillType.Dodge] = "The best blow is the one that never lands.",
+            [Skills.SkillType.ElementalMagic] = "The elements heed a confident hand.",
+            [Skills.SkillType.BloodMagic] = "Blood remembers even forgotten allies.",
+        };
         private static readonly Dictionary<string, string> Ua = new Dictionary<string, string>
         {
-            ["cooking_35"]="Страви майстра повільніше втрачають поживну силу, не подовжуючи ситість. Медовиці з тривалим ефектом діють довше; відновлювальні дозволяють наступний ковток раніше.", ["cooking_70"]="Твій бенкет зберігає поживну силу до кінця й дарує благословення свого біому. Новий бенкет змінює благословення, а не додає його до попереднього.",
+            ["cooking_35"]="Приготовлені з цим даром страви повільніше втрачають поживну силу, не подовжуючи ситість. Майстерні медовиці з тривалим ефектом діють на 40% довше; відновлювальні з цим бонусом дозволяють наступний ковток на 40% раніше. Дар зберігається на продукті й діє для іншого споживача.", ["cooking_70"]="Твій бенкет зберігає поживну силу до кінця й дарує благословення свого біому. Новий бенкет змінює благословення, а не додає його до попереднього.",
             ["crafting_100"]="Вьолундр визнав твоє ремесло. Його дар дозволяє створювати досконале спорядження без матеріалів рецепта або один раз зміцнити готовий виріб за відповідний ідол. Обидва дари відновлюються окремо, поки ти граєш.",
-            ["crafting_35"]="Покращуючи спорядження, майстер інколи зберігає витратні матеріали. Натискання на переробний станок завантажує сировину чи паливо великою порцією.", ["crafting_70"]="Твої конструкції міцніше тримаються, а крафт бере матеріали з доступних скринь у мережі майстерні. Потрібний станок і його рівень усе ще мають значення.",
+            ["crafting_35"]="Покращуючи спорядження, майстер інколи зберігає витратні матеріали. Натискання на переробний станок завантажує сировину чи паливо великою порцією.", ["crafting_70"]="Поставлені з цим даром конструкції міцніше тримаються, а крафт і будівництво беруть матеріали з доступних скринь у мережі майстерні. Потрібний станок і його рівень усе ще мають значення.",
             ["farming_35"]="Тримай культиватор на панелі швидкого доступу: врожай сам пересаджується, витрачаючи насіння, а дикі культури збираються гуртом і частіше дають зайву здобич.", ["farming_70"]="Посадженим тобою культурам не заважають тіснота й дах, але ґрунт та біом мають підходити. Тварини поруч швидше приручаються.",
             ["fishing_35"]="Успішний вилов нерідко повертає наживку для наступного закидання: навіть черв’як хоче ще побачити світанок.", ["fishing_70"]="Одразу після підсікання витягування риби витрачає значно менше витривалості. Скористайся першою миттю, поки здобич не зібралася з силами.",
-            ["jump_35"]="Можеш безпечно падати з більшої висоти: земля не одразу виставляє рахунок за геройство.", ["jump_70"]="Натисни стрибок ще раз у повітрі, щоб відштовхнутися вдруге. Захист від смертельного падіння інколи залишає тебе живим, але потребує перепочинку.",
+            ["jump_35"]="Можеш безпечно падати з більшої висоти: земля не одразу виставляє рахунок за геройство.", ["jump_70"]="Натисни стрибок ще раз у повітрі, щоб один раз до приземлення відштовхнутися вдруге, витрачаючи витривалість. Раз на 5 хвилин смертельне падіння залишає тобі 1 здоров’я.",
             ["pickaxes_35"]="Руда та інші не-квестові предмети, яких зазвичай не пускають крізь портали, важать значно менше. Послаблені правила порталів не забирають цей дар.", ["pickaxes_70"]="Удар кайла інколи пошкоджує сусідні частини тієї самої жили. Зрідка могутній удар розсипає всю жилу, супроводжуваний підземним громом.",
             ["ride_35"]="Припини спринт верхи, щоб їздовий звір швидше відновив витривалість. Навіть бикоящур має право перевести подих.", ["ride_70"]="Їздовий звір легше переживає падіння, менше хитається й відлітає від ворожих ударів.",
-            ["run_35"]="Безперервний спринт набирає ритм: ти біжиш швидше й бережеш витривалість, доки не зупинишся. Небезпечне поранення повертає частину сил і ненадовго прискорює втечу.", ["run_70"]="На повному ритмі схили й мілководдя менше стримують тебе. Не відпускай спринт, виходячи на глибоку воду: ненадовго можеш бігти по хвилях, після чого потрібен перепочинок. Важливі підземелля й фортеці, повз які ти пробігаєш, з’являються на карті.",
-            ["sneak_35"]="Навприсядки рухаєшся швидше, витрачаєш менше сил і стаєш менш помітним та гучним. Ліс чує тебе пізніше.", ["sneak_70"]="Завмри навприсядки поза ворожим поглядом, щоб увійти під покров. Здалеку тебе важче помітити; близький ворог, атака, спринт або поранення розкривають схованку.",
-            ["swim_35"]="Пливеш швидше й бережеш витривалість; після виходу на берег мокрий одяг швидше висихає.", ["swim_70"]="У воді рухаєшся ще швидше й можеш відновлювати витривалість, якщо завмреш серед хвиль.",
+            ["run_35"]="Безперервний спринт набирає ритм: ти біжиш швидше й бережеш витривалість. Повний ритм зберігається до 3 секунд короткої паузи. Прямий удар, після якого здоров’я лишається нижче половини, повертає 35% максимальної витривалості й додає 15% швидкості на 10 секунд. Цей порятунок спрацьовує не частіше разу на 5 хвилин.", ["run_70"]="На повному ритмі легше долаєш схили й мілководдя та можеш до 10 секунд бігти по воді, поки рухаєшся й вистачає витривалості. Після цього дар відновлюється 45 секунд. Важливі підземелля й фортеці поблизу позначаються на карті.",
+            ["sneak_35"]="Навприсядки рухаєшся швидше, витрачаєш менше сил і стаєш менш помітним та гучним. Ліс чує тебе пізніше.", ["sneak_70"]="Побудь навприсядки поза ворожим поглядом 1,8 секунди, щоб увійти під покров. Можеш рухатися непомітніше, але покров не змушує ворога миттєво забути тебе під час переслідування. Ворог у межах 3 метрів, атака, спринт чи прямий удар розкривають схованку.",
+            ["swim_35"]="Пливеш швидше й бережеш витривалість; після виходу на берег мокрий одяг швидше висихає.", ["swim_70"]="Плаваєш на 40% швидше. Завмри у воді на 1 секунду, щоб почати відновлювати витривалість, коли мине звичайна затримка її відновлення.",
             ["woodcutting_35"]="Удар сокирою інколи розколює дерево й слідом розбиває його колоди та пеньок. Деревина лишається здобиччю на землі, а не нав’язується твоєму інвентарю.", ["woodcutting_70"]="Деревина займає більші стаки саме у твоєму інвентарі та важить менше. Звичайне дерево стає майже невагомим; скрині зберігають звичайні стаки.",
             ["swords_35"]="Спецатака меча стає швидшою, сильнішою й краще ламає рівновагу. Ворог, який уже похитнувся, отримує сильніші удари клинком.", ["swords_70"]="Почни атаку мечем перед самим ворожим ударом ближнього бою, щоб парирувати його без зупинки власного замаху. Продовжена атака сильніше ламає рівновагу.",
             ["axes_35"]="Сокира залишає зарубки, які підсилюють наступну різальну шкоду й готують ціль до страти. З досвідом спецатака стає швидшою.", ["axes_70"]="Зарубки інколи позначають жертву для КАТА: добий її спецатакою сокири. Страта повертає здоров’я й ненадовго посилює різальні удари, а потім потребує перепочинку.",
@@ -97,6 +124,9 @@ namespace ValheimMastery
             if (perk.Id == "clubs_35") return ukrainian ? "Силовий удар булави, що добиває малого ворога, жбурляє тіло в наступного супротивника. Удар молота залишає в землі слабше відлуння." : "A mace secondary that finishes a small foe hurls the body into the next enemy. A hammer strike leaves a weaker echo in the ground.";
 #endif
             string mechanics = PerkLocalization.Localize(perk.DescriptionToken);
+            // Current domain-owned staff descriptions take precedence over historical short overrides.
+            if (perk.Id == "elementalmagic_35" || perk.Id == "elementalmagic_70" ||
+                perk.Id == "bloodmagic_35" || perk.Id == "bloodmagic_70") return mechanics;
             if (Localization.instance == null ||
                 !string.Equals(Localization.instance.GetSelectedLanguage(), "Ukrainian", System.StringComparison.OrdinalIgnoreCase))
             {
@@ -106,25 +136,18 @@ namespace ValheimMastery
             if (!Ua.TryGetValue(perk.Id, out string narrative)) return mechanics;
             return narrative + (perk.Id == "crafting_70" && PotentialForgeRepair.Discovered(Player.m_localPlayer) ? PotentialForgeRepair.Secret : "");
         }
+        internal static string SkillLead(Skills.SkillType skill, bool ukrainian)
+        {
+            var leads = ukrainian ? UaSkillLead : EnSkillLead;
+            return leads.TryGetValue(skill, out string line) ? line : "";
+        }
+
         internal static string SkillPassive(Player player, Skills.SkillType skill)
         {
-            bool ukrainian = Localization.instance != null &&
-                string.Equals(Localization.instance.GetSelectedLanguage(), "Ukrainian", System.StringComparison.OrdinalIgnoreCase);
-            string lead = ukrainian && UaSkillLead.TryGetValue(skill, out string line)
-                ? "<color=#B7A781>" + line + "</color>\n\n" : "";
-            if (skill == Skills.SkillType.Crossbows)
-                return lead + CrossbowsHookSecretText.Progression(player, ukrainian) + "\n\n";
-            if (ukrainian && skill == Skills.SkillType.ElementalMagic)
-                return lead + "<color=#B9C5CE>Бонус навички:</color> швидший базовий реген ейтру без зміни затримки його відновлення.\n\n";
-            if (ukrainian && skill == Skills.SkillType.BloodMagic)
-                return lead + "<color=#B9C5CE>Бонус навички:</color> додаткове лікування під час звичайного тіку регенерації.\n\n";
-            if (skill != Skills.SkillType.Unarmed) return lead;
-            if (!ukrainian)
-                return "<color=#B9C5CE>Skill passives (no perk required):</color>\n" +
-                    "Skill increases adrenaline gain and strengthens kick damage, stagger and knockback. Bare hands also gain damage and attack speed; fist weapons retain a restrained vanilla skill-derived damage bonus, not a penalty to total damage.\n\n";
-            return lead + "<color=#B9C5CE>Бонуси навички (не потребують перка):</color>\n" +
-                "Навичка підсилює отримання адреналіну, шкоду та ефекти стусана, а також шкоду й швидкість атак голими руками.\n" +
-                "Кулачна зброя отримує послаблену частку ванільного бонусу навички; це стосується лише бонусу навички, не загальної шкоди.\n\n";
+            var info = player?.GetSkills()?.GetSkillDef(skill);
+            string native = info == null ? "" : PerkLocalization.Localize(info.m_description);
+            string text = SkillProgressionTooltipText.Describe(skill, native, player);
+            return text.Length > 0 ? text + "\n\n" : "";
         }
     }
 }

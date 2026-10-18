@@ -114,7 +114,8 @@ namespace ValheimMastery
             var station=c.Player.GetCurrentCraftingStation();
             if(!Local(c.Player,station)||station.GetComponent<ZNetView>().GetZDO()?.m_uid!=c.Native)return;
             // Cosmetic failures must not affect the settled result or consumer callback.
-            try{WorkbenchEnchantmentBenchVisual.Accepted(station,c.Choice,c.Kind==1);}catch(Exception error){try{MasteryPlugin.Log?.LogWarning("[Enchantments] Accepted feedback: "+error.Message);}catch{}}
+            // Rendering is driven by one committed server observer event, including this actor.
+            // Do not race a local accepted+10s clock against the shared preparation deadline.
         }
         static void Send(ClientRequest c)
         {if(c.Kind==0)ReadTrace(c.Op,false,"sent");var packet=new ZPackage();packet.Write(c.World);packet.Write(c.Actor);packet.Write(c.Native);packet.Write(c.Op);packet.Write(c.Kind);packet.Write(c.Choice);if(c.Session.IsServer()){LocalCalls.Enqueue(()=>{packet.SetPos(0);Receive(null,packet);});}else c.Rpc?.Invoke(RequestRpc,packet);}
@@ -148,6 +149,8 @@ namespace ValheimMastery
             var context=WorkbenchEnchantmentRuntime.Resolve(r.Rpc,r.Native,false,true);var actual=WorkshopActor.Resolve(r.Rpc);
             if(context==null||actual?.CharacterId!=r.Character||context.Actor!=r.Actor||context.World!=r.World||context.Station!=r.Context.Station){if(r.Kind==0)ReadTrace(r.Op,true,"context-lost");Deny(r.Rpc,r.World,r.Actor,r.Native,r.Op,"unconfirmed");Servers.Remove(r.Op);return;}
             r.Context=context;bool success=false;var clock=WorkbenchEnchantmentRuntime.CooldownContext(context,r.Rpc);
+            WorkbenchEnchantmentSnapshot before=null;
+            if(r.Kind!=0)try{before=WorkbenchEnchantmentRuntime.Service.Snapshot(context,clock);}catch(Exception){ }
             try
             {if(r.Kind==0)success=true;else if(r.Kind==1)success=WorkbenchEnchantmentRuntime.Service.Learn(context,r.ReceiptOp,r.Choice,clock);else if(r.Kind==2)success=WorkbenchEnchantmentRuntime.Service.Switch(context,r.Choice,WorkbenchEnchantmentRuntime.NetworkAllows);}
             finally{}
@@ -155,6 +158,26 @@ namespace ValheimMastery
             string reason=success?"":pending?"pending":r.Kind==2?"network":"capacity";
             if(!success&&!pending&&r.Kind==2&&WorkbenchEnchantmentRules.Known(r.Choice)&&
                 !WorkbenchEnchantmentRuntime.NetworkAllows(context.Station,r.Choice,WorkbenchEnchantmentRuntime.Journal.Snapshot()))reason="world-type-busy";
+            if(success&&!pending&&r.Kind!=0&&before!=null)
+            {
+                try
+                {
+                    var after=WorkbenchEnchantmentRuntime.Service.Snapshot(context,clock);
+                    if(after!=null&&after.Station==before.Station&&after.Revision>before.Revision)
+                    {
+                        bool learned=r.Kind==1&&!before.Learned.Contains(r.Choice)&&after.Learned.Contains(r.Choice);
+                        bool activated=r.Kind==2&&before.Active!=r.Choice&&after.Active==r.Choice;
+                        if(learned||activated)
+                        {
+                            var row=WorkbenchEnchantmentRuntime.Journal.ReadStation(context.Station);
+                            string id=learned?row?.Grants.FirstOrDefault(g=>g.Operation==r.ReceiptOp&&g.Choice==r.Choice)?.Operation:
+                                context.Station+"/"+after.Revision+"/"+r.Choice;
+                            if(!string.IsNullOrEmpty(id))
+                                ObserverCueNetwork.PublishEnchantmentCommitted(actual,r.Native,context.Station,r.Choice,id,after.Revision,learned);
+                        }
+                    }
+                }catch(Exception){ } // Cosmetic transport cannot change the durable result or callback.
+            }
             Reply(r,success,pending,reason);
         }
         static void Reply(ServerRequest r,bool success,bool pending,string reason)
@@ -200,5 +223,3 @@ namespace ValheimMastery
         }
     }
 }
-
-

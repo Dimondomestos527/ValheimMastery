@@ -66,34 +66,10 @@ namespace ValheimMastery
 
         internal static string BuildText(Player player, Skills.Skill skill)
         {
-            StringBuilder text = new StringBuilder();
-            string vanilla = PerkLocalization.Localize(skill.m_info.m_description);
-            if (!string.IsNullOrWhiteSpace(vanilla))
-                text.Append(vanilla.Trim()).Append("\n\n");
-            text.Append("<color=#E7B85C>").Append(PerkLocalization.Localize("$vm_mastery_title")).Append("</color>");
-            text.Append("\n\n").Append(PerkNarrativeService.SkillPassive(player, skill.m_info.m_skill));
-
-            int next = PerkStateService.GetNextMilestone(player, skill.m_info.m_skill);
-            foreach (PerkDefinition perk in PerkCatalog.Get(skill.m_info.m_skill))
-            {
-                bool unlocked = PerkStateService.IsUnlocked(player, perk.Skill, perk.Milestone);
-                string color = unlocked ? "#E7B85C" : (perk.Milestone == next ? "#D7C39A" : "#858585");
-                text.Append("\n\n<color=").Append(color).Append(">")
-                    .Append(unlocked ? "◆ " : "◇ ").Append(perk.Milestone).Append(" — ")
-                    .Append(PerkLocalization.Localize(perk.NameToken)).Append("</color>\n")
-                    .Append(PerkNarrativeService.Description(perk));
-            }
-
-            if (MasteryPlugin.Settings.ShowNextMilestoneProgress.Value)
-            {
-                text.Append("\n\n<color=#A8A8A8>");
-                if (next > 0)
-                    text.Append(string.Format(PerkLocalization.Localize("$vm_mastery_next"), Mathf.Max(0, next - Mathf.FloorToInt(skill.m_level))));
-                else
-                    text.Append(PerkLocalization.Localize("$vm_mastery_complete"));
-                text.Append("</color>");
-            }
-            return text.ToString();
+            // Mastery has its own window; native skill hover shows the same concise skill description.
+            if (skill?.m_info == null) return string.Empty;
+            return SkillProgressionTooltipText.Describe(skill.m_info.m_skill,
+                PerkLocalization.Localize(skill.m_info.m_description), player);
         }
 
         private static void LogHierarchy(Transform transform, string indent)

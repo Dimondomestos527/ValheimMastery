@@ -1,0 +1,15 @@
+{
+  "status": "HUMAN_FINAL_LIVEFIX_DEV_PUBLICATION_AUTHORIZED",
+  "humanThread": "01a1087f-0c8e-7b33-88f7-2ce86d8a1145",
+  "humanMessage": "01a150b9-1194-7d03-af37-1660bacd17de",
+  "humanText": "Встанови цей патч також на гіт. Треба вписати в ліміт ресурсу, зараз 7%",
+  "version": "1.4.123-test-non100-livefix-20261018",
+  "sourceGateSha256": "85E65AEF525BF747A1AAF9525B210614E9BB88E6F598B39F96B7C26748F9038E",
+  "wire": "1.4.123+rpc-20261018-non100-livefix-v10",
+  "channels": [
+    "Dev"
+  ],
+  "ReleasePublication": "NOT_AUTHORIZED_PREPARE_ONLY",
+  "Gold100NewFourIncluded": false,
+  "EliteGreetingIncluded": false
+}

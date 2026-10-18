@@ -62,7 +62,7 @@ namespace ValheimMastery
                 PerkCooldownStateService.ReduceRemaining(player, "magic70_ice", 0f);
                 PerkCooldownStateService.TryConsume(player, "magic70_ice", Cooldown);
                 Magic70CastAnimation.Play(player);
-                PerkAudioService.Play("magic70_ice_cast", "sfx_dverger_ice_aoe_start", player.GetCenterPoint(), .5f, .8f);
+                Magic70StormAudio.Play(player);
                 return false;
             }
             GameObject prefab = ZNetScene.instance?.GetPrefab(PrefabName);
@@ -76,7 +76,7 @@ namespace ValheimMastery
             data.Set("vm.storm.expires", ZNet.instance.GetTime().AddSeconds(Duration(player.GetCurrentWeapon().m_quality)).Ticks);
             player.UseEitr(EitrCost); PerkCooldownStateService.TryConsume(player, "magic70_ice", Cooldown);
             Magic70CastAnimation.Play(player);
-            PerkAudioService.Play("magic70_ice_cast", "sfx_dverger_ice_aoe_start", player.GetCenterPoint(), .5f, .8f);
+            Magic70StormAudio.Play(player);
             return false;
         }
         internal static bool Obscures(Character observer, Character target)

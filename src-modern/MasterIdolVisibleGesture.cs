@@ -12,6 +12,8 @@ namespace ValheimMastery
         private Character Actor; private BaseAI Ai; private ZNetView View, Registered; private ZDO Data;
         private ZNet Session; private ZDOMan Manager; private ulong Generation; private long World, Owner, ContextTicks, LastStamp; private ushort Revision;
         private Animator Animator; private RuntimeAnimatorController Original; private AnimatorOverrideController Override; private AnimationClip Clip;
+        private MasterIdolResidentReactionPose GroundPose;
+        private MasterIdolResidentReactionWaveUpperBody Wave;private float CueStart;
         private bool Active, Lease; private float End; private string Home, BroadcastHome; private long LeaseEpoch;
         private byte Style;
         private static readonly HashSet<string> TraceKeys=new HashSet<string>(StringComparer.Ordinal);
@@ -80,8 +82,10 @@ namespace ValheimMastery
         {
             if(actor==null)return 0;
             switch(Utils.GetPrefabName(actor.gameObject))
-            {case "Greyling":return 2f;case "Greydwarf":return MasterIdolResidentIdleRules.VibeSeconds;case "Greydwarf_Elite":return 2.333333f;case "Greydwarf_Shaman":return 2.266667f;default:return 0;}
+            {case "Greyling":return MasterIdolResidentReactionWaveUpperBody.Seconds;case "Greydwarf":return MasterIdolResidentIdleRules.VibeSeconds;case "Greydwarf_Elite":return MasterIdolResidentReactionWaveUpperBody.Seconds;case "Greydwarf_Shaman":return 2.266667f;default:return 0;}
         }
+        private static bool UpperWave(Character actor)
+            =>actor!=null&&(Utils.GetPrefabName(actor.gameObject)=="Greyling"||Utils.GetPrefabName(actor.gameObject)=="Greydwarf_Elite");
         private static bool ReactionClips(Character actor,Animator animator,RuntimeAnimatorController original,out AnimationClip idle,out AnimationClip donor,out string reason)
         {
             idle=donor=null;reason="reaction-actor-controller";
@@ -92,12 +96,12 @@ namespace ValheimMastery
             {reason="reaction-native-binding-mismatch";return false;}
             if(original is AnimatorOverrideController){reason="reaction-native-override-unsupported";return false;}
             string ownIdle=family=="Greydwarf_Shaman"?"Standing Idle":"Idle";
-            string name=family=="Greyling"?"Wakeup":family=="Greydwarf"?"George Vibing":family=="Greydwarf_Elite"?"Spawn":"Standing 1H Cast Spell 01";
+            string name=UpperWave(actor)?ownIdle:family=="Greydwarf"?"George Vibing":"Standing 1H Cast Spell 01";
             int idleCount=0,donorCount=0;
             foreach(var clip in original.animationClips)
             {if(clip==null)continue;if(clip.name==ownIdle){idle=clip;idleCount++;}if(clip.name==name){donor=clip;donorCount++;}}
             if(idleCount!=1||donorCount!=1||idle.legacy||donor.legacy||idle.events.Length!=0){reason="reaction-clip-object-not-unique";return false;}
-            float expected=family=="Greydwarf"?3.75f:ReactionSeconds(actor);
+            float expected=UpperWave(actor)?4f:family=="Greydwarf"?3.75f:ReactionSeconds(actor);
             if(!float.IsFinite(donor.length)||Mathf.Abs(donor.length-expected)>.05f){reason="reaction-native-length-mismatch";return false;}
             reason="ready";return true;
         }
@@ -194,7 +198,14 @@ namespace ValheimMastery
                 if (idle == null || style==1 && donor == null){Trace(Actor,"denied","native-idle-or-vibe-clip",style);return;}
                 float elapsed = Mathf.Max(0, (float)((Session.GetTime().Ticks - stamp) / (double)TimeSpan.TicksPerSecond));
                 if (elapsed >= duration){Trace(Actor,"denied","cue-expired",style);return;}
-                committing=true;Home = home; End = Time.unscaledTime + duration - elapsed;Style=style;
+                MasterIdolResidentReactionPose groundPose=null;
+                if(style==2&&MasterIdolResidentReactionPose.Required(Actor)&&!MasterIdolResidentReactionPose.Capture(Actor,Animator,out groundPose))
+                {Trace(Actor,"denied","reaction-planted-pose-unavailable",style);return;}
+                committing=true;
+                if(style==2&&UpperWave(Actor)&&!MasterIdolResidentReactionWaveUpperBody.Capture(Actor,Animator,out Wave))
+                {Trace(Actor,"denied","reaction-upper-wave-unavailable",style);Stop("reaction-upper-wave-unavailable");return;}
+                Home = home; End = Time.unscaledTime + duration - elapsed;CueStart=Time.unscaledTime-elapsed;Style=style;
+                GroundPose=groundPose;
                 if (style!=0)
                 {
                     Clip = Instantiate(donor); Clip.name = style==2?"VM_EventlessResidentReaction":"VM_EventlessVisibleGreydwarfGesture"; Clip.hideFlags = HideFlags.DontSave; Clip.events = Array.Empty<AnimationEvent>();
@@ -206,6 +217,7 @@ namespace ValheimMastery
                 {
                     Animator.Update(0);
                     if(!float.IsFinite(Animator.speed)||Animator.speed<=0||!ReactionBound()){Trace(Actor,"denied","reaction-motion-not-effective",style);Stop("reaction-binding-failed");return;}
+                    if(GroundPose!=null&&!GroundPose.Stable()){Trace(Actor,"denied","reaction-planted-pose-drop",style);Stop("reaction-planted-pose-drop");return;}
                 }
                 Trace(Actor,"start","native-motion-effective",style);
                 MasterIdolResidentMetrics.Count(style==2?"emote.native-reaction-shown":style==1?"idle.native-vibe-start":"idle.native-idle-start");
@@ -218,6 +230,7 @@ namespace ValheimMastery
             {
                 if (!Context()) { Stop(); return; } if (!Active) return;
                 var owned = Override != null ? (RuntimeAnimatorController)Override : Original;
+                if(GroundPose!=null&&!GroundPose.Stable()){Stop("reaction-planted-pose-drop");return;}
                 if (Time.unscaledTime >= End || !MasterIdolResidentVisibility.Local(Actor) || !Peace() || Animator == null ||
                     !ReferenceEquals(Animator.runtimeAnimatorController, owned) || Animator.GetCurrentAnimatorStateInfo(0).fullPathHash != Movement ||
                     Animator.IsInTransition(0) || !MasterIdolResidentPolicy.TryHome(Actor, out var zone) || zone.Id != Home || !zone.Contains(transform.position)) Stop(Time.unscaledTime>=End?"completed":"safety-context");
@@ -230,19 +243,43 @@ namespace ValheimMastery
             if (Active && Animator != null && ReferenceEquals(Animator.runtimeAnimatorController, owned))
             { Animator.SetFloat("forward_speed", 0); if(Style!=2)Animator.SetFloat("sideway_speed", 0); Animator.SetFloat("turn_speed", 0); }
         }
-        private void LateUpdate() { try { Hold(); } catch (Exception) { Stop(); } }
+        private void LateUpdate()
+        {
+            try
+            {
+                Hold();
+                if(!Active||Wave==null)return;
+                var owned=Override!=null?(RuntimeAnimatorController)Override:Original;
+                // Native Animator has evaluated its idle first; never resample it every frame.
+                if(!Context()||!Active||!Peace()||Animator.runtimeAnimatorController!=owned||!ReactionBound()||
+                    !MasterIdolResidentPolicy.TryHome(Actor,out var zone)||zone.Id!=Home||!zone.Contains(transform.position)||
+                    !Wave.Tick(Time.unscaledTime-CueStart,owned))Stop("reaction-upper-wave-ended");
+            }
+            catch(Exception){Stop("late-update-exception");}
+        }
         private void Stop(string reason="cleanup")
         {
             if(Active)Trace(Actor,"end",reason,Style);
             Active = false;
-            try { if (Animator != null && Override != null && ReferenceEquals(Animator.runtimeAnimatorController, Override)) Animator.runtimeAnimatorController = Original; }
+            try
+            {
+                try{Wave?.Dispose();}catch(Exception){/* One cue cleanup cannot retain our controller or lease. */}finally{Wave=null;}
+                if (Animator != null && Override != null && ReferenceEquals(Animator.runtimeAnimatorController, Override))
+                {
+                    bool idlePose=false;
+                    try{idlePose=GroundPose!=null&&Actor!=null&&!Actor.IsDead()&&!Actor.InAttack()&&!Animator.IsInTransition(0)&&Animator.GetCurrentAnimatorStateInfo(0).fullPathHash==Movement;}
+                    catch(Exception){/* A failed pose query cannot prevent restoring our own controller. */}
+                    Animator.runtimeAnimatorController = Original;
+                    if(idlePose)Animator.Update(0); // Restore native sampled pose this frame; never move the actor or bones directly.
+                }
+            }
             finally
             {
                 try { if (Override != null) Destroy(Override); }
                 finally
                 {
                     try { if (Clip != null) Destroy(Clip); }
-                    finally { Override = null; Clip = null; Original = null; Home = null; if (Lease && LeaseEpoch == GraphicsEpoch) GraphicsScenes = Math.Max(0, GraphicsScenes - 1); Lease = false; }
+                    finally { Override = null; Clip = null; Original = null; Home = null; GroundPose=null; if (Lease && LeaseEpoch == GraphicsEpoch) GraphicsScenes = Math.Max(0, GraphicsScenes - 1); Lease = false; }
                 }
             }
         }

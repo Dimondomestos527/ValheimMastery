@@ -5,6 +5,15 @@ internal sealed class MasterIdolResidentPresentation:MonoBehaviour{
  internal static bool ResourcesReady(Character actor,bool poison){var controller=actor?.GetComponentInChildren<Animator>()?.runtimeAnimatorController??ZNetScene.instance?.GetPrefab("Greydwarf_Shaman")?.GetComponentInChildren<Animator>(true)?.runtimeAnimatorController;if(controller==null)return false;string name=poison?"Standing 2H Magic Attack 04":"Standing 1H Cast Spell 01";bool idle=false,clip=false;foreach(var animation in controller.animationClips){if(animation.name=="Standing Idle")idle=true;if(animation.name==name&&Mathf.Abs(animation.length-(poison?3.333333f:2.266667f))<.05f)clip=true;}return idle&&clip;}
  private static readonly int Movement=unchecked((int)3885065915u);
  internal bool Playing=>Active;
+ internal bool OwnsHealCue(Character actor,string home)
+ {
+  var native=ZNetScene.instance?.GetPrefab("Greydwarf_Shaman")?.GetComponentInChildren<Animator>(true);
+  return Active&&!Aftercare&&LastDecision=="heal-playing"&&Creature==actor&&Home==home&&native!=null&&Animator!=null&&
+   Original==native.runtimeAnimatorController&&Animator.avatar==native.avatar&&!Animator.applyRootMotion&&Animator.layerCount==1&&
+   Override!=null&&Animator.runtimeAnimatorController==Override&&Clip!=null&&Clip.events.Length==0&&
+   Session==ZNet.instance&&Manager==ZDOMan.instance&&Generation==MasterIdolLoadIdentity.Generation&&View?.IsValid()==true&&
+   ReferenceEquals(View.GetZDO(),Data)&&ReferenceEquals(Manager?.GetZDO(Data.m_uid),Data)&&Data.GetOwner()==Owner&&Data.OwnerRevision==OwnerRevision;
+ }
  internal bool BlocksWork=>Active&&!Aftercare;
  internal bool BeginAftercare(float elapsed,string home)
  {if(Active)return false;try{bool started=Begin(false,elapsed,home);Aftercare=started;return started;}

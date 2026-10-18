@@ -5,7 +5,7 @@ using HarmonyLib;
 using UnityEngine;
 namespace ValheimMastery
 {
-    internal static class MasterIdolForestGuardState
+    internal static partial class MasterIdolForestGuardState
     {
         internal const string Marker="vm.bf.guard.v1",WorldKey="vm.bf.guard.world.v1",BornKey="vm.bf.guard.born.v1",NonceKey="vm.bf.guard.nonce.v1";
         private const string DeathRpc="VM_BF_GuardDeath_v1";
@@ -32,7 +32,7 @@ namespace ValheimMastery
             var net=ZNet.instance;if(net?.IsServer()!=true||net.GetWorld()==null||ZDOMan.instance==null||!MasterIdolLoadIdentity.LoadReady||!WorkbenchEnchantmentRuntime.Ready)return false;
             if(Session!=net||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||World!=net.GetWorldUID())
             {
-                Store?.Retire();Session=net;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=net.GetWorldUID();Witnesses.Clear();Pending.Clear();Next=NextSave=0;Dirty=false;
+                Close();Session=net;Manager=ZDOMan.instance;Generation=MasterIdolLoadIdentity.Generation;World=net.GetWorldUID();Witnesses.Clear();Pending.Clear();Next=NextSave=0;Dirty=false;
                 Store=new MasterIdolRecruitmentStore(System.IO.Path.Combine(BepInEx.Paths.ConfigPath,"ValheimMastery","Idols",World+".residents.vmi"),World);
                 LegacyTimers=Store.Load();LegacyMembers=Store.Members.ToDictionary(x=>x.Key,x=>new HashSet<string>(x.Value,StringComparer.Ordinal),StringComparer.Ordinal);
             }
@@ -58,6 +58,9 @@ namespace ValheimMastery
         {
             if(!Ready||zone?.Type!="BlackForest")return;
             foreach(var record in Store.Guards.Values)if(record.Home!=zone.Id){record.Home=zone.Id;Dirty=true;}
+            string token=MasterIdolNativeTaming.Token(zone.Id);
+            if(token!=null&&!Store.Quotas.ContainsKey(token)&&Store.Quotas.Count<512&&NativeDay(out int day))
+            {Store.Quotas.Add(token,new MasterIdolRevivalQuota{Token=token,Day=day});Dirty=true;}
         }
         internal static void Added(MasterIdolForestGuardRecord record)
         {Store.Guards[record.Family]=record;Dirty=true;Capture(record);}
@@ -81,7 +84,7 @@ namespace ValheimMastery
             {
                 if(Confirm(Pending[i])||!MasterIdolForestRules.Window(Pending[i].Death,Session.GetTime().Ticks,Pending[i].Born))Pending.RemoveAt(i);
             }
-            if(Dirty&&Time.unscaledTime>=NextSave&&Store.Queue(LegacyTimers,LegacyMembers,Store.Guards)){Dirty=false;NextSave=Time.unscaledTime+60;}
+            if(Dirty&&Time.unscaledTime>=NextSave&&Store.Queue(LegacyTimers,LegacyMembers,Store.Guards,Store.Quotas)){Dirty=false;NextSave=Time.unscaledTime+60;}
         }
         internal static string DefaultKey(string family){int i=MasterIdolForestRules.Family(family);return i<0?"":NameKeys[i];}
         internal static string Display(Character actor,string native)

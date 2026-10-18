@@ -24,6 +24,8 @@ namespace ValheimMastery
             {
                 Log = Logger;
                 Settings = new MasteryConfig(base.Config);
+                ObserverCuePresentation.Install();
+                EnchantmentAreaVisual.Configure(EnchantmentAreaVisual.ApprovedTestPolicy);
                 GoldCraftingService.Initialize(base.Config);
                 WorkbenchEnchantmentCooldownProtocol.Initialize(System.IO.Path.Combine(Paths.ConfigPath, "ValheimMasteryEnchantments"));
                 WorkbenchEnchantmentRuntime.Initialize(System.IO.Path.Combine(Paths.ConfigPath, "ValheimMastery", "WorkbenchEnchantments"));
@@ -54,9 +56,11 @@ namespace ValheimMastery
             GoldCraftingService.Tick();
             PantheonActiveInput.Tick();
             Magic70Carrier.Tick();
+            MasterIdolResidentDance.Tick();
             NetworkSync.Tick(); OwnerSkillAuthority.Tick(); WorkshopRemoteCraft.Tick(); WorkshopRecovery.Tick(); WorkshopChestLease.Tick();
             WorkbenchEnchantmentCooldownProtocol.Tick();
             WorkbenchEnchantmentRuntime.Tick();
+            EnchantmentAreaVisual.Tick();
 #if MASTERY_MAGIC70_EXPERIMENT
             Magic70Surtling.Tick();
 #endif
@@ -65,10 +69,30 @@ namespace ValheimMastery
 #endif
             WeaponGlowService.Tick(); Axes70Service.Tick(); FarmingPerkService.Tick(); CookingLegacyMigrationService.Tick(); WoodCuttingChainService.Tick(); RuntimeSelfTest.Tick();
         }
+        private void LateUpdate() { MasterIdolResidentDance.LateTick(); }
+        private void OnEnable()
+        {
+            if(Instance==this&&Settings!=null)
+            {
+                EnchantmentAreaVisual.Configure(EnchantmentAreaVisual.ApprovedTestPolicy);
+                ObserverCuePresentation.Install();
+            }
+        }
+        private void OnDisable() { CleanupAreaPresentation(); MasterIdolResidentDance.Reset(); }
         private void OnDestroy() { CleanupRuntime(); }
+
+        private static void CleanupAreaPresentation()
+        {
+            MasterIdolCleanup.Run("enchantment-area-configure-off",()=>EnchantmentAreaVisual.Configure(null),
+                (stage,error)=>Log?.LogWarning("[MasterIdols] "+stage+": "+error));
+            MasterIdolCleanup.Run("observer-cues-reset",()=>{ObserverCueNetwork.Configure(null);ObserverCueNetwork.Reset();},
+                (stage,error)=>Log?.LogWarning("[MasterIdols] "+stage+": "+error));
+        }
 
         private void CleanupRuntime()
         {
+            CleanupAreaPresentation();
+            MasterIdolResidentDance.Reset();
             enabled = false;
             // Also covers initialization failures, which bypass OnDestroy hooks.
             try { Run70MapMarkerPresentation.ReleaseAssets(); }
@@ -181,6 +205,10 @@ namespace ValheimMastery
         }
     }
 }
+
+
+
+
 
 
 

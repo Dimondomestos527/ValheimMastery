@@ -306,6 +306,9 @@ namespace ValheimMastery
                     if (state.Pending != null && Ledger.Settle(id, a.Token, encoded, World, phase))
                     {
                         var result = Ledger.Get(id).Results[a.Token];
+                        // Observer feedback is optional and follows the first durable normal settlement.
+                        if (phase == Applied && result.OriginPhase == 0)
+                        { try { ObserverCueNetwork.PublishCraftingApplied(actor, a); } catch { } }
                         if (result.OriginPhase == 0 || FinishMigration(actor, a, result)) Reply(rpc, actor, nonce, 2, encoded, result.OriginRaw);
                     }
                     else if (phase == Rejected && state.Pending == null)
@@ -344,7 +347,13 @@ namespace ValheimMastery
                     { Reply(rpc, current, nonce, 0, encoded); return; }
                     // Existing reservation keeps the originally admitted duration, never a new tier/config.
                     var permit = latest.Pending ?? new Crafting100PermitLedger.Permit { Token = a.Token, Encoded = encoded, World = world, Kind = a.Kind, Duration = approved };
-                    if (ledger.Admit(id, permit)) Reply(rpc, current, nonce, 1, encoded);
+                    if (ledger.Admit(id, permit))
+                    {
+                        // Existing pending/recovery reservations never acquire a fresh cosmetic stamp.
+                        if (latest.Pending == null)
+                        { try { ObserverCueNetwork.MarkCraftingAdmitted(current, a); } catch { } }
+                        Reply(rpc, current, nonce, 1, encoded);
+                    }
                     Snapshot(rpc, current, nonce);
                 }, error =>
                 { if (!CurrentLedger(session, world, ledger)) return; RemoveValidation(id, encoded); Reply(rpc, actor, nonce, 0, encoded); });

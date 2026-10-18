@@ -61,6 +61,9 @@ namespace ValheimMastery
                 !home.Contains(player.transform.position)||!MasterIdolResidentPolicy.Friendly(actor.SceneCreature,player)||
                 (actor.transform.position-player.transform.position).sqrMagnitude>64||
                 MasterIdolResidentSceneAnimation.HomeActive(home))return false;
+            if(MasterIdolResidentUniqueActions.TryReact(actor.SceneCreature,player))return true;
+            // Only the separately approved Elite native-idle upper-body wave may use legacy fallback.
+            if(Utils.GetPrefabName(actor.gameObject)!="Greydwarf_Elite"||player.m_nview?.GetZDO()?.GetString(ZDOVars.s_emote,"")!="wave")return false;
             float duration=MasterIdolVisibleGesture.ReactionSeconds(actor.SceneCreature);if(duration<=0)return false;
             if(!Homes.TryGetValue(home.Id,out var slot))
             {if(Homes.Count>=MasterIdolResidentIdleRules.MaxHomeRecords)return false;Homes.Add(home.Id,slot=new Slot());}

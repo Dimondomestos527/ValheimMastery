@@ -14,7 +14,7 @@ namespace ValheimMastery
             Actor?.m_nview?.IsValid()==true && !Actor.IsDead() && Data?.Persistent==true &&
             ReferenceEquals(Actor.m_nview.GetZDO(),Data) && ReferenceEquals(Manager.GetZDO(Data.m_uid),Data) &&
             MasterIdolNativeTaming.Assigned(Data) && MasterIdolResidents.Family(Actor) &&
-            Home==Data.GetString(MasterIdolNativeTaming.HomeKey,"");
+            MasterIdolNativeTaming.SameHome(Home,Data.GetString(MasterIdolNativeTaming.HomeKey,""));
     }
     internal static class MasterIdolResidentPetRules
     {
@@ -65,7 +65,7 @@ namespace ValheimMastery
             if(net.IsServer()&&!local)
             {
                 var peer=net.GetPeer(sender);
-                if(peer?.IsReady()!=true||peer.m_characterID!=data.m_uid||peer.m_playerID!=player.GetPlayerID())return false;
+                if(peer?.IsReady()!=true||!ReferenceEquals(OwnerSkillAuthority.ResolveCharacterData(peer),data)||peer.m_characterID!=data.m_uid||data.GetLong(ZDOVars.s_playerID,0)==0||data.GetLong(ZDOVars.s_playerID,0)!=player.GetPlayerID())return false;
             }
             else if(!net.IsServer()&&net.GetServerPeer()?.IsReady()!=true)return false;
             if(author=="host")return local; // native unsigned local host only, never a remote attribution
@@ -92,6 +92,13 @@ namespace ValheimMastery
             __state=null;
             var tag=MasterIdolResidentInteraction.Tag(__instance);if(tag==null)return true;
             if(Application.isBatchMode||!MasterIdolResidentInteraction.PlayerAccess(tag,__0 as Player)){__result=false;return false;}
+            // Root-selected input: crouch+Use cargo, normal Use family action, native AltPlace rename.
+            if(!__2&&MasterIdolForestGuardState.ModuleBorn(tag.Data))
+            {
+                __result=false;if(__1)return false;
+                var player=__0 as Player;
+                __result=player.IsCrouching()?MasterIdolResidentCargo.TryOpen(tag.Actor,player):MasterIdolResidentUniqueActions.TryRequest(tag.Actor,player);return false;
+            }
             if(!__1&&!__2&&!string.IsNullOrWhiteSpace(tag.Data.GetString(ZDOVars.s_tamedName,"")))
                 __state=new PetProof{Tag=tag,Player=__0 as Player,Before=__instance.m_lastPetTime};
             return true; // native pet/stat/throttle and platform-aware rename remain unchanged
@@ -116,8 +123,12 @@ namespace ValheimMastery
     {
         private static bool Prefix(Tameable __instance,ref string __result)
         {
-            var tag=MasterIdolResidentInteraction.Tag(__instance);if(tag==null||tag.Current)return true;
-            __result="";return false;
+            var tag=MasterIdolResidentInteraction.Tag(__instance);if(tag==null)return true;
+            if(!tag.Current){__result="";return false;}
+            if(!MasterIdolForestGuardState.ModuleBorn(tag.Data))return true;
+            string cargo=Localization.instance?.GetSelectedLanguage()=="Ukrainian"?"Інвентар":"Inventory";
+            string action=MasterIdolResidentUniqueRules.TryApprovedFamilyChoice(MasterIdolForestGuardState.Family(tag.Data),0,out _)?"\n[<color=yellow><b>$KEY_Use</b></color>] "+MasterIdolResidentUniqueRules.ActionName(MasterIdolForestGuardState.Family(tag.Data)):"";
+            __result=Localization.instance.Localize(tag.Actor.GetHoverName()+action+"\n[<color=yellow><b>$KEY_Crouch + $KEY_Use</b></color>] "+cargo+"\n[<color=yellow><b>$KEY_AltPlace + $KEY_Use</b></color>] $hud_rename");return false;
         }
     }
     [HarmonyPatch(typeof(Tameable),"IsTamed")]

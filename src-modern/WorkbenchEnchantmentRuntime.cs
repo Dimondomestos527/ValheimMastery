@@ -270,6 +270,29 @@ namespace ValheimMastery
             }
         }
         // Called by root inside the existing server projection tick, not new RPC.
+        // Autonomous resident cargo uses the exact committed enchanted bench's creator,
+        // never a nearby station or a legacy physical-idol registry entry.
+        internal static bool TryCargoBench(string home,out ZDO bench,out long principal)
+        {
+            bench=null;principal=0;
+            if(!Ready||Session?.IsServer()!=true||!MasterIdolEffectZones.Ready||string.IsNullOrEmpty(home)||home.Length>128)return false;
+            int split=home.IndexOf('/');
+            if(split<=0||split!=home.LastIndexOf('/')||!MasterIdolNetworkQuota.TryUid(home.Substring(0,split),out long user,out uint uid))return false;
+            string token=home.Substring(split+1);
+            if(!Guid.TryParseExact(token,"N",out _))return false;
+            var zone=MasterIdolEffectZones.Find(home);
+            var data=Manager?.GetZDO(new ZDOID(user,uid));
+            if(zone?.Type!="BlackForest"||data==null||home!=data.m_uid+"/"+token||data.GetString(StationKey,"")!=token||
+                !UniqueNative(data,token)||Journal.HasPending(token))return false;
+            var row=Journal.ReadStation(token);
+            if(row==null||row.Removed||row.Active!="BlackForest"||row.NativeUid!=data.m_uid.ToString()||row.NativeWitness!=Witness(data)||
+                !TryStation(data,out _,out int level,out _)||!WorkbenchEnchantmentRules.TryAvailable(WorkbenchEnchantmentService.Choices(row),level,out var available)||!available.Contains(row.Active))return false;
+            var position=data.GetPosition();
+            if(position.x!=zone.Home.x||position.y!=zone.Home.y||position.z!=zone.Home.z)return false;
+            long creator=data.GetLong(ZDOVars.s_creator,0);
+            if(creator==0)return false;
+            bench=data;principal=creator;return true;
+        }
         internal static List<MasterIdolEffectZone> ProjectCommittedZones()
         {
             var zones=new List<MasterIdolEffectZone>();if(!Ready)return zones;Index();
