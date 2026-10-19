@@ -2,17 +2,17 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Client",
-  "version": "1.4.123-test-non100-livefix-20261018",
-  "archive": "client-1.4.123-test-non100-livefix-20261018.zip",
-  "archive_sha256": "b5589dce0cc58dd5e17d21c29a669fd476722bcb356990a86c3436c78fe75a71",
+  "version": "1.4.123-test-quickfix-20261019",
+  "archive": "client-1.4.123-test-quickfix-20261019.zip",
+  "archive_sha256": "4deec851973cf2a3229d951f1bcd77890b48495bad499b096bb571b1b101bb1c",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26795008,
-      "sha256": "505fb78869f88314e63ae48a51ddce5d62825b12039ad48e4035d5e596a7aee1"
+      "size": 26796032,
+      "sha256": "3db9ffa84d4653a2428d382713fd1217ee67eee0e844f4b0b75ba71d18adbc4e"
     }
   ],
-  "validation": "FINAL_PAIR_BUILD_AND_TARGETED_CHECKS_REQUIRED;LIVE_RETEST_PENDING",
+  "validation": "ROOT_FINAL_PAIR_BUILD_AFFECTED_CHECKS_PASS;LIVE_RETEST_PENDING",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
@@ -20,8 +20,8 @@
   "network_projection": 3,
   "network_wire_identity": "1.4.123+rpc-20261018-non100-livefix-v10",
   "known_issues": [
-    "Final reported visual/audio/observer/capacity/recast fixes included; multiplayer appearance and FPS require human retest.",
-    "No full gameplay LIVE PASS claimed; Elite greeting and new100 additions excluded."
+    "Four-file quickfix: enchantment-travel cooldown bypass, Forest activation dense effect expires after10s, large centered teleport loading rune.",
+    "Same wirev10; new100/Elite/laterV4 excluded. Gameplay and local FPS require post-install observation; no complete LIVE PASS."
   ],
   "EliteGreetingIncluded": false,
   "Gold100NewFourIncluded": false
