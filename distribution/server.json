@@ -2,26 +2,31 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-test-quickfix-20261019",
-  "archive": "server-1.4.123-test-quickfix-20261019.zip",
-  "archive_sha256": "e53fe1879032bfb020c2b3fdf3132323112b58cbe625b7dcdcb7fc165a3bb790",
+  "version": "1.4.123-test-non100-livefix3-20261020",
+  "archive": "server-1.4.123-test-non100-livefix3-20261020.zip",
+  "archive_sha256": "cd656fed94492b6e0a888ff9daea8c747d70cc2127511c194cb6fb3f42d1aa5d",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26796032,
-      "sha256": "b5f4b361b1594840c0c5fdc1ce100643a75c37166e44d55a270c3394f981d031"
+      "size": 26912768,
+      "sha256": "0cd3fd01ca71a268b5bb2d8be2d56037932232073d7497ba41db4d19c26ba02d"
     }
   ],
-  "validation": "ROOT_FINAL_PAIR_BUILD_AFFECTED_CHECKS_PASS;LIVE_RETEST_PENDING",
+  "validation": "ROOT_EXACT_PAIR_BUILD_CHANGED_CHECKS_PASS;KNOWN_LIVE_FAILURES;NOT_STABLE",
   "plugin_version": "1.4.123",
   "channel": "Release",
   "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
   "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261018-non100-livefix-v10",
+  "network_wire_identity": "1.4.123+rpc-20261020-non100-livefix3-v13",
   "known_issues": [
-    "Four-file quickfix: enchantment-travel cooldown bypass, Forest activation dense effect expires after10s, large centered teleport loading rune.",
-    "Same wirev10; new100/Elite/laterV4 excluded. Gameplay and local FPS require post-install observation; no complete LIVE PASS."
+    "Опубліковано за прямим дозволом користувача з відомими збоями. Це не STABLE і не повний gameplay/LIVE PASS.",
+    "Варта Лісу: користувач повідомляє, що поява все ще не працює; виправлення lifecycle не є підтвердженим усуненням цієї проблеми.",
+    "Гість: за поточним повідомленням користувача з’являється лише один; причина та наступне виправлення ще досліджуються.",
+    "Скелети й вантаж: результат після встановлення поки не підтверджено; gameplay, multiplayer та FPS потребують ручного тесту.",
+    "Клієнт і сервер мають бути оновлені разом до wire v13. Нові 100-перки та EliteGreeting виключені.",
+    "Тимчасовий діагностичний PerformanceAuditProbe не входить у звичайний пакет. Пакет містить лише відповідну ValheimMastery.dll.",
+    "Grove: пізня або холодна побудова може пропустити початковий ефект; cold-first причина UNKNOWN. Повного LIVE PASS для оформлення не заявлено."
   ],
   "EliteGreetingIncluded": false,
   "Gold100NewFourIncluded": false
