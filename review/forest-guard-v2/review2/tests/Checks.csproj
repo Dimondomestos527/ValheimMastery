@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <LangVersion>latest</LangVersion>
+    <ControllerSource Condition="'$(ControllerSource)' == ''">../src-modern/MasterIdolForestGuardLifecycleController.cs</ControllerSource>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../stage-b/after/src-modern/MasterIdolForestGuardLifecycle.cs" />
+    <Compile Include="$(ControllerSource)" />
+    <Compile Include="../../stage-b/after/src-modern/MasterIdolForestGuardLifecycleOwner.cs" />
+    <Compile Include="../../stage-b/after/src-modern/MasterIdolForestGuardDiagnostic.cs" />
+    <Compile Include="../../stage-b/after/src-modern/MasterIdolForestGuardLifecycleVisibility.cs" />
+    <Compile Include="../../stage-b/after/src-modern/MasterIdolForestGuardLoadIdentity.cs" />
+    <Compile Include="Stubs.cs" />
+    <Compile Include="ExistingCases.cs" />
+    <Compile Include="TargetedCases.cs" />
+  </ItemGroup>
+</Project>
