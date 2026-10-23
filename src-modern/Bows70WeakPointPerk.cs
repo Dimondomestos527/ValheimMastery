@@ -112,12 +112,14 @@ namespace ValheimMastery
             float bestDepth = float.MaxValue;
             foreach (Character candidate in Character.GetAllCharacters())
             {
-                if (candidate == null || candidate == player || candidate.IsDead() || candidate is Player || !BaseAI.IsEnemy(player, candidate)) continue;
+                if (candidate == null || candidate == player || candidate.IsDead() || candidate is Player) continue;
                 Vector3 to = candidate.GetCenterPoint() - eye;
                 float depth = Vector3.Dot(to, aim);
                 if (depth <= 0f || depth > 80f) continue;
                 float angle = Vector3.Angle(aim, to);
                 if (angle > bestAngle + 0.01f || (Mathf.Abs(angle - bestAngle) < 0.01f && depth >= bestDepth)) continue;
+                // Only candidates inside the aim cone need expensive faction/enemy classification.
+                if (!BaseAI.IsEnemy(player, candidate)) continue;
                 RaycastHit obstruction;
                 if (Physics.Linecast(eye, candidate.GetCenterPoint(), out obstruction, Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore) &&
                     obstruction.collider?.GetComponentInParent<Character>() != candidate) continue;
