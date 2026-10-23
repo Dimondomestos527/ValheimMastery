@@ -1,0 +1,538 @@
+diff --git a/after/src-modern/MasterIdolForestGuardDiagnostic.cs b/after/src-modern/MasterIdolForestGuardDiagnostic.cs
+new file mode 100644
+index 0000000..3a52f20
+--- /dev/null
++++ b/after/src-modern/MasterIdolForestGuardDiagnostic.cs
+@@ -0,0 +1,146 @@
++using System;
++using System.Globalization;
++using HarmonyLib;
++using UnityEngine;
++namespace ValheimMastery
++{
++    // Task-local observations only. Never calls gameplay Context/Local/Peace/BindBody,
++    // never writes native state, never sends RPC. Four families, eight normal
++    // pending lanes, a thirty-two event routine critical ring and first/latest
++    // unflushed decisive failures each. Routine traffic cannot evict a cause.
++    internal static class MasterIdolForestGuardDiagnostic
++    {
++        internal enum Lane { Request,Apply,Reply,Outcome,Position,Stage,Cue,Wait }
++        sealed class Family
++        {
++            internal float Until;
++            internal int Normal,Critical,Suppressed;
++            internal readonly string[] Last=new string[16],Pending=new string[16];
++            internal readonly float[] RepeatAt=new float[16];
++            internal readonly string[] Failures=new string[32];internal int Head,Count,Dropped;
++            internal string FirstFailure,LatestFailure;internal int FailureOverwritten;
++        }
++        static readonly Family[] Families=new Family[4];
++        static ZNet Net;static ZDOMan Manager;static long World,Sequence;static ulong Generation;static float Next;
++        [ThreadStatic] static MasterIdolForestGuardLifecycle.State? PositionRow;
++        internal readonly struct PositionScope:IDisposable
++        {
++            readonly MasterIdolForestGuardLifecycle.State? Before;
++            internal PositionScope(MasterIdolForestGuardLifecycle.State row){Before=PositionRow;PositionRow=row;}
++            public void Dispose(){PositionRow=Before;}
++        }
++        internal static PositionScope Position(MasterIdolForestGuardLifecycle.State row)=>new PositionScope(row);
++        internal static void PositionEvent(string stage,string reason,string detail)
++        {if(PositionRow.HasValue)Event(PositionRow.Value,Lane.Position,stage+"/"+reason,detail??"",true,reason!="point-ready");}
++        internal static bool PositionReject(bool reject,string reason)
++        {if(reject)PositionEvent("guard",reason,"");return reject;}
++        static bool Context()
++        {
++            var net=ZNet.instance;var manager=ZDOMan.instance;long world=net?.GetWorld()!=null?net.GetWorldUID():0;
++            if(net!=Net||manager!=Manager||world!=World||Generation!=MasterIdolLoadIdentity.Generation)
++            {Array.Clear(Families,0,4);Net=net;Manager=manager;World=world;Generation=MasterIdolLoadIdentity.Generation;Sequence=0;Next=0;}
++            return net!=null&&manager!=null&&world!=0&&float.IsFinite(Time.unscaledTime);
++        }
++        static MasterIdolForestGuardLifecycle.State Read(Character actor)
++        {
++            var data=actor?.m_nview?.GetZDO();if(data==null)return PositionRow??default;
++            return new MasterIdolForestGuardLifecycle.State{Id=data.m_uid,Family=MasterIdolForestGuardState.Family(data),
++                Owner=data.GetOwner(),OwnerRevision=data.OwnerRevision,Born=data.GetLong(MasterIdolForestGuardState.BornKey,0),
++                Cycle=data.GetLong(MasterIdolForestGuardLifecycle.CycleKey,0),IntentRevision=data.GetLong(MasterIdolForestGuardLifecycle.IntentKey,0),
++                Attempt=data.GetString(MasterIdolForestGuardLifecycle.AttemptKey,""),Status=(MasterIdolForestGuardLifecycle.Phase)data.GetInt(MasterIdolForestGuardLifecycle.PhaseKey,0)};
++        }
++        internal static bool Check(bool value,Character actor,Lane lane,string reason)
++        {if(!value)Event(actor,lane,reason,"",true,true);return value;}
++        internal static bool Reject(bool value,Character actor,Lane lane,string reason)
++        {if(value)Event(actor,lane,reason,"",true,true);return value;}
++        internal static bool Check(bool value,MasterIdolForestGuardLifecycle.State row,Lane lane,string reason)
++        {if(!value)Event(row,lane,reason,"",true,true);return value;}
++        internal static bool Reject(bool value,MasterIdolForestGuardLifecycle.State row,Lane lane,string reason)
++        {if(value)Event(row,lane,reason,"",true,true);return value;}
++        internal static void Event(Character actor,Lane lane,string reason,string detail="",bool critical=false,bool decisive=false)
++        {try{Event(Read(actor),lane,reason,detail,critical,decisive);}catch(Exception){}}
++        static string Limit(string text,int count)=>text==null?"":text.Length<=count?text:text.Substring(0,count);
++        static string Clock(float value)=>value.ToString("0.000",CultureInfo.InvariantCulture);
++        static bool Spend(Family family,bool critical)
++        {
++            if(critical){if(family.Critical>=16)return false;family.Critical++;}
++            else {if(family.Normal>=16)return false;family.Normal++;}
++            return true;
++        }
++        static void Emit(string text,int suppressed)
++        {try{MasteryPlugin.Log?.LogInfo("[ForestGuardDiag] "+text+" emitted="+Clock(Time.unscaledTime)+" suppressed="+suppressed);}catch(Exception){}}
++        static void Renew(Family family,float now)
++        {
++            if(now<family.Until)return;
++            family.Until=now+10;family.Normal=family.Critical=0;
++            // Reserved cause evidence flushes before all routine Request/Reply/
++            // Outcome traffic. Keep first plus latest when several causes arrive.
++            if(family.FirstFailure!=null)
++            {
++                Spend(family,true);Emit(family.FirstFailure+" retained=true decisive=true failureOverwritten="+family.FailureOverwritten,family.Suppressed);
++                if(family.LatestFailure!=null&&family.LatestFailure!=family.FirstFailure)
++                {Spend(family,true);Emit(family.LatestFailure+" retained=true decisive=true failureOverwritten="+family.FailureOverwritten,family.Suppressed);}
++                family.FirstFailure=family.LatestFailure=null;family.FailureOverwritten=0;
++            }
++            while(family.Count>0&&Spend(family,true))
++            {
++                string retained=family.Failures[family.Head];family.Failures[family.Head]=null;
++                family.Head=(family.Head+1)%32;family.Count--;
++                Emit(retained+" retained=true criticalDropped="+family.Dropped,family.Suppressed);
++            }
++            // All retained failures preserve their original sequence/time. An
++            // overflow drops the oldest only and explicitly reports that count.
++            for(int i=0;i<8;i++)
++            {
++                var pending=family.Pending[i];if(pending==null||!Spend(family,i>=8))continue;
++                family.Pending[i]=null;Emit(pending+" retained=true",family.Suppressed);
++            }
++            family.Suppressed=0;
++        }
++        internal static void Event(MasterIdolForestGuardLifecycle.State row,Lane lane,string reason,string detail="",bool critical=false,bool decisive=false)
++        {
++            try
++            {
++                if(row.Family<0||row.Family>=4||row.Id==ZDOID.None||!Context())return;
++                decisive|=reason?.EndsWith("-exception",StringComparison.Ordinal)==true;
++                critical|=decisive;
++                float now=Time.unscaledTime;var family=Families[row.Family]??(Families[row.Family]=new Family());Renew(family,now);
++                int index=(int)lane+(critical?8:0);if(index<0||index>=16)return;
++                string signature=row.Id+"/"+row.Status+"/"+row.Cycle+"/"+row.IntentRevision+"/"+Limit(row.Attempt,32)+"/"+row.Owner+"/"+row.OwnerRevision+"/"+Limit(reason,96)+"/"+Limit(detail,384);
++                if(signature==family.Last[index]&&now<family.RepeatAt[index]){family.Suppressed++;return;}
++                family.Last[index]=signature;family.RepeatAt[index]=now+5;
++                string text="seq="+(++Sequence)+" observed="+Clock(now)+" frame="+Time.frameCount+" role="+(Net.IsServer()?"host-or-server":"peer")+
++                    " world="+World+" generation="+Generation+" family="+row.Family+" uid="+row.Id+" owner="+row.Owner+" ownerRev="+row.OwnerRevision+
++                    " phase="+row.Status+" cycle="+row.Cycle+" intent="+row.IntentRevision+" attempt="+Limit(row.Attempt,32)+" lane="+lane+
++                    " reason="+Limit(reason,96)+" "+Limit(detail,384);
++                if(!Spend(family,critical))
++                {
++                    if(decisive)
++                    {
++                        if(family.FirstFailure==null)family.FirstFailure=text;
++                        else if(family.LatestFailure!=null)family.FailureOverwritten++;
++                        family.LatestFailure=text;
++                    }
++                    else if(critical)
++                    {
++                        if(family.Count==32){family.Head=(family.Head+1)%32;family.Count--;family.Dropped++;}
++                        family.Failures[(family.Head+family.Count)%32]=text;family.Count++;
++                    }
++                    else family.Pending[index]=text;
++                    family.Suppressed++;return;
++                }
++                // A new emitted event supersedes any older retained event in this lane.
++                family.Pending[index]=null;Emit(text,family.Suppressed);family.Suppressed=0;
++            }
++            catch(Exception){} // Logging failure must never change the actual branch.
++        }
++        internal static void Tick()
++        {
++            try{if(!Context()||Time.unscaledTime<Next)return;Next=Time.unscaledTime+.5f;foreach(var family in Families)if(family!=null)Renew(family,Time.unscaledTime);}
++            catch(Exception){}
++        }
++    }
++    [HarmonyPatch(typeof(MasteryPlugin),"Update")]
++    internal static class MasterIdolForestGuardDiagnosticPatch
++    {static void Postfix()=>MasterIdolForestGuardDiagnostic.Tick();}
++}
+diff --git a/before/src-modern/MasterIdolForestGuardLifecycleController.cs b/after/src-modern/MasterIdolForestGuardLifecycleController.cs
+index edd37e0..568a937 100644
+--- a/before/src-modern/MasterIdolForestGuardLifecycleController.cs
++++ b/after/src-modern/MasterIdolForestGuardLifecycleController.cs
+@@ -73,8 +73,11 @@ namespace ValheimMastery
+         internal static void OnOwnerOutcome(MasterIdolForestGuardLifecycle.State row,string epoch,ForestGuardOwnerAction action,ForestGuardOwnerOutcome outcome,long sender)
+         {
+-            if(!ChangeContext()||!Entries.TryGetValue(row.Id,out var entry)||sender!=row.Owner||!MasterIdolForestGuardLifecycleOwner.Same(entry.Row,row))return;
++            MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"received","action="+action+" outcome="+outcome+" sender="+sender,true);
++            if(!MasterIdolForestGuardDiagnostic.Check(ChangeContext(),row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"controller-context")||!Entries.TryGetValue(row.Id,out var entry)||MasterIdolForestGuardDiagnostic.Reject(sender!=row.Owner,row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"sender-mismatch")||!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycleOwner.Same(entry.Row,row),row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"row-mismatch"))return;
++            try
++            {
+             var data=ChangeManager.GetZDO(row.Id);
+-            if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out var currentEpoch)||currentEpoch!=epoch||!MasterIdolForestGuardLifecycleOwner.Same(row,accepted))return;
+-            if(action!=Action(entry))return;
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out var currentEpoch),row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"accepted-intent-unavailable")||MasterIdolForestGuardDiagnostic.Reject(currentEpoch!=epoch,row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"epoch-changed")||!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycleOwner.Same(row,accepted),row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"accepted-row-changed"))return;
++            if(MasterIdolForestGuardDiagnostic.Reject(action!=Action(entry),row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"action-mismatch"))return;
+             if(outcome==ForestGuardOwnerOutcome.Deferred)
+             {
+@@ -99,4 +102,6 @@ namespace ValheimMastery
+             else entry.Ack=true;
+             entry.Epoch=epoch;
++            }
++            finally { MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Outcome,"after","action="+action+" outcome="+outcome+" afterPhase="+entry.Row.Status+" afterIntent="+entry.Row.IntentRevision+" afterAttempt="+entry.Row.Attempt,true); }
+         }
+         static ForestGuardOwnerAction Action(Entry entry)
+@@ -231,5 +236,9 @@ namespace ValheimMastery
+                 entry.NextCommand=Time.unscaledTime+1;
+                 var action=Action(entry);
+-                if(!MasterIdolForestGuardLifecycleOwner.Request(row,action))Defer(entry,"owner-command-unavailable");
++                var diagnosticBefore=entry.Row;
++                MasterIdolForestGuardDiagnostic.Event(diagnosticBefore,MasterIdolForestGuardDiagnostic.Lane.Request,"before","action="+action,true);
++                bool diagnosticSent=MasterIdolForestGuardLifecycleOwner.Request(row,action);
++                MasterIdolForestGuardDiagnostic.Event(diagnosticBefore,MasterIdolForestGuardDiagnostic.Lane.Request,"after","action="+action+" sent="+diagnosticSent+" afterPhase="+entry.Row.Status+" afterIntent="+entry.Row.IntentRevision+" afterAttempt="+entry.Row.Attempt,true);
++                if(!diagnosticSent)Defer(entry,"owner-command-unavailable");
+                 else if(action==ForestGuardOwnerAction.PrepareAppearance&&entry.Started<0)Defer(entry,"appearance-start-pending");
+                 else if(action==ForestGuardOwnerAction.ReleaseActive&&!entry.ReleaseAck)Defer(entry,"owner-release-ack-pending");
+diff --git a/before/src-modern/MasterIdolForestGuardLifecycleOwner.cs b/after/src-modern/MasterIdolForestGuardLifecycleOwner.cs
+index 99616e6..9a3da63 100644
+--- a/before/src-modern/MasterIdolForestGuardLifecycleOwner.cs
++++ b/after/src-modern/MasterIdolForestGuardLifecycleOwner.cs
+@@ -62,19 +62,20 @@ namespace ValheimMastery
+         internal static bool Request(MasterIdolForestGuardLifecycle.State row,ForestGuardOwnerAction action)
+         {
+-            if(!Context()||!Net.IsServer())return false;
++            if(!MasterIdolForestGuardDiagnostic.Check(Context(),row,MasterIdolForestGuardDiagnostic.Lane.Request,"context")||!MasterIdolForestGuardDiagnostic.Check(Net.IsServer(),row,MasterIdolForestGuardDiagnostic.Lane.Request,"not-server"))return false;
+             var data=Manager.GetZDO(row.Id);
+-            if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out string epoch)||!Same(accepted,row))return false;
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out string epoch),row,MasterIdolForestGuardDiagnostic.Lane.Request,"accepted-intent-unavailable")||!MasterIdolForestGuardDiagnostic.Check(Same(accepted,row),row,MasterIdolForestGuardDiagnostic.Lane.Request,"accepted-row-mismatch"))return false;
+             // Native owner is respected. No SetOwner, forced lease expiry or factory.
+-            if(row.Owner==ZNet.GetUID()){Apply(row,epoch,action,null);return true;}
++            if(row.Owner==ZNet.GetUID()){MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Request,"local-apply","action="+action,false);Apply(row,epoch,action,null);return true;}
+             foreach(var peer in Net.GetPeers())if(peer?.m_uid==row.Owner&&peer.IsReady()&&NetworkSync.HasPeerSettings(peer)&&peer.m_rpc!=null)
+-            {try{peer.m_rpc.Invoke(CommandRpc,new ZPackage(Encode(row,epoch,action,ForestGuardOwnerOutcome.Applied)));return true;}catch(Exception){return false;}}
+-            return false;
++            {try{peer.m_rpc.Invoke(CommandRpc,new ZPackage(Encode(row,epoch,action,ForestGuardOwnerOutcome.Applied)));MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Request,"remote-command-sent","action="+action,false);return true;}catch(Exception){MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Request,"remote-send-exception","action="+action,true);return false;}}
++            MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Request,"no-ready-owner-peer","action="+action,true);return false;
+         }
+         static void Reply(Pending pending,ForestGuardOwnerOutcome outcome)
+         {
+             pending.Outcome=outcome;pending.HasOutcome=true;
+-            if(!Context()||!Running.TryGetValue(pending.Row.Id,out var current)||!ReferenceEquals(current,pending))return;
++            MasterIdolForestGuardDiagnostic.Event(pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"generated","action="+pending.Action+" outcome="+outcome,true);
++            if(!MasterIdolForestGuardDiagnostic.Check(Context(),pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"context")||!MasterIdolForestGuardDiagnostic.Check(Running.TryGetValue(pending.Row.Id,out var current),pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"pending-not-found")||!MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(current,pending),pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"pending-replaced"))return;
+             var data=Manager.GetZDO(pending.Row.Id);
+-            if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var row,out string epoch)||epoch!=pending.Epoch||!Same(row,pending.Row))return;
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var row,out string epoch),pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"accepted-intent-unavailable")||MasterIdolForestGuardDiagnostic.Reject(epoch!=pending.Epoch,pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"epoch-changed")||!MasterIdolForestGuardDiagnostic.Check(Same(row,pending.Row),pending.Row,MasterIdolForestGuardDiagnostic.Lane.Reply,"accepted-row-changed"))return;
+             pending.Outcome=outcome;
+             if(Net.IsServer())MasterIdolForestGuardLifecycleController.OnOwnerOutcome(row,epoch,pending.Action,outcome,ZNet.GetUID());
+@@ -101,21 +102,22 @@ namespace ValheimMastery
+         static void Apply(MasterIdolForestGuardLifecycle.State row,string epoch,ForestGuardOwnerAction action,ZRpc reply)
+         {
+-            if(!Context()||!Allowed(action,row.Status))return;
++            if(!MasterIdolForestGuardDiagnostic.Check(Context(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"context")||!MasterIdolForestGuardDiagnostic.Check(Allowed(action,row.Status),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"action-phase-not-allowed"))return;
++            MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Apply,"entered","action="+action,false);
+             var data=Manager.GetZDO(row.Id);
+-            if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out string currentEpoch)||currentEpoch!=epoch||!Same(row,accepted)||data.GetOwner()!=ZNet.GetUID())return;
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out var accepted,out string currentEpoch),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"accepted-intent-unavailable")||MasterIdolForestGuardDiagnostic.Reject(currentEpoch!=epoch,row,MasterIdolForestGuardDiagnostic.Lane.Apply,"epoch-changed")||!MasterIdolForestGuardDiagnostic.Check(Same(row,accepted),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"row-changed")||MasterIdolForestGuardDiagnostic.Reject(data.GetOwner()!=ZNet.GetUID(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"not-native-owner"))return;
+             var instance=ZNetScene.instance?.FindInstance(row.Id);var actor=instance!=null?instance.GetComponent<Character>():null;
+-            if(actor==null||actor.IsDead()||actor.m_nview?.IsOwner()!=true||!ReferenceEquals(actor.m_nview.GetZDO(),data))return;
++            if(MasterIdolForestGuardDiagnostic.Reject(actor==null,row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-not-loaded")||MasterIdolForestGuardDiagnostic.Reject(actor.IsDead(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-dead")||MasterIdolForestGuardDiagnostic.Reject(actor.m_nview?.IsOwner()!=true,row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-view-not-owner")||!MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(actor.m_nview.GetZDO(),data),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-zdo-mismatch"))return;
+             if(Running.TryGetValue(row.Id,out var old)&&Same(old.Row,row)&&old.Epoch==epoch&&old.Action==action)
+             {
+-                if(!old.HasOutcome)return; // Actual asset preparation is still in flight.
++                if(!old.HasOutcome){MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Wait,"previous-outcome-in-flight","action="+action,false);return;} // Actual asset preparation is still in flight.
+                 if(old.Outcome!=ForestGuardOwnerOutcome.Deferred||action==ForestGuardOwnerAction.PrepareAppearance)
+-                {Reply(old,old.Outcome);return;}
++                {MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Apply,"cached-outcome","action="+action+" outcome="+old.Outcome,false);Reply(old,old.Outcome);return;}
+                 // Transient suspend/queue failure must reattempt its side effect.
+             }
+             foreach(var stale in new List<ZDOID>(Running.Keys))
+                 if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(Manager.GetZDO(stale),out _,out _))Running.Remove(stale);
+-            if(Running.Count>=4&&!Running.ContainsKey(row.Id))return;
++            if(MasterIdolForestGuardDiagnostic.Reject(Running.Count>=4&&!Running.ContainsKey(row.Id),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"running-capacity"))return;
+             // A delayed Prepare cannot replay after Release stamped phase1.
+-            if(action==ForestGuardOwnerAction.PrepareAppearance&&NativeRelease(row,data))return;
++            if(action==ForestGuardOwnerAction.PrepareAppearance&&MasterIdolForestGuardDiagnostic.Reject(NativeRelease(row,data),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"already-native-active"))return;
+             var pending=new Pending{Row=row,Epoch=epoch,Action=action,Reply=reply,Actor=actor,Outcome=ForestGuardOwnerOutcome.Deferred};Running[row.Id]=pending;
+             if(action==ForestGuardOwnerAction.MarkQuiescing)
+@@ -123,5 +125,5 @@ namespace ValheimMastery
+             if(action==ForestGuardOwnerAction.Suspend||action==ForestGuardOwnerAction.Queue)
+             {
+-                if(actor.InAttack()||actor.InDodge()||actor.IsStaggering()) {Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
++                if(MasterIdolForestGuardDiagnostic.Reject(actor.InAttack(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-attacking")||MasterIdolForestGuardDiagnostic.Reject(actor.InDodge(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-dodging")||MasterIdolForestGuardDiagnostic.Reject(actor.IsStaggering(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"actor-staggering")) {Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
+                 if(actor.GetBaseAI() is MonsterAI ai)
+                 {
+@@ -144,21 +146,23 @@ namespace ValheimMastery
+                 }
+                 Stamp(row,row.Status,data);
+-                Reply(pending,MasterIdolForestGuardLifecycleVisibility.Suspend(actor)?ForestGuardOwnerOutcome.Applied:ForestGuardOwnerOutcome.Deferred);return;
++                Reply(pending,MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycleVisibility.Suspend(actor),row,MasterIdolForestGuardDiagnostic.Lane.Stage,"suspend-rejected")?ForestGuardOwnerOutcome.Applied:ForestGuardOwnerOutcome.Deferred);return;
+             }
+             if(action==ForestGuardOwnerAction.ReleaseActive)
+             {Stamp(row,MasterIdolForestGuardLifecycle.Phase.Active,data);Reply(pending,ForestGuardOwnerOutcome.Applied);return;}
+             var zone=MasterIdolEffectZones.Find(row.Home)??MasterIdolEffectZones.ResidentHome(row.Id.ToString(),MasterIdolForestRules.Families[row.Family]);
+-            if(!MasterIdolRecruitment.TryPosition(zone,row.Family,null,out var point,out _)){Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
+-            if(!MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out accepted,out currentEpoch)||currentEpoch!=epoch||!Same(row,accepted)||!actor.m_nview.IsOwner())return;
++            using var diagnosticPosition=MasterIdolForestGuardDiagnostic.Position(row);
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolRecruitment.TryPosition(zone,row.Family,null,out var point,out _),row,MasterIdolForestGuardDiagnostic.Lane.Position,"search-rejected")){Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(data,out accepted,out currentEpoch),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"post-position-intent-unavailable")||MasterIdolForestGuardDiagnostic.Reject(currentEpoch!=epoch,row,MasterIdolForestGuardDiagnostic.Lane.Apply,"post-position-epoch-changed")||!MasterIdolForestGuardDiagnostic.Check(Same(row,accepted),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"post-position-row-changed")||!MasterIdolForestGuardDiagnostic.Check(actor.m_nview.IsOwner(),row,MasterIdolForestGuardDiagnostic.Lane.Apply,"post-position-not-owner"))return;
+             MasterIdolResidentBirthPresentation.Stop(actor);
+-            if(!MasterIdolForestGuardLifecycleVisibility.Stage(actor)){Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycleVisibility.Stage(actor),row,MasterIdolForestGuardDiagnostic.Lane.Stage,"stage-rejected")){Reply(pending,ForestGuardOwnerOutcome.Deferred);return;}
+             actor.transform.position=point;data.SetPosition(point);if(actor.m_body!=null){actor.m_body.position=point;actor.m_body.velocity=Vector3.zero;actor.m_body.angularVelocity=Vector3.zero;}
+             Stamp(row,row.Status,data);
+             if(!MasterIdolResidentBirthPresentation.TryQueueActivation(actor,row.Cycle,row.IntentRevision,row.Attempt,result=>
+             {
++                MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Cue,"callback","result="+result,true);
+                 if(result==ForestGuardAppearanceOutcome.Started)Reply(pending,ForestGuardOwnerOutcome.Started);
+                 else if(result==ForestGuardAppearanceOutcome.Completed){pending.Terminal=true;Reply(pending,ForestGuardOwnerOutcome.Completed);}
+                 else {pending.Terminal=true;Reply(pending,ForestGuardOwnerOutcome.Deferred);}
+-            }))Reply(pending,ForestGuardOwnerOutcome.Deferred);
++            })){MasterIdolForestGuardDiagnostic.Event(row,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-activation-rejected","",true);Reply(pending,ForestGuardOwnerOutcome.Deferred);}
+         }
+         internal static string Diagnostic(ZDOID id)
+diff --git a/before/src-modern/MasterIdolForestGuardLifecycleVisibility.cs b/after/src-modern/MasterIdolForestGuardLifecycleVisibility.cs
+index 2c72712..3ba8012 100644
+--- a/before/src-modern/MasterIdolForestGuardLifecycleVisibility.cs
++++ b/after/src-modern/MasterIdolForestGuardLifecycleVisibility.cs
+@@ -24,15 +24,15 @@ namespace ValheimMastery
+         static readonly Dictionary<Character,Body> Bodies=new Dictionary<Character,Body>();
+         static float Next;
+-        static bool Current(Body body)=>body!=null&&body.Actor!=null&&body.View!=null&&body.View.IsValid()&&
+-            body.Net==ZNet.instance&&body.Manager==ZDOMan.instance&&body.Generation==MasterIdolLoadIdentity.Generation&&
+-            body.Net?.GetWorld()!=null&&body.World==body.Net.GetWorldUID()&&ReferenceEquals(body.View.GetZDO(),body.Data)&&
+-            ReferenceEquals(body.Manager.GetZDO(body.Data.m_uid),body.Data)&&MasterIdolForestGuardState.ModuleBorn(body.Data)&&
+-            body.Data.GetLong(MasterIdolForestGuardState.BornKey,0)==body.Born&&body.Data.GetString(MasterIdolForestGuardState.NonceKey,"")==body.Nonce;
++        static bool Current(Body body)=>MasterIdolForestGuardDiagnostic.Check(body!=null,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-body-missing")&&MasterIdolForestGuardDiagnostic.Check(body.Actor!=null,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-actor-missing")&&MasterIdolForestGuardDiagnostic.Check(body.View!=null,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-view-missing")&&MasterIdolForestGuardDiagnostic.Check(body.View.IsValid(),body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-view-invalid")&&
++            MasterIdolForestGuardDiagnostic.Check(body.Net==ZNet.instance,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-session-changed")&&MasterIdolForestGuardDiagnostic.Check(body.Manager==ZDOMan.instance,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-manager-changed")&&MasterIdolForestGuardDiagnostic.Check(body.Generation==MasterIdolLoadIdentity.Generation,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-generation-changed")&&
++            MasterIdolForestGuardDiagnostic.Check(body.Net?.GetWorld()!=null,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-world-missing")&&MasterIdolForestGuardDiagnostic.Check(body.World==body.Net.GetWorldUID(),body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-world-changed")&&MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(body.View.GetZDO(),body.Data),body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-view-zdo-changed")&&
++            MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(body.Manager.GetZDO(body.Data.m_uid),body.Data),body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-canonical-zdo-changed")&&MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardState.ModuleBorn(body.Data),body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-not-module-born")&&
++            MasterIdolForestGuardDiagnostic.Check(body.Data.GetLong(MasterIdolForestGuardState.BornKey,0)==body.Born,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-born-changed")&&MasterIdolForestGuardDiagnostic.Check(body.Data.GetString(MasterIdolForestGuardState.NonceKey,"")==body.Nonce,body?.Actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"current-nonce-changed");
+         static Body Get(Character actor)
+         {
+-            if(actor==null||actor.IsDead()||actor.m_nview?.IsValid()!=true||ZNet.instance?.GetWorld()==null)return null;
+-            var data=actor.m_nview.GetZDO();if(!ReferenceEquals(ZDOMan.instance?.GetZDO(data.m_uid),data)||!MasterIdolForestGuardState.ModuleBorn(data))return null;
+-            if(Bodies.TryGetValue(actor,out var old))return Current(old)?old:null;
+-            if(Bodies.Count>=4)return null;
++            if(MasterIdolForestGuardDiagnostic.Reject(actor==null,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"actor-missing")||MasterIdolForestGuardDiagnostic.Reject(actor.IsDead(),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"actor-dead")||MasterIdolForestGuardDiagnostic.Reject(actor.m_nview?.IsValid()!=true,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"view-not-valid")||MasterIdolForestGuardDiagnostic.Reject(ZNet.instance?.GetWorld()==null,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"world-missing"))return null;
++            var data=actor.m_nview.GetZDO();if(!MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(ZDOMan.instance?.GetZDO(data.m_uid),data),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"canonical-zdo-mismatch")||!MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardState.ModuleBorn(data),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"not-module-born"))return null;
++            if(Bodies.TryGetValue(actor,out var old))return MasterIdolForestGuardDiagnostic.Check(Current(old),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"cached-body-stale")?old:null;
++            if(MasterIdolForestGuardDiagnostic.Reject(Bodies.Count>=4,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"body-capacity"))return null;
+             var body=new Body{Actor=actor,Ai=actor.GetBaseAI(),View=actor.m_nview,Data=data,Net=ZNet.instance,Manager=ZDOMan.instance,
+                 Generation=MasterIdolLoadIdentity.Generation,World=ZNet.instance.GetWorldUID(),Born=data.GetLong(MasterIdolForestGuardState.BornKey,0),Nonce=data.GetString(MasterIdolForestGuardState.NonceKey,"")};
+@@ -63,5 +63,5 @@ namespace ValheimMastery
+         internal static bool Suspend(Character actor)
+         {
+-            var body=Get(actor);if(body==null||!Current(body)||actor.IsDead())return false;
++            var body=Get(actor);if(MasterIdolForestGuardDiagnostic.Reject(body==null,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"body-unavailable")||!MasterIdolForestGuardDiagnostic.Check(Current(body),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"body-context-not-current")||MasterIdolForestGuardDiagnostic.Reject(actor.IsDead(),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"actor-dead"))return false;
+             MasterIdolResidentBirthPresentation.Stop(actor);
+             body.Held=true;HoldVisual(body);
+@@ -71,5 +71,5 @@ namespace ValheimMastery
+         internal static bool Stage(Character actor)
+         {
+-            var body=Get(actor);if(body==null||!Current(body)||actor.IsDead())return false;
++            var body=Get(actor);if(MasterIdolForestGuardDiagnostic.Reject(body==null,actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"body-unavailable")||!MasterIdolForestGuardDiagnostic.Check(Current(body),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"body-context-not-current")||MasterIdolForestGuardDiagnostic.Reject(actor.IsDead(),actor,MasterIdolForestGuardDiagnostic.Lane.Stage,"actor-dead"))return false;
+             body.Held=true;HoldVisual(body);RemoveTargets(body);
+             if(actor.m_body!=null&&!body.PhysicsHeld)
+diff --git a/before/src-modern/MasterIdolRecruitment.cs b/after/src-modern/MasterIdolRecruitment.cs
+index 34a958b..38c8e89 100644
+--- a/before/src-modern/MasterIdolRecruitment.cs
++++ b/after/src-modern/MasterIdolRecruitment.cs
+@@ -89,9 +89,9 @@ namespace ValheimMastery
+         {
+             point=endpoint=default;var net=ZNet.instance;
+-            if(net==null||net.GetWorld()==null||family<0||family>3||zone?.Type!="BlackForest"||ZoneSystem.instance==null||Pathfinding.instance==null)return false;
++            if(MasterIdolForestGuardDiagnostic.PositionReject(net==null,"net-missing")||MasterIdolForestGuardDiagnostic.PositionReject(net.GetWorld()==null,"world-missing")||MasterIdolForestGuardDiagnostic.PositionReject(family<0,"invalid-family-low")||MasterIdolForestGuardDiagnostic.PositionReject(family>3,"invalid-family-high")||MasterIdolForestGuardDiagnostic.PositionReject(zone?.Type!="BlackForest","home-zone-unavailable")||MasterIdolForestGuardDiagnostic.PositionReject(ZoneSystem.instance==null,"zone-system-missing")||MasterIdolForestGuardDiagnostic.PositionReject(Pathfinding.instance==null,"pathfinding-missing"))return false;
+             if(SearchSession!=net||SearchManager!=ZDOMan.instance||SearchGeneration!=MasterIdolLoadIdentity.Generation||SearchHome!=zone.Id)
+             {SearchSession=net;SearchManager=ZDOMan.instance;SearchGeneration=MasterIdolLoadIdentity.Generation;SearchHome=zone.Id;Array.Clear(Probes,0,4);}
+             var prototype=ZNetScene.instance?.GetPrefab(MasterIdolForestRules.Families[family])?.GetComponent<BaseAI>();
+-            return prototype!=null&&FindPoint(zone,prototype,family,observer,out point,out endpoint);
++            return !MasterIdolForestGuardDiagnostic.PositionReject(prototype==null,"native-prefab-ai-missing")&&FindPoint(zone,prototype,family,observer,out point,out endpoint);
+         }
+         internal static bool CheapPosition(MasterIdolEffectZone zone,int family,Vector3 point,Vector3 endpoint)
+@@ -213,4 +213,5 @@ namespace ValheimMastery
+             var net=ZNet.instance;long world=net?.GetWorld()!=null?net.GetWorldUID():0;
+             if(Net!=net||World!=world||Generation!=MasterIdolLoadIdentity.Generation){Seen.Clear();Net=net;World=world;Generation=MasterIdolLoadIdentity.Generation;}
++            MasterIdolForestGuardDiagnostic.PositionEvent(stage,reason,detail);
+             string key=stage+":"+reason;if(Seen.Count>=32||!Seen.Add(key))return;
+             try{MasteryPlugin.Log?.LogInfo("[GuardSpawn] "+(net?.IsServer()==true?"server":"client")+" world="+world+" stage="+stage+" reason="+reason+(detail==null?"":" "+detail));}catch(Exception){}
+diff --git a/before/src-modern/MasterIdolResidentBirthPresentation.cs b/after/src-modern/MasterIdolResidentBirthPresentation.cs
+index 9474806..e8f844f 100644
+--- a/before/src-modern/MasterIdolResidentBirthPresentation.cs
++++ b/after/src-modern/MasterIdolResidentBirthPresentation.cs
+@@ -31,21 +31,22 @@ namespace ValheimMastery
+         internal static bool TryQueueActivation(Character actor,long cycle,long intent,string attempt,Action<ForestGuardAppearanceOutcome> report)
+         {
+-            if(actor==null||cycle<=0||intent<=0||!MasterIdolForestRules.Nonce(attempt)||report==null)return false;
++            if(MasterIdolForestGuardDiagnostic.Reject(actor==null,actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-actor-missing")||MasterIdolForestGuardDiagnostic.Reject(cycle<=0,actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-invalid-cycle")||MasterIdolForestGuardDiagnostic.Reject(intent<=0,actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-invalid-intent")||MasterIdolForestGuardDiagnostic.Reject(!MasterIdolForestRules.Nonce(attempt),actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-invalid-attempt")||MasterIdolForestGuardDiagnostic.Reject(report==null,actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-callback-missing"))return false;
+             Attach(actor);var cue=actor.GetComponent<MasterIdolResidentBirthPresentation>();
+-            if(cue==null||!cue.Context()||!cue.Local(true))return false;
++            if(MasterIdolForestGuardDiagnostic.Reject(cue==null,actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-component-unavailable")||!MasterIdolForestGuardDiagnostic.Check(cue.Context(),actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-context")||!MasterIdolForestGuardDiagnostic.Check(cue.Local(true),actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-local"))return false;
+             cue.End();cue.Activation=true;cue.ActivationCycle=cycle;cue.ActivationIntent=intent;cue.ActivationAttempt=attempt;cue.Report=report;
+             cue.Data=actor.m_nview.GetZDO();cue.Born=cue.Data.GetLong(MasterIdolForestGuardState.BornKey,0);cue.Nonce=cue.Data.GetString(MasterIdolForestGuardState.NonceKey,"");
+             cue.Session=ZNet.instance;cue.Manager=ZDOMan.instance;cue.Generation=MasterIdolLoadIdentity.Generation;cue.Owner=cue.Data.GetOwner();cue.Revision=cue.Data.OwnerRevision;
+             cue.InitialHealth=actor.GetHealth();cue.Origin=actor.transform.position;cue.Tried=false;cue.Queued=true;cue.QueueUntil=Time.unscaledTime+6.5f;
+-            Waiting.Add(cue);return true;
++            Waiting.Add(cue);MasterIdolForestGuardDiagnostic.Event(actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queued","cycle="+cycle+" intent="+intent+" attempt="+attempt,false);return true;
+         }
+         bool ActivationCurrent()
+         {
+             if(!Activation)return true;
+-            return MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(Data,out var row,out _)&&row.Cycle==ActivationCycle&&row.IntentRevision==ActivationIntent&&row.Attempt==ActivationAttempt&&
+-                row.Status==MasterIdolForestGuardLifecycle.Phase.Appearing&&Data.GetInt(MasterIdolForestGuardLifecycle.PhaseKey,0)==5;
++            return MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardLifecycle.TryReadAcceptedIntent(Data,out var row,out _),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-proof-unavailable")&&MasterIdolForestGuardDiagnostic.Check(row.Cycle==ActivationCycle,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-cycle-changed")&&MasterIdolForestGuardDiagnostic.Check(row.IntentRevision==ActivationIntent,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-intent-changed")&&MasterIdolForestGuardDiagnostic.Check(row.Attempt==ActivationAttempt,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-attempt-changed")&&
++                MasterIdolForestGuardDiagnostic.Check(row.Status==MasterIdolForestGuardLifecycle.Phase.Appearing,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-phase-changed")&&MasterIdolForestGuardDiagnostic.Check(Data.GetInt(MasterIdolForestGuardLifecycle.PhaseKey,0)==5,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-native-phase-changed");
+         }
+         void Outcome(ForestGuardAppearanceOutcome result)
+         {
++            MasterIdolForestGuardDiagnostic.Event(Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"outcome","result="+result,true);
+             var report=Report;
+             if(result!=ForestGuardAppearanceOutcome.Started)Report=null;
+@@ -73,6 +74,6 @@ namespace ValheimMastery
+         {
+             camera=null;playerPosition=default;var player=Player.m_localPlayer;var view=GameCamera.instance?.m_camera;
+-            if(Application.isBatchMode||SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null||!Application.isFocused||Game.IsPaused()||
+-                player==null||player.IsDead()||player.IsTeleporting()||player.InGhostMode()||player.IsDebugFlying()||view==null||!view.isActiveAndEnabled)return false;
++            if(MasterIdolForestGuardDiagnostic.PositionReject(Application.isBatchMode,"batch-mode")||MasterIdolForestGuardDiagnostic.PositionReject(SystemInfo.graphicsDeviceType==GraphicsDeviceType.Null,"graphics-null")||MasterIdolForestGuardDiagnostic.PositionReject(!Application.isFocused,"not-focused")||MasterIdolForestGuardDiagnostic.PositionReject(Game.IsPaused(),"paused")||
++                MasterIdolForestGuardDiagnostic.PositionReject(player==null,"player-missing")||MasterIdolForestGuardDiagnostic.PositionReject(player.IsDead(),"player-dead")||MasterIdolForestGuardDiagnostic.PositionReject(player.IsTeleporting(),"player-teleporting")||MasterIdolForestGuardDiagnostic.PositionReject(player.InGhostMode(),"player-ghost")||MasterIdolForestGuardDiagnostic.PositionReject(player.IsDebugFlying(),"player-debug-flying")||MasterIdolForestGuardDiagnostic.PositionReject(view==null,"camera-missing")||MasterIdolForestGuardDiagnostic.PositionReject(!view.isActiveAndEnabled,"camera-inactive"))return false;
+             camera=view;playerPosition=player.transform.position;return true;
+         }
+@@ -102,26 +103,26 @@ namespace ValheimMastery
+         private bool Context()
+         {
+-            return Actor!=null&&Ai!=null&&View?.IsValid()==true&&!Actor.IsDead()&&GoldCraftingService.Enabled&&
+-                MasterIdolLoadIdentity.LoadReady&&ZNet.instance?.GetWorld()!=null&&
+-                ReferenceEquals(ZDOMan.instance?.GetZDO(View.GetZDO().m_uid),View.GetZDO())&&MasterIdolForestGuardState.ModuleBorn(View.GetZDO());
++            return MasterIdolForestGuardDiagnostic.Check(Actor!=null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-actor-missing")&&MasterIdolForestGuardDiagnostic.Check(Ai!=null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-ai-missing")&&MasterIdolForestGuardDiagnostic.Check(View?.IsValid()==true,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-view-invalid")&&MasterIdolForestGuardDiagnostic.Check(!Actor.IsDead(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-actor-dead")&&MasterIdolForestGuardDiagnostic.Check(GoldCraftingService.Enabled,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-feature-disabled")&&
++                MasterIdolForestGuardDiagnostic.Check(MasterIdolLoadIdentity.LoadReady,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-load-not-ready")&&MasterIdolForestGuardDiagnostic.Check(ZNet.instance?.GetWorld()!=null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-world-missing")&&
++                MasterIdolForestGuardDiagnostic.Check(ReferenceEquals(ZDOMan.instance?.GetZDO(View.GetZDO().m_uid),View.GetZDO()),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-zdo-not-current")&&MasterIdolForestGuardDiagnostic.Check(MasterIdolForestGuardState.ModuleBorn(View.GetZDO()),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"context-not-module-born");
+         }
+         private bool Local(bool sight)
+         {
+             var player=Player.m_localPlayer;var camera=GameCamera.instance?.m_camera;
+-            if(Application.isBatchMode||SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null||!Application.isFocused||
+-                player==null||player.IsDead()||player.IsTeleporting()||player.InGhostMode()||player.IsDebugFlying()||
+-                camera==null||!camera.isActiveAndEnabled||Game.IsPaused()||
+-                (player.transform.position-transform.position).sqrMagnitude>1024)return false;
++            if(MasterIdolForestGuardDiagnostic.Reject(Application.isBatchMode,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-batch-mode")||MasterIdolForestGuardDiagnostic.Reject(SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-graphics-null")||MasterIdolForestGuardDiagnostic.Reject(!Application.isFocused,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-not-focused")||
++                MasterIdolForestGuardDiagnostic.Reject(player==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-player-missing")||MasterIdolForestGuardDiagnostic.Reject(player.IsDead(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-player-dead")||MasterIdolForestGuardDiagnostic.Reject(player.IsTeleporting(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-player-teleporting")||MasterIdolForestGuardDiagnostic.Reject(player.InGhostMode(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-player-ghost")||MasterIdolForestGuardDiagnostic.Reject(player.IsDebugFlying(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-player-debug-flying")||
++                MasterIdolForestGuardDiagnostic.Reject(camera==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-camera-missing")||MasterIdolForestGuardDiagnostic.Reject(!camera.isActiveAndEnabled,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-camera-inactive")||MasterIdolForestGuardDiagnostic.Reject(Game.IsPaused(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-paused")||
++                MasterIdolForestGuardDiagnostic.Reject((player.transform.position-transform.position).sqrMagnitude>1024,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-too-far"))return false;
+             Vector3 point=transform.position+Vector3.up*.9f;var screen=camera.WorldToViewportPoint(point);
+-            if(!MasterIdolVisibilityRules.Viewport(screen.x,screen.y,screen.z))return false;
++            if(!MasterIdolForestGuardDiagnostic.Check(MasterIdolVisibilityRules.Viewport(screen.x,screen.y,screen.z),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-outside-viewport"))return false;
+             if(!sight)return true;
+-            return !Physics.Linecast(camera.transform.position,point,out var hit,LayerMask.GetMask("piece","static_solid","terrain"),QueryTriggerInteraction.Ignore)||hit.collider?.GetComponentInParent<Character>()==Actor;
++            return MasterIdolForestGuardDiagnostic.Check(!Physics.Linecast(camera.transform.position,point,out var hit,LayerMask.GetMask("piece","static_solid","terrain"),QueryTriggerInteraction.Ignore)||hit.collider?.GetComponentInParent<Character>()==Actor,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"local-los-blocked");
+         }
+         private bool Peace()
+         {
+-            return !Actor.InAttack()&&!Actor.InDodge()&&!Actor.IsStaggering()&&!Actor.InEmote()&&!Ai.IsSleeping()&&
+-                !MasterIdolSocialSeats.Battle(Ai,Actor)&&!MasterIdolResidentWork.Busy(Actor)&&
+-                GetComponent<MasterIdolResidentPresentation>()?.Playing!=true&&!MasterIdolResidentSceneAnimation.Playing(Actor)&&GetComponent<MasterIdolWelcome>()?.IsPresenting!=true&&
+-                Actor.GetHealth()>=InitialHealth&&(transform.position-Origin).sqrMagnitude<=.25f;
++            return MasterIdolForestGuardDiagnostic.Check(!Actor.InAttack(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-attacking")&&MasterIdolForestGuardDiagnostic.Check(!Actor.InDodge(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-dodging")&&MasterIdolForestGuardDiagnostic.Check(!Actor.IsStaggering(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-staggering")&&MasterIdolForestGuardDiagnostic.Check(!Actor.InEmote(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-emote")&&MasterIdolForestGuardDiagnostic.Check(!Ai.IsSleeping(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-sleeping")&&
++                MasterIdolForestGuardDiagnostic.Check(!MasterIdolSocialSeats.Battle(Ai,Actor),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-battle")&&MasterIdolForestGuardDiagnostic.Check(!MasterIdolResidentWork.Busy(Actor),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-work-busy")&&
++                MasterIdolForestGuardDiagnostic.Check(GetComponent<MasterIdolResidentPresentation>()?.Playing!=true,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-presentation-busy")&&MasterIdolForestGuardDiagnostic.Check(!MasterIdolResidentSceneAnimation.Playing(Actor),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-scene-busy")&&MasterIdolForestGuardDiagnostic.Check(GetComponent<MasterIdolWelcome>()?.IsPresenting!=true,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-welcome-busy")&&
++                MasterIdolForestGuardDiagnostic.Check(Actor.GetHealth()>=InitialHealth,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-damaged")&&MasterIdolForestGuardDiagnostic.Check((transform.position-Origin).sqrMagnitude<=.25f,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"peace-displaced");
+         }
+         private static void TemplatesCurrent()
+@@ -284,6 +285,6 @@ namespace ValheimMastery
+             if(!Queued||!Context())return;
+             float elapsed=(float)((ZNet.instance.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
+-            if((!Activation&&(elapsed<0||elapsed>Admission))||!ActivationCurrent()||Time.unscaledTime>=QueueUntil){End();return;}
+-            if(!Local(true)||Current!=null||MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentSceneAnimation.GraphicsCount>=4)return;
++            if((!Activation&&(elapsed<0||elapsed>Admission))||MasterIdolForestGuardDiagnostic.Reject(!ActivationCurrent(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-not-current")||MasterIdolForestGuardDiagnostic.Reject(Time.unscaledTime>=QueueUntil,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-expired")){End();return;}
++            if(!Local(true)||MasterIdolForestGuardDiagnostic.Reject(Current!=null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"another-cue-current")||MasterIdolForestGuardDiagnostic.Reject(MasterIdolVisibleGesture.GraphicsCount+MasterIdolResidentSceneAnimation.GraphicsCount>=4,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"graphics-budget"))return;
+             Origin=transform.position;if(!Peace()){End();return;}
+             if(Activation&&!MasteryPlugin.Settings.EnablePerkProcVFX.Value)
+@@ -294,21 +295,21 @@ namespace ValheimMastery
+             }
+             Warm();TemplatesCurrent();if(!Queued)return;var template=BodyTemplate(Utils.GetPrefabName(gameObject));
+-            if(template==null||!Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_cloud",out var cloud)||!Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_dust",out var dust))return;
++            if(MasterIdolForestGuardDiagnostic.Reject(template==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"body-template-missing")||!MasterIdolForestGuardDiagnostic.Check(Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_cloud",out var cloud),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cloud-template-missing")||!MasterIdolForestGuardDiagnostic.Check(Templates.TryGetValue("vfx_VM_BF_BirthAtmosphere_dust",out var dust),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"dust-template-missing"))return;
+             Waiting.Remove(this);Queued=false;Current=this;Pending=true;Active=false;StartedAt=0;PrepareUntil=Mathf.Min(QueueUntil,Time.unscaledTime+Preparation);
+             try
+             {
+-                Body=OwnVisual(template,transform.rotation);if(Body==null){End(false);return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
++                Body=OwnVisual(template,transform.rotation);if(MasterIdolForestGuardDiagnostic.Reject(Body==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"owned-body-missing")){End(false);return;}Body.transform.localScale=transform.lossyScale*.02f;Body.SetActive(true);
+                 int family=MasterIdolForestRules.Family(Utils.GetPrefabName(gameObject));
+                 var names=new List<string>{"AncientSeed","Wood","Resin"};if(family!=3)names.Add("Wood");if(family!=0)names.Add("Stone");if(family==3)names.Add("Resin");if(family==2)names.Add("Stone");
+                 for(int i=0;i<names.Count;i++)
+                 {
+-                    var item=FragmentTemplate(names[i]);if(item==null){End(false);return;}var obj=OwnVisual(item,Quaternion.identity);if(obj==null){End(false);return;}
++                    var item=FragmentTemplate(names[i]);if(MasterIdolForestGuardDiagnostic.Reject(item==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"fragment-template-missing")){End(false);return;}var obj=OwnVisual(item,Quaternion.identity);if(MasterIdolForestGuardDiagnostic.Reject(obj==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"owned-part-missing")){End(false);return;}
+                     obj.SetActive(true);Fragments.Add(obj);float angle=i*2.399963f;Starts.Add(i==0?Vector3.zero:new Vector3(Mathf.Cos(angle),.15f,Mathf.Sin(angle))*(1.5f+(i%2)*1.5f));
+                 }
+-                foreach(var effect in new[]{cloud,dust}){var obj=OwnVisual(effect,Quaternion.identity);if(obj==null){End(false);return;}obj.SetActive(true);Atmosphere.Add(obj);}
++                foreach(var effect in new[]{cloud,dust}){var obj=OwnVisual(effect,Quaternion.identity);if(MasterIdolForestGuardDiagnostic.Reject(obj==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"owned-part-missing")){End(false);return;}obj.SetActive(true);Atmosphere.Add(obj);}
+                 NativeVfxSafeFrame.AfterReady(Body,SuppressReady);foreach(var obj in Fragments)NativeVfxSafeFrame.AfterReady(obj,SuppressReady);
+                 foreach(var obj in Atmosphere)NativeVfxSafeFrame.AfterReady(obj,()=>{if(Pending)foreach(var ps in obj.GetComponentsInChildren<ParticleSystem>(true))ps.Stop(true,ParticleSystemStopBehavior.StopEmittingAndClear);SuppressReady();});
+             }
+-            catch{End(false);}
++            catch{MasterIdolForestGuardDiagnostic.Event(Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"preparation-exception","",true);End(false);}
+         }
+         private void SuppressReady()
+@@ -316,11 +317,11 @@ namespace ValheimMastery
+             try
+             {
+-            if(!Pending||Suppressed||!Prepared(Body))return;foreach(var obj in Fragments)if(!Prepared(obj))return;foreach(var obj in Atmosphere)if(!Prepared(obj))return;
++            if(!Pending||Suppressed||MasterIdolForestGuardDiagnostic.Reject(!Prepared(Body),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"body-not-prepared"))return;foreach(var obj in Fragments)if(MasterIdolForestGuardDiagnostic.Reject(!Prepared(obj),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"part-not-prepared"))return;foreach(var obj in Atmosphere)if(MasterIdolForestGuardDiagnostic.Reject(!Prepared(obj),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"part-not-prepared"))return;
+             float elapsed=(float)((Session.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
+-            if((!Activation&&(elapsed<0||elapsed>Admission))||!ActivationCurrent()||Time.unscaledTime>=PrepareUntil||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||
+-                !Context()||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||
+-                Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce||!BindBody()||!Peace()||!Local(true)){End();return;}
++            if((!Activation&&(elapsed<0||elapsed>Admission))||MasterIdolForestGuardDiagnostic.Reject(!ActivationCurrent(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-not-current")||MasterIdolForestGuardDiagnostic.Reject(Time.unscaledTime>=PrepareUntil,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"preparation-expired")||MasterIdolForestGuardDiagnostic.Reject(Session!=ZNet.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"session-changed")||MasterIdolForestGuardDiagnostic.Reject(Manager!=ZDOMan.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"manager-changed")||MasterIdolForestGuardDiagnostic.Reject(Generation!=MasterIdolLoadIdentity.Generation,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"load-generation-changed")||
++                !Context()||MasterIdolForestGuardDiagnostic.Reject(!ReferenceEquals(Data,View.GetZDO()),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-zdo-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetOwner()!=Owner,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.OwnerRevision!=Revision,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-revision-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-birth-changed")||
++                MasterIdolForestGuardDiagnostic.Reject(Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-nonce-changed")||MasterIdolForestGuardDiagnostic.Reject(!BindBody(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"bind-body-failed")||!Peace()||!Local(true)){End();return;}
+             if(Activation)MasterIdolForestGuardLifecycleVisibility.HandVisualToCue(Actor);
+-            var renderers=Actor.m_visual.GetComponentsInChildren<Renderer>(true);if(renderers.Length>6){End();return;}
++            var renderers=Actor.m_visual.GetComponentsInChildren<Renderer>(true);if(MasterIdolForestGuardDiagnostic.Reject(renderers.Length>6,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"renderer-capacity")){End();return;}
+             foreach(var renderer in renderers){Originals.Add(renderer);OriginalEnabled.Add(renderer.enabled);}
+             Suppressed=true;StartedAt=Time.unscaledTime;Tried=true;Pending=false;Active=true;foreach(var renderer in Originals)renderer.enabled=false;
+@@ -329,5 +330,5 @@ namespace ValheimMastery
+             if(Activation)Outcome(ForestGuardAppearanceOutcome.Started);
+             }
+-            catch{End();}
++            catch{MasterIdolForestGuardDiagnostic.Event(Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-exception","",true);End();}
+         }
+         private void LateUpdate()
+@@ -336,5 +337,5 @@ namespace ValheimMastery
+             {
+                 if(Sounds.Count>0&&!MasteryPlugin.Settings.EnablePerkSFX.Value){foreach(var obj in Sounds)try{if(obj!=null)Destroy(obj);}catch(Exception){}Sounds.Clear();}
+-                if(Sounds.Count>0&&!Active&&!Pending&&!Queued&&(!Context()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||Data?.GetOwner()!=Owner||Data?.OwnerRevision!=Revision||Time.unscaledTime>=SoundUntil)){End();return;}
++                if(Sounds.Count>0&&!Active&&!Pending&&!Queued&&(!Context()||MasterIdolForestGuardDiagnostic.Reject(Session!=ZNet.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"session-changed")||MasterIdolForestGuardDiagnostic.Reject(Manager!=ZDOMan.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"manager-changed")||MasterIdolForestGuardDiagnostic.Reject(Generation!=MasterIdolLoadIdentity.Generation,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"load-generation-changed")||Data?.GetOwner()!=Owner||Data?.OwnerRevision!=Revision||Time.unscaledTime>=SoundUntil)){End();return;}
+                 if(!Tried&&!Pending&&!Active)
+                 {
+@@ -345,7 +346,7 @@ namespace ValheimMastery
+                     if(!Activation&&(birth<=0||age<0||age>Admission)){End();return;}
+                     if(!Queued){Queue();if(!Queued)return;}
+-                    if(Time.unscaledTime>=QueueUntil){End();return;}
+-                    if(!Context()||!ActivationCurrent()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||
+-                        Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce){End();return;}
++                    if(MasterIdolForestGuardDiagnostic.Reject(Time.unscaledTime>=QueueUntil,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"queue-expired")){End();return;}
++                    if(!Context()||MasterIdolForestGuardDiagnostic.Reject(!ActivationCurrent(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-not-current")||MasterIdolForestGuardDiagnostic.Reject(Session!=ZNet.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"session-changed")||MasterIdolForestGuardDiagnostic.Reject(Manager!=ZDOMan.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"manager-changed")||MasterIdolForestGuardDiagnostic.Reject(Generation!=MasterIdolLoadIdentity.Generation,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"load-generation-changed")||MasterIdolForestGuardDiagnostic.Reject(!ReferenceEquals(Data,View.GetZDO()),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-zdo-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetOwner()!=Owner,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.OwnerRevision!=Revision,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-revision-changed")||
++                        MasterIdolForestGuardDiagnostic.Reject(Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-birth-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-nonce-changed")){End();return;}
+                     Origin=transform.position;if(!Peace()||!Local(true)){End();return;}
+                     if(Waiting.Count>0&&Waiting[0]==this)Begin();
+@@ -354,7 +355,7 @@ namespace ValheimMastery
+                 if(!Active&&!Pending)return;
+                 float elapsed=(float)((Session.GetTime().Ticks-Born)/(double)TimeSpan.TicksPerSecond);
+-                if(!Context()||!ActivationCurrent()||Session!=ZNet.instance||Manager!=ZDOMan.instance||Generation!=MasterIdolLoadIdentity.Generation||!ReferenceEquals(Data,View.GetZDO())||Data.GetOwner()!=Owner||Data.OwnerRevision!=Revision||
+-                    Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born||Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce||
+-                    (!Activation&&elapsed<0)||!Suppressed&&((!Activation&&elapsed>Admission)||Time.unscaledTime>=PrepareUntil)||!Activation&&Suppressed&&!PresentationWindow(Time.unscaledTime-StartedAt)||!Peace()||!Local(false)||!SilentActivation&&!MasteryPlugin.Settings.EnablePerkProcVFX.Value){End();return;}
++                if(!Context()||MasterIdolForestGuardDiagnostic.Reject(!ActivationCurrent(),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"activation-not-current")||MasterIdolForestGuardDiagnostic.Reject(Session!=ZNet.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"session-changed")||MasterIdolForestGuardDiagnostic.Reject(Manager!=ZDOMan.instance,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"manager-changed")||MasterIdolForestGuardDiagnostic.Reject(Generation!=MasterIdolLoadIdentity.Generation,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"load-generation-changed")||MasterIdolForestGuardDiagnostic.Reject(!ReferenceEquals(Data,View.GetZDO()),Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-zdo-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetOwner()!=Owner,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.OwnerRevision!=Revision,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-owner-revision-changed")||
++                    MasterIdolForestGuardDiagnostic.Reject(Data.GetLong(MasterIdolForestGuardState.BornKey,0)!=Born,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-birth-changed")||MasterIdolForestGuardDiagnostic.Reject(Data.GetString(MasterIdolForestGuardState.NonceKey,"")!=Nonce,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-nonce-changed")||
++                    (!Activation&&elapsed<0)||!Suppressed&&((!Activation&&elapsed>Admission)||MasterIdolForestGuardDiagnostic.Reject(Time.unscaledTime>=PrepareUntil,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"preparation-expired"))||!Activation&&Suppressed&&!PresentationWindow(Time.unscaledTime-StartedAt)||!Peace()||!Local(false)||MasterIdolForestGuardDiagnostic.Reject(!SilentActivation&&!MasteryPlugin.Settings.EnablePerkProcVFX.Value,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"vfx-disabled-during-cue")){End();return;}
+                 if(Time.unscaledTime>=NextSight){NextSight=Time.unscaledTime+.2f;if(!Local(true)){End();return;}}
+                 if(SilentActivation)
+@@ -374,12 +375,13 @@ namespace ValheimMastery
+                 for(int i=0;i<Fragments.Count;i++)
+                 {
+-                    var obj=Fragments[i];if(obj==null){End();return;}Vector3 end=i==0?Vector3.zero:new Vector3(Mathf.Sin(i),.2f+(i%3)*.22f,Mathf.Cos(i))*.3f;
++                    var obj=Fragments[i];if(MasterIdolForestGuardDiagnostic.Reject(obj==null,Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"owned-part-missing")){End();return;}Vector3 end=i==0?Vector3.zero:new Vector3(Mathf.Sin(i),.2f+(i%3)*.22f,Mathf.Cos(i))*.3f;
+                     obj.transform.position=transform.position+Vector3.Lerp(Starts[i],end,gather);float size=i==0?Mathf.Lerp(.05f,.45f,seed):1f;obj.transform.localScale=Vector3.one*size*(1-growth);
+                 }
+             }
+-            catch{End();}
++            catch{MasterIdolForestGuardDiagnostic.Event(Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"cue-exception","",true);End();}
+         }
+         private void End(bool terminal=true)
+         {
++            if(Activation)MasterIdolForestGuardDiagnostic.Event(Actor,MasterIdolForestGuardDiagnostic.Lane.Cue,"end","terminal="+terminal+" queued="+Queued+" pending="+Pending+" active="+Active+" suppressed="+Suppressed,true);
+             bool activation=Activation;
+             if(activation&&Report!=null)Outcome(ForestGuardAppearanceOutcome.Deferred);
