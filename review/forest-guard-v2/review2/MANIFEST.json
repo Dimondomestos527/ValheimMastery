@@ -1,0 +1,52 @@
+{
+  "ownerFreezeSHA256": "E9C5BB7EC08D0142EB2E442A2F14C5158EDC4F2C0E9119E641582EFEB9D33DBC",
+  "productionDelta": [
+    {
+      "path": "src-modern/MasterIdolForestGuardLifecycleController.cs",
+      "baseSHA256": "BD30E245D6919D35203D4E957CA896886C0EC281D75ABF678A0DF4C13409D3B2",
+      "newSHA256": "1517208F26D1D5D6F1249782CA37E311D263C0AD4F91AC2ECD2954F5A52DE082"
+    }
+  ],
+  "roles": [
+    {
+      "role": "Client",
+      "baseCandidateDLLSHA256": "508FBC8BCA3BDAED7F8BC3BEF37F3137A2872D25F370580C3C67632B4FDB8020",
+      "baseSourceGateSHA256": "DF77C946476288CB0AE39239E5ECA02F8671B2A68B633FCD46FBA5BB06D58C04",
+      "derivedFromInstalledDLLSHA256": "42C54732409D5EA38228EA572B2B0E9D232331CCFAC07E877F0E761C5BAD72FD",
+      "derivedFromSourceGateSHA256": "DFD182BC1CCC85796C592508E510271BDB33012DFBA22268329CECF5A4BA2E36",
+      "wire": "1.4.123+rpc-20261023-forest-guard-v2-v14"
+    },
+    {
+      "role": "Server",
+      "baseCandidateDLLSHA256": "CC8340040F1753A8D2E6CF5FBAE6B7B94084219F318689A31CA62B9E54352C4D",
+      "baseSourceGateSHA256": "BEE9133683448CB6822DB78A39EA7F8F71B385F676A462D8DF77A0213ED9596E",
+      "derivedFromInstalledDLLSHA256": "0CD3FD01CA71A268B5BB2D8BE2D56037932232073D7497BA41DB4D19C26BA02D",
+      "derivedFromSourceGateSHA256": "C773B0C26521FCEC7D39D18FCC2495D3B1AC1D1131DCA14ABD0494820A6BF9E1",
+      "wire": "1.4.123+rpc-20261023-forest-guard-v2-v14"
+    }
+  ],
+  "files": [
+    {
+      "path": "tests/ExistingCases.cs",
+      "sha256": "5E5B60F6095B0A12026915076D1A26EF5E04ED53DFF79FFFDE0325810A2538CE"
+    },
+    {
+      "path": "tests/Stubs.cs",
+      "sha256": "B732426D180DD46BB643F46B03E1D9D8619C30499F58D20BB076283FE088384A"
+    },
+    {
+      "path": "tests/TargetedCases.cs",
+      "sha256": "80EE40F4EFE23E881A74B2C3EDBB312598115FBB8947F115FD01B2CB0DE06349"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuardLifecycleController.cs",
+      "sha256": "1517208F26D1D5D6F1249782CA37E311D263C0AD4F91AC2ECD2954F5A52DE082"
+    }
+  ],
+  "status": "SCOPED_SOURCE_REVIEW_NOT_FULL_BUILD_OR_LIVE",
+  "parentSourceCommit": "5d35b5b0a62ec628d638c31ddb74be06e1d6801e",
+  "unchangedDependencyRoot": "../stage-b/after/src-modern",
+  "recovery": "BLOCKED missing/conflicting canonical native birth identity without load witness; actual saved-world cause UNKNOWN; proposal not implemented",
+  "evidence": "Targeted3groups PASS; same oldBD30 P1 expected FAIL with3callback NullReferenceException; isolated host ACK not Unity/remote LIVE",
+  "successorFullPair": "Infra pending at publication preparation; no new DLL hashes claimed"
+}

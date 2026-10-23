@@ -1,0 +1,268 @@
+{
+  "status": "SOURCE_REVIEW_ONLY_NOT_FULL_BUILD_OR_LIVE",
+  "utilityManifestSHA256": "D16A59834F697BEF8CFE5122F0A872AF384EA2F3917E911EE63C6A6AE7EC071C",
+  "cargoManifestSHA256": "689534F08A76ED8D9C6BA71750B09501D065CB1DAE1653C57614295A828D8443",
+  "compositionSHA256": "051AA8AF581F1080051306CB48C6D02A3ECC416DE50CFEF75DBCC2D2C4EE875C",
+  "sourceCommit": "UNKNOWN; repository ancestry is not role build baseline",
+  "wire": "1.4.123+rpc-20261023-forest-guard-v2-v14",
+  "excluded": "Outer-controller per-row callback guard/test pending human, excluded and untested; no DLL/private/runtime data.",
+  "roles": [
+    {
+      "role": "Client",
+      "baseGateSHA256": "DFD182BC1CCC85796C592508E510271BDB33012DFBA22268329CECF5A4BA2E36",
+      "baseDLLSHA256": "42C54732409D5EA38228EA572B2B0E9D232331CCFAC07E877F0E761C5BAD72FD",
+      "files": [
+        {
+          "path": "src-modern/MasterIdolForestGuardDiagnostic.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardDiagnostic.cs",
+          "after": "after/src-modern/MasterIdolForestGuardDiagnostic.cs",
+          "baseSHA256": "979E259F5A0CA053977B32821BF89B856F488D359B2D8FD0308BFAFC556CD3D5",
+          "newSHA256": "979E259F5A0CA053977B32821BF89B856F488D359B2D8FD0308BFAFC556CD3D5",
+          "operation": "unchanged",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycle.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLifecycle.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycle.cs",
+          "baseSHA256": "F2192C37DED3604201054D932DE5FE4CC10A411D2563E894A756205B784C88FC",
+          "newSHA256": "241672518DF83E0A236826E329C45EA3B7A18E9DA1E1EF29B28F3CAD60DEA9B5",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleClientTrace.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLifecycleClientTrace.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleClientTrace.cs",
+          "baseSHA256": "743CE8E3371EA64F2C83BABF2FCE67440C78DC231A4B201AE338095854213A3C",
+          "newSHA256": "8611C41ED04A386700B249BFFDCAE12F32B2B5947D61517C53AA32883632DFA8",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "baseSHA256": "564BAE8414F72E4DAB07E1293588B6893D78D487EFB342188C3E14152E496E3F",
+          "newSHA256": "BD30E245D6919D35203D4E957CA896886C0EC281D75ABF678A0DF4C13409D3B2",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "baseSHA256": "8A022125A5830A4AAEEF2A2301B4DA430743D6A9F5F3EF3564166B29CEA10DD6",
+          "newSHA256": "82D059DBE5762EF568C53E2D34A6565225A495414793CB5D12896104A7E993C9",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "baseSHA256": "2F0500580BFB615CF576000F111F43B0CC297796D08E0185CB1C1063B93847D2",
+          "newSHA256": "180BE5EB4A3ABC3937AD24FD04268E7E19D49F6CFFB28EA5695DCAB29AF92F03",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "baseSHA256": "15B9E8EED7785FE17FC6E84098B6913114F1B90B7EA734B3802C3AF43D1307ED",
+          "newSHA256": "11089A2DD2C7FBDB9607992FFDFA182CF131B2F8EFA7BCD82467B86D99AB45ED",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardState.cs",
+          "before": "before/Client/src-modern/MasterIdolForestGuardState.cs",
+          "after": "after/src-modern/MasterIdolForestGuardState.cs",
+          "baseSHA256": "DC287A61174CC28384459EF4CA46C1DC8872A25EA2AA525EA2B95E25C7C0D181",
+          "newSHA256": "0EFB46EC2627249C8DF7305DBE9F53182D196761D0E4DADE012A37998FECA1A8",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestSpawnProbe.cs",
+          "before": "before/Client/src-modern/MasterIdolForestSpawnProbe.cs",
+          "after": "after/src-modern/MasterIdolForestSpawnProbe.cs",
+          "baseSHA256": "D879C8DB7B57E4D046433308782205BB00DE39384E19EDA9BB24E35224879A40",
+          "newSHA256": "29E7E7068489E606442D3821900705BC5AC9F92D1602CC6B8DE00007290E3382",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolRecruitment.cs",
+          "before": "before/Client/src-modern/MasterIdolRecruitment.cs",
+          "after": "after/src-modern/MasterIdolRecruitment.cs",
+          "baseSHA256": "2F6BBCFDDFE53AEE259F7A390683F4A55D4E9B9242C8160B3406CAA78FE6050B",
+          "newSHA256": "D1689E9781CA0EB41340CDF4FCCBF9BE60AC95B1B58D61D16EB7247BD438758C",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolResidentBirthPresentation.cs",
+          "before": "before/Client/src-modern/MasterIdolResidentBirthPresentation.cs",
+          "after": "after/src-modern/MasterIdolResidentBirthPresentation.cs",
+          "baseSHA256": "1A28DEE2288830DC91B9EDEE633DBB6CADF27EF83996A095DFDDED6130F6326E",
+          "newSHA256": "947829D5AA2797AE781B8E2CC3F2D4990E8FC7BA91239C125E84F9271710C05B",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/ResidentCargoEligibility.cs",
+          "before": "before/Client/src-modern/ResidentCargoEligibility.cs",
+          "after": "after/src-modern/ResidentCargoEligibility.cs",
+          "baseSHA256": "8D7898292ABA5383715650F42913E2F12B17AD89741DAB180511A9596AA7E719",
+          "newSHA256": "F967F09E033E896B153A1C287AFAC69A9866E3CE97470281EA4A9C24C8830F0F",
+          "operation": "replace",
+          "owner": "Cargo"
+        },
+        {
+          "path": "src-modern/MasterIdolResidentCargoStore.cs",
+          "before": "before/Client/src-modern/MasterIdolResidentCargoStore.cs",
+          "after": "after/src-modern/MasterIdolResidentCargoStore.cs",
+          "baseSHA256": "6F10226446FA18EBBB030F591D240AD14D41C907AF99B2642B83E15FF776CA1A",
+          "newSHA256": "C0D858AD61B06CC9EEA2C5787FB54C6462187CB51016549BE12B8598A1EA5589",
+          "operation": "replace",
+          "owner": "Cargo"
+        },
+        {
+          "path": "src-modern/NetworkSync.cs",
+          "before": "before/Client/src-modern/NetworkSync.cs",
+          "after": "after/src-modern/NetworkSync.cs",
+          "baseSHA256": "B41ECAC35802C2DFA2423CDAB2B75AE5D11C0F8E13A91CA57793F04CBCAA377A",
+          "newSHA256": "933C0E72666B3954D4D6BB505E29E5EAD86B130F358644279562410E2EBA50D8",
+          "operation": "replace",
+          "owner": "Root"
+        }
+      ]
+    },
+    {
+      "role": "Server",
+      "baseGateSHA256": "C773B0C26521FCEC7D39D18FCC2495D3B1AC1D1131DCA14ABD0494820A6BF9E1",
+      "baseDLLSHA256": "0CD3FD01CA71A268B5BB2D8BE2D56037932232073D7497BA41DB4D19C26BA02D",
+      "files": [
+        {
+          "path": "src-modern/MasterIdolForestGuardDiagnostic.cs",
+          "before": null,
+          "after": "after/src-modern/MasterIdolForestGuardDiagnostic.cs",
+          "baseSHA256": null,
+          "newSHA256": "979E259F5A0CA053977B32821BF89B856F488D359B2D8FD0308BFAFC556CD3D5",
+          "operation": "add",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycle.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardLifecycle.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycle.cs",
+          "baseSHA256": "8295E75D4A8A2E9FFD7989DB579095ACB0006F12FD0037B38F98FA52B3EDAA04",
+          "newSHA256": "241672518DF83E0A236826E329C45EA3B7A18E9DA1E1EF29B28F3CAD60DEA9B5",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleController.cs",
+          "baseSHA256": "1F8DAEEF31C5B9AFD4EFDEDFD365FE26FD8BB3CDE229195B46C037887D9D5C7C",
+          "newSHA256": "BD30E245D6919D35203D4E957CA896886C0EC281D75ABF678A0DF4C13409D3B2",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+          "baseSHA256": "C20EE78D5B868EC13AA7DFE3347BEA1820E0CC51101F535D420F8C39FD94DB34",
+          "newSHA256": "82D059DBE5762EF568C53E2D34A6565225A495414793CB5D12896104A7E993C9",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+          "baseSHA256": "B8AFD61AA6FD56BAA7E5A03E2FA5C2A2B71087E62BF0CDEB433340B258CCCF66",
+          "newSHA256": "180BE5EB4A3ABC3937AD24FD04268E7E19D49F6CFFB28EA5695DCAB29AF92F03",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "after": "after/src-modern/MasterIdolForestGuardLoadIdentity.cs",
+          "baseSHA256": "15B9E8EED7785FE17FC6E84098B6913114F1B90B7EA734B3802C3AF43D1307ED",
+          "newSHA256": "11089A2DD2C7FBDB9607992FFDFA182CF131B2F8EFA7BCD82467B86D99AB45ED",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestGuardState.cs",
+          "before": "before/Server/src-modern/MasterIdolForestGuardState.cs",
+          "after": "after/src-modern/MasterIdolForestGuardState.cs",
+          "baseSHA256": "DC287A61174CC28384459EF4CA46C1DC8872A25EA2AA525EA2B95E25C7C0D181",
+          "newSHA256": "0EFB46EC2627249C8DF7305DBE9F53182D196761D0E4DADE012A37998FECA1A8",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolForestSpawnProbe.cs",
+          "before": "before/Server/src-modern/MasterIdolForestSpawnProbe.cs",
+          "after": "after/src-modern/MasterIdolForestSpawnProbe.cs",
+          "baseSHA256": "D879C8DB7B57E4D046433308782205BB00DE39384E19EDA9BB24E35224879A40",
+          "newSHA256": "29E7E7068489E606442D3821900705BC5AC9F92D1602CC6B8DE00007290E3382",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolRecruitment.cs",
+          "before": "before/Server/src-modern/MasterIdolRecruitment.cs",
+          "after": "after/src-modern/MasterIdolRecruitment.cs",
+          "baseSHA256": "4158BF5F1850C86C9CC3E68FF4D8CB043BAD93C6BAD252CB997411F309193B43",
+          "newSHA256": "D1689E9781CA0EB41340CDF4FCCBF9BE60AC95B1B58D61D16EB7247BD438758C",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/MasterIdolResidentBirthPresentation.cs",
+          "before": "before/Server/src-modern/MasterIdolResidentBirthPresentation.cs",
+          "after": "after/src-modern/MasterIdolResidentBirthPresentation.cs",
+          "baseSHA256": "49FF4725B2B8A6A83B349965D6F218396A5C32A91C662F127F4511CD062B4F7D",
+          "newSHA256": "947829D5AA2797AE781B8E2CC3F2D4990E8FC7BA91239C125E84F9271710C05B",
+          "operation": "replace",
+          "owner": "Utility"
+        },
+        {
+          "path": "src-modern/ResidentCargoEligibility.cs",
+          "before": "before/Server/src-modern/ResidentCargoEligibility.cs",
+          "after": "after/src-modern/ResidentCargoEligibility.cs",
+          "baseSHA256": "8D7898292ABA5383715650F42913E2F12B17AD89741DAB180511A9596AA7E719",
+          "newSHA256": "F967F09E033E896B153A1C287AFAC69A9866E3CE97470281EA4A9C24C8830F0F",
+          "operation": "replace",
+          "owner": "Cargo"
+        },
+        {
+          "path": "src-modern/MasterIdolResidentCargoStore.cs",
+          "before": "before/Server/src-modern/MasterIdolResidentCargoStore.cs",
+          "after": "after/src-modern/MasterIdolResidentCargoStore.cs",
+          "baseSHA256": "6F10226446FA18EBBB030F591D240AD14D41C907AF99B2642B83E15FF776CA1A",
+          "newSHA256": "C0D858AD61B06CC9EEA2C5787FB54C6462187CB51016549BE12B8598A1EA5589",
+          "operation": "replace",
+          "owner": "Cargo"
+        },
+        {
+          "path": "src-modern/NetworkSync.cs",
+          "before": "before/Server/src-modern/NetworkSync.cs",
+          "after": "after/src-modern/NetworkSync.cs",
+          "baseSHA256": "B41ECAC35802C2DFA2423CDAB2B75AE5D11C0F8E13A91CA57793F04CBCAA377A",
+          "newSHA256": "933C0E72666B3954D4D6BB505E29E5EAD86B130F358644279562410E2EBA50D8",
+          "operation": "replace",
+          "owner": "Root"
+        }
+      ]
+    }
+  ]
+}

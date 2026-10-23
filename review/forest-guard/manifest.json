@@ -1,0 +1,79 @@
+{
+  "task": "CORE_FOREST_GIT_SYNC_20261023",
+  "mechanicOwner": "UTILITY_35_70",
+  "date": "2026-10-23",
+  "scope": "Source-only, task review snapshot. Not a complete build tree, installer, release, gameplay fix or LIVE proof.",
+  "branch": "fix/forest-guard",
+  "historicalGitAncestor": "6deb6cae3ee464ff241ecdabd676effb13a18521",
+  "installedSourceCommit": "UNKNOWN; exact source build manifests are authority, not inherited Dev root.",
+  "baseline": {
+    "clientSHA256": "7FA767D4E70477EDDC9A8CD7B2E1255EF25510E8641EA40FA16349FB2E42BF08",
+    "sourceGateSHA256": "D3756CAF2FBBD1295BCF6B0A0080D0AB5E987B571E91C7E113D789D35A7151B5",
+    "version": "1.4.123-test-client-retest2-20261020"
+  },
+  "approvedDelta": {
+    "manifestSHA256": "FAE084CE0642CFD26A0780C872F427FEDE358D841AC9DF843469E3DDD02AC05D",
+    "filesChanged": 6,
+    "originalFilesChanged": 5,
+    "newHelpers": 1,
+    "reversibleEdits": 45
+  },
+  "installedSuccessorReportedByRoot": {
+    "clientSHA256": "42C54732409D5EA38228EA572B2B0E9D232331CCFAC07E877F0E761C5BAD72FD",
+    "version": "1.4.123-test-client-forest-phase2-diag-20261023",
+    "sourceGateSHA256": "DFD182BC1CCC85796C592508E510271BDB33012DFBA22268329CECF5A4BA2E36",
+    "wire": "1.4.123+rpc-20261020-non100-livefix3-v13",
+    "serverSHA256Unchanged": "0CD3FD01CA71A268B5BB2D8BE2D56037932232073D7497BA41DB4D19C26BA02D",
+    "note": "Reuses Root/Infrastructure install readback; no deployment by Git task. Packaging version stamp and unrelated source/resources are not exported."
+  },
+  "files": [
+    {
+      "path": "src-modern/MasterIdolForestGuardDiagnostic.cs",
+      "beforeSHA256": null,
+      "afterSHA256": "979E259F5A0CA053977B32821BF89B856F488D359B2D8FD0308BFAFC556CD3D5"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuardLifecycleController.cs",
+      "beforeSHA256": "3E0114374A8C3555BE4DD977005DF36462E8BAED5FE6A5DF660CA39BA133F228",
+      "afterSHA256": "564BAE8414F72E4DAB07E1293588B6893D78D487EFB342188C3E14152E496E3F"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuardLifecycleOwner.cs",
+      "beforeSHA256": "D453975CEFB18190ABF1BFC2C14104C5FAB60810C7E9CB3CB5B56CF32F12A014",
+      "afterSHA256": "8A022125A5830A4AAEEF2A2301B4DA430743D6A9F5F3EF3564166B29CEA10DD6"
+    },
+    {
+      "path": "src-modern/MasterIdolForestGuardLifecycleVisibility.cs",
+      "beforeSHA256": "B8AFD61AA6FD56BAA7E5A03E2FA5C2A2B71087E62BF0CDEB433340B258CCCF66",
+      "afterSHA256": "2F0500580BFB615CF576000F111F43B0CC297796D08E0185CB1C1063B93847D2"
+    },
+    {
+      "path": "src-modern/MasterIdolRecruitment.cs",
+      "beforeSHA256": "4158BF5F1850C86C9CC3E68FF4D8CB043BAD93C6BAD252CB997411F309193B43",
+      "afterSHA256": "2F6BBCFDDFE53AEE259F7A390683F4A55D4E9B9242C8160B3406CAA78FE6050B"
+    },
+    {
+      "path": "src-modern/MasterIdolResidentBirthPresentation.cs",
+      "beforeSHA256": "49FF4725B2B8A6A83B349965D6F218396A5C32A91C662F127F4511CD062B4F7D",
+      "afterSHA256": "1A28DEE2288830DC91B9EDEE633DBB6CADF27EF83996A095DFDDED6130F6326E"
+    }
+  ],
+  "checks": {
+    "sourcePins": "5 before +6 after verified against manifests",
+    "reversal": "Prior affected review:45 diagnostic edits restore5 installed-baseline source files",
+    "controlledDiagnostics": "Owner actual-helper checks15 PASS, including90s routine flood preserving one decisive failure; controlled boundaries, not LIVE",
+    "nativeClient": "Owner focused native API compile0errors142warnings; existing evidence reused, not run by publisher",
+    "liveCause": "UNKNOWN",
+    "newGameplayBuild": "NOT_RUN_NO_SOURCE_CHANGE"
+  },
+  "excluded": [
+    "saves",
+    "private configs",
+    "secrets",
+    "complete runtime logs",
+    "DLL/native dependencies",
+    "resources/assets",
+    "other mechanics",
+    "unaccepted drafts"
+  ]
+}

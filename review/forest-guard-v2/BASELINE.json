@@ -1,0 +1,73 @@
+{
+  "task": "CORE_FOREST_V2_GIT_PREP_20261023",
+  "stage": "A_DESIGN_ONLY",
+  "branch": "refactor/forest-guard-v2",
+  "historicalGitParent": "df2fb762d803f5e0cf7d827ecde1360c1a214a84",
+  "sourceCommit": "UNKNOWN; historical Git root is not the installed implementation source.",
+  "roles": [
+    {
+      "role": "Client",
+      "version": "1.4.123-test-client-forest-phase2-diag-20261023",
+      "installedDLLSHA256": "42C54732409D5EA38228EA572B2B0E9D232331CCFAC07E877F0E761C5BAD72FD",
+      "sourceGateSHA256": "DFD182BC1CCC85796C592508E510271BDB33012DFBA22268329CECF5A4BA2E36",
+      "currentWire": "1.4.123+rpc-20261020-non100-livefix3-v13"
+    },
+    {
+      "role": "Server",
+      "version": "1.4.123-test-non100-livefix3-20261020",
+      "installedDLLSHA256": "0CD3FD01CA71A268B5BB2D8BE2D56037932232073D7497BA41DB4D19C26BA02D",
+      "sourceGateSHA256": "C773B0C26521FCEC7D39D18FCC2495D3B1AC1D1131DCA14ABD0494820A6BF9E1",
+      "currentWire": "1.4.123+rpc-20261020-non100-livefix3-v13"
+    }
+  ],
+  "acceptedDesign": {
+    "contractPath": "CONTRACT_UA.md",
+    "contractSHA256": "FCAB347739AC99C245EF9EA8F151118908BBE7A46374A8B7F87475A67ACEE961",
+    "ownerStageAManifestSHA256": "46EDD5356C39AAA24C46A822F799283186B5391557404498BE11F4FA0098C2B7",
+    "affectedCoreVerdict": "SOURCE_DESIGN_ACCEPT_SCOPED",
+    "implementationOwner": "UTILITY_35_70",
+    "cargoOwner": "RESIDENT_CARGO",
+    "integrationOwner": "ROOT"
+  },
+  "plannedProtocol": {
+    "wire": "1.4.123+rpc-20261023-forest-guard-v2-v14",
+    "semanticCodec": 2,
+    "rpcs": [
+      "VM_BF_LifecycleAsk_v2",
+      "VM_BF_LifecycleSnapshot_v2",
+      "VM_BF_LifecycleOwner_v2",
+      "VM_BF_LifecycleOwnerAck_v2"
+    ],
+    "mixedV13Allowed": false,
+    "registrySchemaRemains": 5,
+    "nativePhaseReceiptMeaningsUnchanged": [
+      1,
+      2,
+      3
+    ],
+    "note": "Design target for later paired candidate; this documentation commit does not install/change wire."
+  },
+  "evidence": {
+    "designReview": "Three affected seams accepted: neutral Cargo, one V2 writer/cohort, presentation independent of ACTIVE.",
+    "nativeClientPremiseSHA256": "EE810A7C445FBE08887CB605259322C1EE83BCD8C5D547B1BAD27A4DE842713B",
+    "nativeEvidenceLimit": "Existing owner Client IL observations, not new Server/runtime proof.",
+    "implementationTests": "UNRUN in this StageA docs commit",
+    "pairBuild": "UNRUN in this StageA docs commit",
+    "gameplayLive": "UNRUN",
+    "fpsCpuGcGain": "UNKNOWN"
+  },
+  "exclusions": [
+    "private StageA preflight inventory",
+    "raw Registry byte snapshots",
+    "per-actor/world/home identities",
+    "private configs or secrets",
+    "full runtime logs",
+    "DLLs/native/resources",
+    "unaccepted StageB code"
+  ],
+  "sourceRollback": {
+    "referenceBranch": "fix/forest-guard",
+    "commit": "df2fb762d803f5e0cf7d827ecde1360c1a214a84",
+    "scope": "Git review-source only, not a runtime/world rollback. Preserve exact installed role artifacts separately; no automatic restore."
+  }
+}
