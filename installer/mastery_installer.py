@@ -625,6 +625,17 @@ def discover(roots, variant):
 
 def choose(choices):
 
+ if sys.platform=='darwin' and len(choices)>1:
+  # Paths are data arguments, never interpolated into AppleScript source.
+  paths=[str(Path(p).absolute()) for p in choices]
+  script='on run argv\nset selectedItem to choose from list argv with prompt "Choose the Valheim installation or Steam profile" without multiple selections allowed\nif selectedItem is false then error number -128\nreturn item 1 of selectedItem\nend run'
+  try:
+   selected=subprocess.check_output(['/usr/bin/osascript','-e',script,'--',*paths],text=True,timeout=300).rstrip('\r\n')
+  except (subprocess.CalledProcessError,subprocess.TimeoutExpired) as error:
+   raise ValueError('Selection cancelled; game files were not changed') from error
+  if selected not in paths:raise ValueError('Unrecognized selection; game files were not changed')
+  return Path(selected)
+
  if len(choices)==1: print('Found:',choices[0]); return choices[0]
 
  if choices:
@@ -639,7 +650,7 @@ def choose(choices):
 
  if sys.platform=='darwin':
 
-  folder=subprocess.check_output(['/usr/bin/osascript','-e','POSIX path of (choose folder with prompt "Choose your Valheim game folder")'],text=True).strip()
+  folder=subprocess.check_output(['/usr/bin/osascript','-e','POSIX path of (choose folder with prompt "Choose the folder containing Valheim.app")'],text=True).strip()
 
  else:
 
@@ -652,6 +663,18 @@ def choose(choices):
  return Path(folder)
 
 def select_target(variant):
+ if sys.platform=='darwin':
+  if variant!='Client':raise ValueError('Mac installer targets the native game client')
+  candidates=[]
+  for target in discover(steam_roots(),variant):
+   try:mac_executable(target)
+   except (OSError,ValueError):continue
+   target=target.absolute()
+   if not any(p.resolve()==target.resolve() for p in candidates):candidates.append(target)
+  selected=choose(candidates)
+  if selected.suffix.casefold()=='.app' and selected.stem.casefold()=='valheim':selected=selected.parent
+  mac_executable(selected)
+  return selected.absolute()
  answer=input('Game folder: 1 Auto-search Steam (default), 2 Choose folder manually: ').strip()
  if answer in {'','1'}:
   return choose(discover(steam_roots(),variant))
@@ -917,7 +940,14 @@ def main():
 
  print('Installed',manifest['version'],'from Release',head)
 
- print('Start Valheim normally through Steam. Game loading remains a player test.')
+ if sys.platform=='darwin':
+  launcher=safe(root,'Launch-Mastery.command')
+  print('Updated game folder:',root)
+  print('Use Launch-Mastery.command in this updated folder; old shortcuts may point to another copy.')
+  if a.action=='install' and launcher.is_file():
+   try:subprocess.run(['/usr/bin/open','-R',str(launcher)],check=False,timeout=15)
+   except (OSError,subprocess.TimeoutExpired):print('Updated launcher:',launcher)
+ else:print('Start Valheim normally through Steam. Game loading remains a player test.')
 
 if __name__=='__main__':
 
