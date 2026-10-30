@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-integrated-ward-farming-wire29-r8-20261030",
-  "archive": "server-1.4.123-integrated-ward-farming-wire29-r8-20261030.zip",
-  "archive_sha256": "f39fd44621560c1f096117e2089f79db34bc0142bdc060da52ebe1937112b1ba",
+  "version": "1.4.123-emergency-structure-workshop-wire29-r9-20261030",
+  "archive": "server-1.4.123-emergency-structure-workshop-wire29-r9-20261030.zip",
+  "archive_sha256": "1e761ed4678afd75a203b115f612a050c90e5b2457a4bf1365ad3ac27a858173",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 27377664,
-      "sha256": "576b97c16a63f460a284a052ab84e5d4ce8a4215021066c29e6d68c8382fff12"
+      "size": 27386880,
+      "sha256": "64745198d738f18da6d8db3d752a2fa42ed95fee35dd1191abe86fba909d089b"
     }
   ],
   "plugin_version": "1.4.123",
@@ -18,14 +18,14 @@
   "network_wire_identity": "1.4.123+rpc-20261029-test-followup-v29",
   "validation": "ROOT_PAIRED_BUILD_SOURCE_NATIVE_RESOURCE_CHECKS_PASS;INSTALLED_MATCHED_PAIR;ACTUAL_GAMEPLAY_STARTUP_MULTIPLAYER_FPS_UNRUN",
   "known_issues": [
-    "Human-authorized test patch. Gameplay, actual native/Harmony startup, multiplayer and FPS are UNRUN; this is not a STABLE or full LIVE-verified release.",
-    "Previously dead Ward cards are reconciled on the first updated server load only when no-live evidence is available. Respawn cooldown starts at that reconciliation and lasts one game day; unknown card index fails closed with a log.",
-    "Automatic sap collection uses base output when builder Farming evidence is offline or stale.",
-    "New Ward roles, patrol/leisure behavior, FIFO fuel policy and related successor behavior are excluded for the next patch.",
-    "Client and Server must both use wire v29. Temporary diagnostic probes and private state are excluded.",
+    "Human-authorized emergency TEST patch. Root cause of repeated base collapse remains UNKNOWN; gameplay, multiplayer, FPS and actual game startup for this exact pair are UNRUN.",
+    "TEMPORARY support-only 100-percent unsupported wear is suppressed by preserving the previous accumulated wear value in UpdateWear. This applies to all WearNTear pieces including ruins, independently of the existing optimization toggle. Native support calculation, weather, combat damage and dismantling remain unchanged.",
+    "Existing r8 mechanics and approved Cooking100 audio are preserved. Bounded stability and Workshop lease diagnostics are included; no causal crafting or stability fix is claimed.",
+    "New Ward behavior and FIFO remain excluded. Known first-load Ward reconciliation/cooldown and stale or offline builder Farming limitations from r8 remain.",
+    "Client and Server must use the matching v29 build. Temporary external diagnostic plugins and private player state are excluded.",
     "Installations using the older automatic updater must rerun the current Install-Mastery.cmd or Install-Mastery.command once to obtain support for the approved Cooking100 audio payload. Until migrated, automatic update may reject this package and keep the prior installed version."
   ],
-  "source_gate_sha256": "f08811a2d472ccb0852063614e3d3a3df69533d2c379473bd0052686c0a7f7f4",
+  "source_gate_sha256": "1df313f1817cd72f5ded7136279d1335f8aa9d9484f89beb0f7c9596a2239d16",
   "diagnostic_probe_included": false,
   "new_ward_behavior_included": false,
   "audio_payload": "none",
