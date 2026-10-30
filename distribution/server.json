@@ -2,32 +2,32 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-emergency-structure-workshop-wire29-r9-20261030",
-  "archive": "server-1.4.123-emergency-structure-workshop-wire29-r9-20261030.zip",
-  "archive_sha256": "1e761ed4678afd75a203b115f612a050c90e5b2457a4bf1365ad3ac27a858173",
+  "version": "1.4.123-crafting-wire29-r12-20261030",
+  "archive": "server-1.4.123-crafting-wire29-r12-20261030.zip",
+  "archive_sha256": "2bbfc7a5e5ee4f49c3f6b6bb9a2351300c3d3494db3a448f9bd5d6d9122ed4b4",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 27386880,
-      "sha256": "64745198d738f18da6d8db3d752a2fa42ed95fee35dd1191abe86fba909d089b"
+      "size": 27397120,
+      "sha256": "8589008fcb98e168d80daa14b989be54780b739d78bd74d49ddef1a336785367"
     }
   ],
   "plugin_version": "1.4.123",
   "channel": "Release",
   "requires_paired_client_server": true,
   "network_wire_identity": "1.4.123+rpc-20261029-test-followup-v29",
-  "validation": "ROOT_PAIRED_BUILD_SOURCE_NATIVE_RESOURCE_CHECKS_PASS;INSTALLED_MATCHED_PAIR;ACTUAL_GAMEPLAY_STARTUP_MULTIPLAYER_FPS_UNRUN",
+  "validation": "ROOT_EXACT_FROZEN_PAIR_BUILD_SOURCE_NATIVE_WIRE_RESOURCES_PASS;OWNER_SCOPED_EVIDENCE_REUSED;ACTUAL_GAMEPLAY_UNRUN",
   "known_issues": [
-    "Human-authorized emergency TEST patch. Root cause of repeated base collapse remains UNKNOWN; gameplay, multiplayer, FPS and actual game startup for this exact pair are UNRUN.",
-    "TEMPORARY support-only 100-percent unsupported wear is suppressed by preserving the previous accumulated wear value in UpdateWear. This applies to all WearNTear pieces including ruins, independently of the existing optimization toggle. Native support calculation, weather, combat damage and dismantling remain unchanged.",
-    "Existing r8 mechanics and approved Cooking100 audio are preserved. Bounded stability and Workshop lease diagnostics are included; no causal crafting or stability fix is claimed.",
-    "New Ward behavior and FIFO remain excluded. Known first-load Ward reconciliation/cooldown and stale or offline builder Farming limitations from r8 remain.",
-    "Client and Server must use the matching v29 build. Temporary external diagnostic plugins and private player state are excluded.",
-    "Installations using the older automatic updater must rerun the current Install-Mastery.cmd or Install-Mastery.command once to obtain support for the approved Cooking100 audio payload. Until migrated, automatic update may reject this package and keep the prior installed version."
+    "Human-authorized TEST release; actual game startup, rendered UI, multiplayer and persistence/recovery acceptance are UNRUN.",
+    "Crafting supports one exact chest base-weapon ItemData instance with total requirement1. Scope is the frozen r12 packet, not a generic identity/quality/alternative adapter.",
+    "Gold UI change cleans inherited cloned gray/input state and provides a precise disabled reason. Causal resolution of the reported nonclickability is NOT proven.",
+    "Temporary unsupported-wear containment registration is retired. Native destruction of unsupported structures is restored; support/combat/weather configuration is not changed.",
+    "Other r11 mechanics and approved Cooking100 audio are retained. No Forest Guard fix or unrelated paused feature is included.",
+    "Both players should update to this current matching Client/Server pair; wire v29 is unchanged. Existing Mac automatic installer and LF bootstrap remain unchanged."
   ],
-  "source_gate_sha256": "1df313f1817cd72f5ded7136279d1335f8aa9d9484f89beb0f7c9596a2239d16",
+  "source_gate_sha256": "c69a7d5499258e8851a3c9317d0a99a156db519d92c9e77c0b35ecb0bfbbf4cd",
+  "owner_manifest_sha256": "20f9af405195c238d32f1911403291f22e176acb796457f1a7a723c2e5ad78ae",
+  "temporary_support_containment_registered": false,
   "diagnostic_probe_included": false,
-  "new_ward_behavior_included": false,
-  "audio_payload": "none",
-  "installer_core_sha256": "cf7ee9e95d74dc039e2deebf2f0eebafad44063333c9b4948b2e7c608a3788eb"
+  "installer_core_sha256": "9be18c718ff0726e1f99b73dd3699895527b4fcba46693c05b9136e57a7fabef"
 }
