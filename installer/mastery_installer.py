@@ -833,7 +833,7 @@ def main():
 
   n=r['path']
 
-  if n!='ValheimMastery.dll' and n not in {'Localization/ukrainian.json','Localization/english.json','Localization/manifest.json'} and not n.startswith('assets/'): raise ValueError('Outside mod payload')
+  if n!='ValheimMastery.dll' and n not in {'Localization/ukrainian.json','Localization/english.json','Localization/manifest.json','audio/cooking100/HarvestSeason.mp3','audio/cooking100/CREDITS.txt'} and not n.startswith('assets/'): raise ValueError('Outside mod payload')
 
   if sha(payload[n])!=r['sha256'] or len(payload[n])!=r['size']: raise ValueError('Mod file checksum mismatch')
 

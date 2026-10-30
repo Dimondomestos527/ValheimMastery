@@ -2,32 +2,42 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Client",
-  "version": "1.4.123-test-non100-livefix3-20261020",
-  "archive": "client-1.4.123-test-non100-livefix3-20261020.zip",
-  "archive_sha256": "8bc524a502e29684e799b688033f0dfdbadfc3e171ac43c94d7c6ccf268e26e6",
+  "version": "1.4.123-integrated-ward-farming-wire29-r8-20261030",
+  "archive": "client-1.4.123-integrated-ward-farming-wire29-r8-20261030.zip",
+  "archive_sha256": "473e430c576fa03318495d0b587890e6d95dda03b0ecb9a1fe7833c4ee48def7",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 26912768,
-      "sha256": "3745ffe63330b5269cd65ba49f29eb633bbc748549deff5c09d8cc1043186441"
+      "size": 27405312,
+      "sha256": "76134b6f528c5c67c61bcb4f5d2074cec6052ef7a927e1aa5dc5331ea580b4c5"
+    },
+    {
+      "path": "audio/cooking100/CREDITS.txt",
+      "size": 237,
+      "sha256": "2cfb2cb903d5a7c54d6f1b41722e76233609625fce3686b171300b9b9b041d57"
+    },
+    {
+      "path": "audio/cooking100/HarvestSeason.mp3",
+      "size": 8568245,
+      "sha256": "f9fc3eab787aa70b035f48a07ec3d3bb2f5733f1d6096c6f2bba62abb6b84718"
     }
   ],
-  "validation": "ROOT_EXACT_PAIR_BUILD_CHANGED_CHECKS_PASS;KNOWN_LIVE_FAILURES;NOT_STABLE",
   "plugin_version": "1.4.123",
   "channel": "Release",
-  "localization_mode": "existing-game-language-Ukrainian",
   "requires_paired_client_server": true,
-  "network_projection": 3,
-  "network_wire_identity": "1.4.123+rpc-20261020-non100-livefix3-v13",
+  "network_wire_identity": "1.4.123+rpc-20261029-test-followup-v29",
+  "validation": "ROOT_PAIRED_BUILD_SOURCE_NATIVE_RESOURCE_CHECKS_PASS;INSTALLED_MATCHED_PAIR;ACTUAL_GAMEPLAY_STARTUP_MULTIPLAYER_FPS_UNRUN",
   "known_issues": [
-    "Опубліковано за прямим дозволом користувача з відомими збоями. Це не STABLE і не повний gameplay/LIVE PASS.",
-    "Варта Лісу: користувач повідомляє, що поява все ще не працює; виправлення lifecycle не є підтвердженим усуненням цієї проблеми.",
-    "Гість: за поточним повідомленням користувача з’являється лише один; причина та наступне виправлення ще досліджуються.",
-    "Скелети й вантаж: результат після встановлення поки не підтверджено; gameplay, multiplayer та FPS потребують ручного тесту.",
-    "Клієнт і сервер мають бути оновлені разом до wire v13. Нові 100-перки та EliteGreeting виключені.",
-    "Тимчасовий діагностичний PerformanceAuditProbe не входить у звичайний пакет. Пакет містить лише відповідну ValheimMastery.dll.",
-    "Grove: пізня або холодна побудова може пропустити початковий ефект; cold-first причина UNKNOWN. Повного LIVE PASS для оформлення не заявлено."
+    "Human-authorized test patch. Gameplay, actual native/Harmony startup, multiplayer and FPS are UNRUN; this is not a STABLE or full LIVE-verified release.",
+    "Previously dead Ward cards are reconciled on the first updated server load only when no-live evidence is available. Respawn cooldown starts at that reconciliation and lasts one game day; unknown card index fails closed with a log.",
+    "Automatic sap collection uses base output when builder Farming evidence is offline or stale.",
+    "New Ward roles, patrol/leisure behavior, FIFO fuel policy and related successor behavior are excluded for the next patch.",
+    "Client and Server must both use wire v29. Temporary diagnostic probes and private state are excluded.",
+    "Installations using the older automatic updater must rerun the current Install-Mastery.cmd or Install-Mastery.command once to obtain support for the approved Cooking100 audio payload. Until migrated, automatic update may reject this package and keep the prior installed version."
   ],
-  "EliteGreetingIncluded": false,
-  "Gold100NewFourIncluded": false
+  "source_gate_sha256": "df6b67b2263db5d85d925525c35ea1d7b7d26c4950fbd76fb124b304bbe0c75a",
+  "diagnostic_probe_included": false,
+  "new_ward_behavior_included": false,
+  "audio_payload": "approved-existing-CC0-with-credits",
+  "installer_core_sha256": "cf7ee9e95d74dc039e2deebf2f0eebafad44063333c9b4948b2e7c608a3788eb"
 }

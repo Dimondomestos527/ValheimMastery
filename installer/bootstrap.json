@@ -2,7 +2,7 @@
   "schema": 2,
   "channel": "Release",
   "windows": {
-    "core_sha256": "c1844430c50ed51dd829bd73ec4e4b99e4915760abef175ff4489916a3a64ad3"
+    "core_sha256": "cf7ee9e95d74dc039e2deebf2f0eebafad44063333c9b4948b2e7c608a3788eb"
   },
   "mac": {
     "status": "PINNED_ARCHIVES_INSPECTED; CONFIG/STARTUP_FIXTURES_PASS; NATIVE_MAC_UNTESTED"
@@ -13,7 +13,7 @@
     "english": "DEFERRED"
   },
   "runtime_files": {
-    "mastery_installer.py": "c1844430c50ed51dd829bd73ec4e4b99e4915760abef175ff4489916a3a64ad3",
+    "mastery_installer.py": "cf7ee9e95d74dc039e2deebf2f0eebafad44063333c9b4948b2e7c608a3788eb",
     "steam_launch.py": "ca77b3b592d03ef4b64adb6ab47128c073b7b0eae50f564725509fd658906507",
     "language_setting.py": "33814955489a1ad42953d3f3e3689a7350ecf95f8bddeeb8f1f3a89c044732bc"
   },
