@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-crafting-wire29-r12-20261030",
-  "archive": "server-1.4.123-crafting-wire29-r12-20261030.zip",
-  "archive_sha256": "2bbfc7a5e5ee4f49c3f6b6bb9a2351300c3d3494db3a448f9bd5d6d9122ed4b4",
+  "version": "1.4.123-ward-cargo-binding-wire29-candidate-20261031",
+  "archive": "server-1.4.123-ward-cargo-binding-wire29-candidate-20261031.zip",
+  "archive_sha256": "695338b9086da52441f048e6c398b1fa780dec28a1479d79709637bf34642ed1",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 27397120,
-      "sha256": "8589008fcb98e168d80daa14b989be54780b739d78bd74d49ddef1a336785367"
+      "size": 27411456,
+      "sha256": "a6ac91d4e456a7b0fd2f44aa2c75a97306c65a9a7ae812507e0a287ff46d7158"
     }
   ],
   "plugin_version": "1.4.123",
@@ -18,15 +18,16 @@
   "network_wire_identity": "1.4.123+rpc-20261029-test-followup-v29",
   "validation": "ROOT_EXACT_FROZEN_PAIR_BUILD_SOURCE_NATIVE_WIRE_RESOURCES_PASS;OWNER_SCOPED_EVIDENCE_REUSED;ACTUAL_GAMEPLAY_UNRUN",
   "known_issues": [
-    "Human-authorized TEST release; actual game startup, rendered UI, multiplayer and persistence/recovery acceptance are UNRUN.",
-    "Crafting supports one exact chest base-weapon ItemData instance with total requirement1. Scope is the frozen r12 packet, not a generic identity/quality/alternative adapter.",
-    "Gold UI change cleans inherited cloned gray/input state and provides a precise disabled reason. Causal resolution of the reported nonclickability is NOT proven.",
-    "Temporary unsupported-wear containment registration is retired. Native destruction of unsupported structures is restored; support/combat/weather configuration is not changed.",
-    "Other r11 mechanics and approved Cooking100 audio are retained. No Forest Guard fix or unrelated paused feature is included.",
-    "Both players should update to this current matching Client/Server pair; wire v29 is unchanged. Existing Mac automatic installer and LF bootstrap remain unchanged."
+    "Human-authorized TEST Release of the exact locally installed Cargo binding candidate. Controlled/source/native API evidence is not full live multiplayer acceptance.",
+    "Includes inherited Ward death/behavior, empowered Nature-root reach and Pick70 target-count changes from the prior next candidate; all r12 resources and approved Cooking100 audio retained.",
+    "Cargo binding fix rejects stale Link rebinding and refreshes only expired closed in-memory lease identity under the frozen guards. No manual NPC/world-state restore is performed by this publication.",
+    "Existing seven Cargo RPC and two optional Social RPC registrations are unchanged from the installed next baseline; wire29 remains unchanged. Equal wire/settings manifests do not prove equal DLLs or equivalent mechanics across old/new players.",
+    "Individual lifecycle Active/pickup log observations do not establish full pickup/deposit/recovery or two-client acceptance. Actual two-client play, hover/transport AI, reconnect and full live cycle remain UNVERIFIED.",
+    "No ambient jokes, new shaman/full-small events, unapproved PickAV/PickVFX or unfinished Cooking changes are included. No performance/FPS improvement is claimed.",
+    "Both players should update to this matching Client/Server pair. Existing Mac automatic installer, LF bootstrap and installer safety/ownership behavior remain unchanged."
   ],
-  "source_gate_sha256": "c69a7d5499258e8851a3c9317d0a99a156db519d92c9e77c0b35ecb0bfbbf4cd",
-  "owner_manifest_sha256": "20f9af405195c238d32f1911403291f22e176acb796457f1a7a723c2e5ad78ae",
+  "source_gate_sha256": "3ce902dd565f9868f34ae390e669978fed9aee898d5a909a50fd2adfe4594a56",
+  "owner_manifest_sha256": "f7df248390f19fdd1760bb5ef921678eaad1b670db3bca2facdb3243b945f4f9",
   "temporary_support_containment_registered": false,
   "diagnostic_probe_included": false,
   "installer_core_sha256": "9be18c718ff0726e1f99b73dd3699895527b4fcba46693c05b9136e57a7fabef"
