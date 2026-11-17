@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Client",
-  "version": "1.4.123-ward-cargo-binding-wire29-candidate-20261031",
-  "archive": "client-1.4.123-ward-cargo-binding-wire29-candidate-20261031.zip",
-  "archive_sha256": "5a00d1f5a15c390637e8348c7a0efd02a05c6cbfbaf46239636d85374908a913",
+  "version": "1.4.123-magic100-livefix-r4-20261117",
+  "archive": "client-1.4.123-magic100-livefix-r4-20261117.zip",
+  "archive_sha256": "5fd25398bb8509901b764a04381cc20796d84d8d1eaf2f2096704f8ebd7427d7",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 27439104,
-      "sha256": "f96f515b6633f946145ecaa69ce381924fa576eb74ba4c64d795060710ff5714"
+      "size": 28402688,
+      "sha256": "4ffeee54e9b1773d87cbffb7886d75ba7a3c20ebf3bd896e28a4dccec0c7f575"
     },
     {
       "path": "audio/cooking100/CREDITS.txt",
@@ -25,20 +25,18 @@
   "plugin_version": "1.4.123",
   "channel": "Release",
   "requires_paired_client_server": true,
-  "network_wire_identity": "1.4.123+rpc-20261029-test-followup-v29",
-  "validation": "ROOT_EXACT_FROZEN_PAIR_BUILD_SOURCE_NATIVE_WIRE_RESOURCES_PASS;OWNER_SCOPED_EVIDENCE_REUSED;ACTUAL_GAMEPLAY_UNRUN",
+  "network_wire_identity": "1.4.123+rpc-20261116-magic100-v34",
+  "validation": "FOUR_NATIVE_ROLE_BUILDS_PASS;SCOPED_BINARY_SOURCE_RESOURCE_CHECKS_PASS;HUMAN_AUTHORIZED_RELEASE;LIVE_RETEST_REQUIRED",
   "known_issues": [
-    "Human-authorized TEST Release of the exact locally installed Cargo binding candidate. Controlled/source/native API evidence is not full live multiplayer acceptance.",
-    "Includes inherited Ward death/behavior, empowered Nature-root reach and Pick70 target-count changes from the prior next candidate; all r12 resources and approved Cooking100 audio retained.",
-    "Cargo binding fix rejects stale Link rebinding and refreshes only expired closed in-memory lease identity under the frozen guards. No manual NPC/world-state restore is performed by this publication.",
-    "Existing seven Cargo RPC and two optional Social RPC registrations are unchanged from the installed next baseline; wire29 remains unchanged. Equal wire/settings manifests do not prove equal DLLs or equivalent mechanics across old/new players.",
-    "Individual lifecycle Active/pickup log observations do not establish full pickup/deposit/recovery or two-client acceptance. Actual two-client play, hover/transport AI, reconnect and full live cycle remain UNVERIFIED.",
-    "No ambient jokes, new shaman/full-small events, unapproved PickAV/PickVFX or unfinished Cooking changes are included. No performance/FPS improvement is claimed.",
-    "Both players should update to this matching Client/Server pair. Existing Mac automatic installer, LF bootstrap and installer safety/ownership behavior remain unchanged."
+    "Ice stream interruption is addressed by isolating the bonus cast effect; live confirmation is still required.",
+    "Missing first100 unlock image/raven is not yet causally resolved; no character flags or levels were reset.",
+    "Portal solo fix, barrier HP recipient and owner/observer celebration changes require gameplay retest; no FPS improvement is claimed."
   ],
-  "source_gate_sha256": "c8d87a2a145e773116291aaa1e0d199d836400704a9c7e15b852fe99f65e7341",
-  "owner_manifest_sha256": "f7df248390f19fdd1760bb5ef921678eaad1b670db3bca2facdb3243b945f4f9",
+  "source_gate_sha256": "543f0d28e1ee3370cea1726ca8ebee37e17fc5fa85fbd966e8b85c83f22b9d66",
+  "owner_manifest_sha256": "1ac314fefc3c2731a1ec98ef78a1f8aff5d6f6d21c38f52c2fa9e024cd0c3b03",
   "temporary_support_containment_registered": false,
   "diagnostic_probe_included": false,
-  "installer_core_sha256": "9be18c718ff0726e1f99b73dd3699895527b4fcba46693c05b9136e57a7fabef"
+  "installer_core_sha256": "9be18c718ff0726e1f99b73dd3699895527b4fcba46693c05b9136e57a7fabef",
+  "test_diagnostics_included": false,
+  "debug_commands_registered": false
 }
