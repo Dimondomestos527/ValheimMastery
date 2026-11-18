@@ -2,14 +2,14 @@
   "schema": 1,
   "product": "ValheimMastery",
   "variant": "Server",
-  "version": "1.4.123-magic100-livefix-r4-20261117",
-  "archive": "server-1.4.123-magic100-livefix-r4-20261117.zip",
-  "archive_sha256": "834c18792f9999f0d7119f684dbc8769e796916eccf6562f415fc2ff3392a651",
+  "version": "1.4.123-magic100-torba-r5-20261118",
+  "archive": "server-1.4.123-magic100-torba-r5-20261118.zip",
+  "archive_sha256": "64f8cfc0e9a9601a876ca5948cc3b963c320838dd2c165680573c80229b248ee",
   "files": [
     {
       "path": "ValheimMastery.dll",
-      "size": 28383232,
-      "sha256": "7c031c849865ad41db8f352474913a12edc9d6d4f5329ba26f45fddedd1c6358"
+      "size": 28386304,
+      "sha256": "4f17818355556c526a199ee29f7a0ee34803983297787c050d27b22f541eeff4"
     }
   ],
   "plugin_version": "1.4.123",
@@ -18,12 +18,12 @@
   "network_wire_identity": "1.4.123+rpc-20261116-magic100-v34",
   "validation": "FOUR_NATIVE_ROLE_BUILDS_PASS;SCOPED_BINARY_SOURCE_RESOURCE_CHECKS_PASS;HUMAN_AUTHORIZED_RELEASE;LIVE_RETEST_REQUIRED",
   "known_issues": [
-    "Ice stream interruption is addressed by isolating the bonus cast effect; live confirmation is still required.",
-    "Missing first100 unlock image/raven is not yet causally resolved; no character flags or levels were reset.",
-    "Portal solo fix, barrier HP recipient and owner/observer celebration changes require gameplay retest; no FPS improvement is claimed."
+    "Central reserve debit attempts and Torba cargo handoff passed focused controlled and source/binary checks; actual gameplay retest remains required.",
+    "Blood spells cannot spend reserve; each elemental reserve debit gets its own25percent attempt. No FPS improvement or complete LIVE acceptance is claimed.",
+    "Previously unresolved first100 image/raven issue is not addressed. Axes rework is not included."
   ],
-  "source_gate_sha256": "543f0d28e1ee3370cea1726ca8ebee37e17fc5fa85fbd966e8b85c83f22b9d66",
-  "owner_manifest_sha256": "1ac314fefc3c2731a1ec98ef78a1f8aff5d6f6d21c38f52c2fa9e024cd0c3b03",
+  "source_gate_sha256": "f46e157cb9197b9668a235010474ea7e19fb2916c8d767091e70a216abbc5749",
+  "owner_manifest_sha256": "c2ae12114908a9b7aab827b2e3a9835d77fbf89677ae81f456cc6597b5a39f58",
   "temporary_support_containment_registered": false,
   "diagnostic_probe_included": false,
   "installer_core_sha256": "9be18c718ff0726e1f99b73dd3699895527b4fcba46693c05b9136e57a7fabef",
